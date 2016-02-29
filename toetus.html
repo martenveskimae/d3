@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+
+<title>Erakondade toetus</title>
+
+<style>
+
+body {
+  font: 11px "American Typewriter Light", Baskerville;
+}
+
+.title {
+  font-size: 36px;
+  font-family: "American Typewriter Light", Baskerville;
+  text-align: center;
+  margin-top: 40px;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+svg {
+  margin-top: 40px;
+  margin-left:auto;
+  margin-right:auto;
+  display:block;
+  vertical-align: middle;
+}
+
+.dot {
+  stroke: #000;
+}
+
+.tooltip {
+  position: absolute;
+  width: 200px;
+  height: 28px;
+  pointer-events: none;
+}
+
+.tick line{
+  opacity: 0.2;
+}
+
+</style>
+<body>
+<p class="title">Erakondade toetus 2007-2015</p>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script>
+var margin = {top: 20, right: 20, bottom: 30, left: 40},
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+var xValue = function(d) { return d.date;}, 
+    xScale = d3.time.scale().range([0, width]),
+    xMap = function(d) { return xScale(xValue(d));},
+    xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+
+var yValue = function(d) { return d.support;}, 
+    yScale = d3.scale.linear().range([height, 0]), 
+    yMap = function(d) { return yScale(yValue(d));},
+    yAxis = d3.svg.axis().scale(yScale).orient("left").innerTickSize(-width);
+
+var cValue = function(d) { return d.party;};
+var color = d3.scale.ordinal()
+  .domain(["ref", "kesk", "irl", "sde"])
+  .range(["#ff9900", "#109618", "#3366cc", "#dc3912"]);
+
+var dValue = function(d) { return d.skp_yearly; },
+    dScale = d3.scale.linear().range([1, 5]),
+    dMap = function(d) { return dScale(dValue(d));};
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+var tooltip = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+
+var party = function(d) { return d.party;};
+
+var elections = svg.append("line")
+  .attr("x1", 460)
+  .attr("y1", 0)
+  .attr("x2", 460)
+  .attr("y2", height)
+  .attr("stroke-width", 1)
+  .attr("stroke", "black")
+  svg.append("text")
+  .attr("class", "label")
+  .attr("transform", "rotate(-90)")
+  .attr("y", 466)
+  .attr("dy", ".71em")
+  .style("text-anchor", "end")
+  .text("Riigikogu valimised");
+
+d3.csv("toetus.csv", function(error, data) {
+
+  data.forEach(function(d) {
+    d.year = +d.year;
+    d.month = +d.month;
+    d.date = new Date(+d.year, +d.month-1, 1);
+    d.unemp = +d.unemp*d.unemp;
+    d.support = Math.round(+d.support*100);
+    d.skp_yearly = +d.skp_yearly;
+    d.cycle = +d.cycle*d.cycle;
+    d.party = d.party;
+    d.gdpgr = +d.gdpgr;
+    d.bruto = +d.bruto;
+    //console.log(d);
+  });
+
+  xScale.domain(d3.extent(data, function(d) { return d.date; }));
+  yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
+  dScale.domain([d3.min(data, dValue), d3.max(data, dValue)]);
+
+    svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis)
+    .append("text")
+      .attr("class", "label")
+      .attr("x", width)
+      .attr("y", -6)
+      .style("text-anchor", "end")
+      .text("Aeg");
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("class", "label")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Toetus");
+
+  svg.selectAll(".dot")
+      .data(data)
+      .enter().append("circle")
+      .attr("class", "dot")
+      .attr("id", party)
+      .attr("r", dMap)
+      .attr("cx", xMap)
+      .attr("cy", yMap)
+      .style("opacity", .7)
+      .style("fill", function(d) { return color(cValue(d));})
+      .on("mouseover", function(d) {
+          tooltip.transition()
+               .duration(200)
+               .style("opacity", 1);
+          tooltip.html(d.party + " - " + yValue(d) + 
+          "% <br>" + d.month + "/" + d.year)
+               .style("left", (d3.event.pageX + 5) + "px")
+               .style("top", (d3.event.pageY - 28) + "px");
+      })
+      .on("mouseout", function(d) {
+          tooltip.transition()
+               .duration(500)
+               .style("opacity", 0);
+      });
+
+  var legend = svg.selectAll(".legend")
+      .data(color.domain())
+      .enter().append("g")
+      .attr("id", party)
+      .attr("class", "legend")
+      .attr("transform", function(d, i) { return "translate(0," + i * 30 + ")"; });
+
+  legend.append("rect")
+      .attr("x", width - 18)
+      .attr("width", 25)
+      .attr("height", 25)
+      .attr("id", party)
+      .style("fill", color)
+      .on("mouseover", function(d){
+            d3.selectAll(".dot")
+            .transition()
+            .duration(700)
+            .style("opacity", 0.1);
+            d3.selectAll("#" + [d])
+            .transition()
+            .duration(700)
+            .style("opacity", 1);
+      })
+      .on("mouseout", function(d){
+            d3.selectAll(".dot")
+            .transition()
+            .duration(700)
+            .style("opacity", .7);
+
+      });
+
+  legend.append("text")
+      .attr("x", width - 24)
+      .attr("y", 13)
+      .attr("dy", ".35em")
+      .style("text-anchor", "end")
+      .text(function(d) { return d;})
+});
+
+</script>
+</body>
+</html>
