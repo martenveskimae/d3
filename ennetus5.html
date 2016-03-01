@@ -25,11 +25,13 @@ body {
 
 <div id="figure" style="margin-bottom: 50px;"></div>
 
+
+
 <script>
 
-var margin = {top: 50, right: 20, bottom: 10, left: 300},
-    width = 1000 - margin.left - margin.right,
-    height = 650 - margin.top - margin.bottom;
+var margin = {top: 50, right: 20, bottom: 10, left: 500},
+    width = 1200 - margin.left - margin.right,
+    height = 200 - margin.top - margin.bottom;
 
 var y = d3.scale.ordinal()
     .rangeRoundBands([0, height], .3);
@@ -38,7 +40,7 @@ var x = d3.scale.linear()
     .rangeRound([0, width]);
 
 var color = d3.scale.ordinal()
-    .range(["#c7001e", "E44C20", "#f6a580", "#cccccc", "#92c6db", "6490A5", "32639C"]);
+    .range(["#c7001e", "#f6a580", "#cccccc", "#92c6db", "32639C"]);
 
 var xAxis = d3.svg.axis()
     .scale(x)
@@ -55,20 +57,18 @@ var svg = d3.select("#figure").append("svg")
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  color.domain(["1", "2", "3", "4", "5", "6", "7"]);
+  color.domain(["Ei nõustu", "Pigem ei nõustu", "Ei tea", "Pigem nõustun", "Nõustun täielikult"]);
 
-  d3.csv("ennetus7.csv", function(error, data) {
+  d3.csv("ennetus5.csv", function(error, data) {
 
   data.forEach(function(d) {
 
-    d["1"] = +d[1]*100/d.N;
-    d["2"] = +d[2]*100/d.N;
-    d["3"] = +d[3]*100/d.N;
-    d["4"] = +d[4]*100/d.N;
-    d["5"] = +d[5]*100/d.N;
-    d["6"] = +d[6]*100/d.N;
-    d["7"] = +d[7]*100/d.N;
-    var x0 = -1*(d["4"]/2+d["3"]+d["2"]+d["1"]);
+    d["Ei nõustu"] = +d[1]*100/d.N;
+    d["Pigem ei nõustu"] = +d[2]*100/d.N;
+    d["Ei tea"] = +d[3]*100/d.N;
+    d["Pigem nõustun"] = +d[4]*100/d.N;
+    d["Nõustun täielikult"] = +d[5]*100/d.N;
+    var x0 = -1*(d["Ei tea"]/2+d["Pigem ei nõustu"]+d["Ei nõustu"]);
     var idx = 0;
     d.boxes = color.domain().map(function(name) { return {name: name, x0: x0, x1: x0 += +d[name], N: +d.N, n: +d[idx += 1]}; });
   });
@@ -78,7 +78,7 @@ var svg = d3.select("#figure").append("svg")
           });
 
   var max_val = d3.max(data, function(d) {
-          return d.boxes["6"].x1;
+          return d.boxes["4"].x1;
           });
 
   x.domain([min_val, max_val]).nice();
@@ -134,7 +134,7 @@ var svg = d3.select("#figure").append("svg")
 
   var startp = svg.append("g").attr("class", "legendbox").attr("id", "mylegendbox");
 
-  var legend_tabs = [0, 60, 120, 180, 240, 310, 370];
+  var legend_tabs = [0, 120, 240, 360, 480];
   var legend = startp.selectAll(".legend")
       .data(color.domain().slice())
     .enter().append("g")
@@ -168,8 +168,8 @@ var svg = d3.select("#figure").append("svg")
   var movesize = width/2 - startp.node().getBBox().width/2;
   d3.selectAll(".legendbox").attr("transform", "translate(" + movesize  + ",0)");
 
-});
 
+});
 </script>
 
 </body>
