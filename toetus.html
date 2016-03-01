@@ -87,21 +87,6 @@ var tooltip = d3.select("body").append("div")
 
 var party = function(d) { return d.party;};
 
-var elections = svg.append("line")
-  .attr("x1", 460)
-  .attr("y1", 0)
-  .attr("x2", 460)
-  .attr("y2", height)
-  .attr("stroke-width", 1)
-  .attr("stroke", "black")
-  svg.append("text")
-  .attr("class", "label")
-  .attr("transform", "rotate(-90)")
-  .attr("y", 466)
-  .attr("dy", ".71em")
-  .style("text-anchor", "end")
-  .text("Riigikogu valimised");
-
 d3.csv("toetus.csv", function(error, data) {
 
   data.forEach(function(d) {
@@ -117,6 +102,21 @@ d3.csv("toetus.csv", function(error, data) {
     d.bruto = +d.bruto;
     //console.log(d);
   });
+
+  var elections = svg.append("line")
+  .attr("x1", 460)
+  .attr("y1", 0)
+  .attr("x2", 460)
+  .attr("y2", height)
+  .attr("stroke-width", 1)
+  .attr("stroke", "black")
+  svg.append("text")
+  .attr("class", "label")
+  .attr("transform", "rotate(-90)")
+  .attr("y", 466)
+  .attr("dy", ".71em")
+  .style("text-anchor", "end")
+  .text("Riigikogu valimised");
 
   xScale.domain(d3.extent(data, function(d) { return d.date; }));
   yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
