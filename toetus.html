@@ -17,12 +17,22 @@ body {
   margin-top: 40px;
 }
 
+.line {
+  fill:none;
+  stroke-width: 1;
+}
+
 .axis path,
 .axis line {
   fill: none;
   stroke: #000;
   shape-rendering: crispEdges;
 }
+
+.axis text {
+  font: 10px sans-serif;
+}
+
 
 svg {
   margin-top: 40px;
@@ -33,7 +43,8 @@ svg {
 }
 
 .dot {
-  stroke: #000;
+  stroke: black;
+  stroke-width: 1;
 }
 
 .tooltip {
@@ -66,26 +77,38 @@ var yValue = function(d) { return d.support;},
     yMap = function(d) { return yScale(yValue(d));},
     yAxis = d3.svg.axis().scale(yScale).orient("left").innerTickSize(-width);
 
-var cValue = function(d) { return d.party;};
+var party = function(d) { return d.party;};
 var color = d3.scale.ordinal()
   .domain(["ref", "kesk", "irl", "sde"])
   .range(["#ff9900", "#109618", "#3366cc", "#dc3912"]);
 
-var dValue = function(d) { return d.skp_yearly; },
-    dScale = d3.scale.linear().range([1, 5]),
+var dValue = function(d) { return d.news; },
+    dScale = d3.scale.linear().range([2, 7]),
     dMap = function(d) { return dScale(dValue(d));};
 
-var svg = d3.select("body").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+/*
+var trendlinedom = d3.scale.ordinal()
+  .domain(["1"])
+  .range(["1"]);
+var eValue = function(d) { return d.news; },
+    eScale = d3.scale.linear().range([height, 0]);
+
+var supportline = d3.svg.line()
+    .x(function(d) { return xScale(d.date); })
+    .y(function(d) { return yScale(d.support); })
+    .interpolate("bundle")
+    .tension(.5);
+
+var newsline = d3.svg.line()
+    .x(function(d) { return xScale(d.date); })
+    .y(function(d) { return eScale(d.news); })
+    .interpolate("bundle");
+*/
+
 
 var tooltip = d3.select("body").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
-
-var party = function(d) { return d.party;};
 
 d3.csv("toetus.csv", function(error, data) {
 
@@ -93,15 +116,20 @@ d3.csv("toetus.csv", function(error, data) {
     d.year = +d.year;
     d.month = +d.month;
     d.date = new Date(+d.year, +d.month-1, 1);
-    d.unemp = +d.unemp*d.unemp;
     d.support = Math.round(+d.support*100);
     d.skp_yearly = +d.skp_yearly;
     d.cycle = +d.cycle*d.cycle;
     d.party = d.party;
-    d.gdpgr = +d.gdpgr;
-    d.bruto = +d.bruto;
+    d.news = +d.news;
+    d.newspercent = +d.newspercent;
     //console.log(d);
   });
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
   var elections = svg.append("line")
   .attr("x1", 460)
@@ -121,7 +149,46 @@ d3.csv("toetus.csv", function(error, data) {
   xScale.domain(d3.extent(data, function(d) { return d.date; }));
   yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
   dScale.domain([d3.min(data, dValue), d3.max(data, dValue)]);
+  //eScale.domain([d3.min(data, eValue), d3.max(data, eValue)]);
 
+/*
+var domain0 = [+new Date(2007, 2, 1), +new Date(2015, 3, 1)],
+    domain1 = [+new Date(2015, 2, 1), +new Date(2019, 2, 1)];
+
+var x2 = d3.time.scale.utc()
+    .domain(domain0)
+    .range([0, width]);
+
+var xAxis2 = d3.svg.axis()
+    .scale(x2);
+
+var gAxis = svg.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height + ")")
+    .call(xAxis2)
+
+transition();
+setInterval(transition, 10000);
+
+
+function transition() {
+  gAxis.transition().duration(8500).tween("axis", function(d, i) {
+    var i = d3.interpolate(domain0, domain1);
+    return function(t) {
+      x2.domain(i(t));
+      gAxis.call(xAxis2);
+    }
+  });
+}
+*/
+/*
+    svg.append("text")
+      .attr("class", "label")
+      .attr("x", width)
+      .attr("y", height-6)
+      .style("text-anchor", "end")
+      .text("Aeg");
+*/
     svg.append("g")
       .attr("class", "x axis")
       .attr("transform", "translate(0," + height + ")")
@@ -143,17 +210,39 @@ d3.csv("toetus.csv", function(error, data) {
       .attr("dy", ".71em")
       .style("text-anchor", "end")
       .text("Toetus");
+/*
+var dataNest = d3.nest()
+  .key(function(d) {return d.party;})
+  .entries(data);
 
+dataNest.forEach(function(d) {
+        svg.append("path")
+            .attr("class", "line")
+            .attr("id", function() { return d.key; })
+            .attr("d", supportline(d.values))
+            .style("opacity", .1)
+            .style("stroke", function() {
+                return d.color = color(d.key); });
+
+         svg.append("path")
+            .attr("class", "line")
+            .attr("id", function() { return d.key + "news"; })
+            .attr("d", newsline(d.values))
+            .style("opacity", .1)
+            .style("stroke", function() {
+                return d.color = color(d.key); });
+});
+*/
   svg.selectAll(".dot")
       .data(data)
       .enter().append("circle")
       .attr("class", "dot")
-      .attr("id", party)
+      .attr("id", function(d) { return party(d) + "dot"; })
       .attr("r", dMap)
       .attr("cx", xMap)
       .attr("cy", yMap)
       .style("opacity", .7)
-      .style("fill", function(d) { return color(cValue(d));})
+      .style("fill", function(d) { return color(party(d));})
       .on("mouseover", function(d) {
           tooltip.transition()
                .duration(200)
@@ -176,6 +265,53 @@ d3.csv("toetus.csv", function(error, data) {
       .attr("class", "legend")
       .attr("transform", function(d, i) { return "translate(0," + i * 30 + ")"; });
 
+/*
+  var lineop = svg.selectAll(".lineop")
+      .data(trendlinedom.domain())
+      .enter()
+      .append("g")
+      .attr("id", "lineop")
+      .attr("class", "legend")
+      .attr("transform", "translate(0, 121)");
+  lineop.append("rect")
+      .attr("x", width - 17)
+      .attr("width", 23)
+      .attr("height", 23)
+      .attr("id", party)
+      .style("stroke", "#ff9900")
+      .style("stroke-width", 2)
+      .style("fill", "white")
+      .on("mouseover", function(d){
+            d3.selectAll(".line")
+            .transition()
+            .duration(700)
+            .style("opacity", 1);
+            d3.selectAll(".dot")
+            .transition()
+            .duration(700)
+            .style("opacity", .1);
+      })
+      .on("mouseout", function(d){
+            d3.selectAll(".line")
+            .transition()
+            .duration(700)
+            .style("opacity", .1);
+            d3.selectAll(".dot")
+            .transition()
+            .duration(700)
+            .style("opacity", .7);
+
+      });
+      
+  lineop.append("text")
+      .attr("x", width - 24)
+      .attr("y", 13)
+      .attr("dy", ".35em")
+      .attr("class", "label")
+      .style("text-anchor", "end")
+      .text("trend");
+*/
+
   legend.append("rect")
       .attr("x", width - 18)
       .attr("width", 25)
@@ -186,14 +322,18 @@ d3.csv("toetus.csv", function(error, data) {
             d3.selectAll(".dot")
             .transition()
             .duration(700)
-            .style("opacity", 0.1);
-            d3.selectAll("#" + [d])
+            .style("opacity", .1);
+            d3.selectAll("#" + [d] + "dot")
             .transition()
             .duration(700)
             .style("opacity", 1);
       })
       .on("mouseout", function(d){
-            d3.selectAll(".dot")
+          d3.selectAll("#" + [d] + "dot")
+            .transition()
+            .duration(700)
+            .style("opacity", .1);
+          d3.selectAll(".dot")
             .transition()
             .duration(700)
             .style("opacity", .7);
@@ -205,8 +345,52 @@ d3.csv("toetus.csv", function(error, data) {
       .attr("y", 13)
       .attr("dy", ".35em")
       .style("text-anchor", "end")
-      .text(function(d) { return d;})
+      .text(function(d) { return d;});
+
+/*
+d3.csv("makro.csv", function(error, makro) {
+
+  makro.forEach(function(d) {
+    d.year = +d.year;
+    d.month = +d.month;
+    d.date = new Date(+d.year, +d.month-1, 1);
+    d.gdpgr_yearly = +d.gdpgr_yearly;
+    d.cycle = +d.cycle*d.cycle;
+    d.bruto = +d.bruto;
+    d.refer = +d.refer;
+    console.log(d);
+  });
+
+var cValue = function(d) { return d.gdpgr_yearly; },
+    cScale = d3.scale.linear()
+    .range([height-100, 0])
+    .domain([d3.min(makro, cValue), d3.max(makro, cValue)]);
+
+var gdpline = d3.svg.line() 
+  .x(function(d){ return xScale(d.date);}) 
+  .y(function(d){ return cScale(d.gdpgr_yearly);})
+  .interpolate("bundle")
+  .tension(1);
+
+var dataNest = d3.nest()
+  .key(function(d) {return d.refer;})
+  .entries(makro);
+
+dataNest.forEach(function(d) {
+
+  svg.append("path")
+    .attr("class", "line")
+    .attr("id", "gdp")
+    .attr("d", gdpline(d.values))
+    .attr("stroke-width", 1)
+    .attr("stroke", "black");
+
 });
+});
+*/
+
+});
+
 
 </script>
 </body>
