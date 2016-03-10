@@ -188,14 +188,14 @@ var graph = d3.csv(csvpath, function(data) {
     d.private = d.donation+d.membership;
     d.sum = +d.N;
     d.party = d.party;
-    d.value = d.private;
+    d.value = d.donation;
     //console.log(d);
   });
 
   var layers = stack(nest.entries(data));
 
   x.domain(d3.extent(data, function(d) { return d.date; }));
-  y.domain([0, d3.max(data, function(d) { return d.y0 + d.y; })]);
+  y.domain([0, d3.max(data, function(d) { return d.y0 + d.y; })+100000]);
 
 svg.append("g")
     .attr("class", "x axis")
@@ -216,7 +216,7 @@ svg.append("g")
       .attr("x", -7)
       .attr("dy", ".71em")
       .style("text-anchor", "end")
-      .text("Sissetulek eurodes");
+      .text("Annetused eurodes");
 
 svg.append("clipPath")
     .attr("id", "rectClip")
@@ -284,9 +284,12 @@ legend = svg.append("g")
       .style("visibility", "hidden");
   })
 
+
+
 });
 
 }
+
 </script>
 </body>
 </html>
