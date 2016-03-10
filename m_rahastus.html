@@ -32,7 +32,9 @@ body {
   stroke:"grey";
   opacity: 0.2;
  }
-
+.layer {
+  opacity: 0.6;
+}
 .axis path,
 .axis line {
   fill: none;
@@ -216,6 +218,12 @@ svg.append("g")
       .style("text-anchor", "end")
       .text("Sissetulek eurodes");
 
+svg.append("clipPath")
+    .attr("id", "rectClip")
+  .append("rect")
+    .attr("width", 0)
+    .attr("height", height); 
+
 svg.selectAll(".layer")
       .data(layers)
       .enter().append("path")
@@ -223,7 +231,15 @@ svg.selectAll(".layer")
       .attr("data-legend", function(d) { return d.key; })
       .attr("class", "layer")
       .attr("d", function(d) { return area(d.values); })
-      .style("fill", function(d, i) { return z(i); });
+      .attr("clip-path", "url(#rectClip)")
+      .style("fill", function(d, i) { return z(i); })
+      .attr("stroke", strokecolor)
+      .attr("stroke-width", "0.5px")
+      .call(function(d) {
+      d3.select("#rectClip rect")
+      .transition().duration(3000)
+        .attr("width", 1200);
+});
 
 legend = svg.append("g")
   .attr("class","legend")
@@ -232,15 +248,6 @@ legend = svg.append("g")
   .call(d3.legend)
 
   svg.selectAll(".layer")
-    .attr("opacity", 1)
-    .style("z-index", "-5")
-    .on("mouseover", function(d, i) {
-      svg.selectAll(".layer").transition()
-      .duration(250)
-      .attr("opacity", function(d, j) {
-        return j != i ? 0.6 : 1;
-    })})
-
     .on("mousemove", function(d, i) {
       mousex = d3.mouse(this);
       mousex = mousex[0];
@@ -258,8 +265,9 @@ legend = svg.append("g")
       d3.select(this)
       .classed("hover", true)
       .attr("stroke", strokecolor)
-      .attr("stroke-width", "0.5px"), 
-      tooltip.html( d.key +": €"+ pro )
+      .attr("stroke-width", "0.5px")
+      .style("opacity", 1)
+      tooltip.html( d.key +": €"+ pro)
       .style("visibility", "visible");
       
     })
@@ -270,12 +278,14 @@ legend = svg.append("g")
       .attr("opacity", "1");
       d3.select(this)
       .classed("hover", false)
-      .attr("stroke-width", "0px"),
+      .attr("stroke-width", "0.5px")
+      .style("opacity", 0.6),
       tooltip
       .style("visibility", "hidden");
   })
-    
+
 });
+
 }
 </script>
 </body>
