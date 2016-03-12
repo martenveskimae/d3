@@ -28,6 +28,13 @@ body {
   shape-rendering: crispEdges;
 }
 
+.buttons {
+  margin-left:auto;
+  margin-right:auto;
+  display:block;
+  vertical-align: middle;
+}
+
 svg {
   margin-top: 40px;
   margin-left:auto;
@@ -52,7 +59,6 @@ svg {
 <body>
 <script src="http://d3js.org/d3.v3.js"></script>
 <script src="d3.legend.js"></script>
-
 <p class="title">Erakondade rahastamine 2013Q1 - 2015Q4</p>
 <div class="chart"></div>
 
@@ -72,7 +78,7 @@ var EST = d3.locale({
   "shortMonths": ["Jan", "Veeb", "Märts", "Apr", "Mai", "Juun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dets"]
 });
 
-chart("m_rahastus.csv", "blue");
+chart("m_rahastus.csv", "party");
 
 var datearray = [];
 var colorrange = [];
@@ -83,6 +89,9 @@ if (color == "blue") {
   }
   else if (color == "pink") {
   colorrange = ["#980043", "#DD1C77", "#DF65B0", "#C994C7", "#D4B9DA", "#F1EEF6"];
+  }
+  else if (color == "party") {
+  colorrange = ["#109618", "#ff9900", "#3366cc", "#dc3912"];
   }
   else if (color == "orange") {
   colorrange = ["#B30000", "#E34A33", "#FC8D59", "#FDBB84", "#FDD49E", "#FEF0D9"];
@@ -178,9 +187,8 @@ var svg = d3.select(".chart").append("svg")
       .attr("y",-0.5)
       .attr("width", width+0.5)
       .attr("height", height)
-      .style("fill", colorrange[0])
-      .style("opacity", 0.05)
-      .on("click", transition);
+      .style("fill", "#045A8D")
+      .style("opacity", 0.05);
 
 var graph = d3.csv(csvpath, function(data) {
 
@@ -201,6 +209,13 @@ var graph = d3.csv(csvpath, function(data) {
 
   x.domain(d3.extent(data, function(d) { return d.date; }));
   y.domain([0, d3.max(data, function(d) { return d.y0 + d.y; })+100000]);
+
+  d3.select(".chart")
+    .append("button")
+    .attr("class", "buttons")
+    .text("Update")
+    .attr("float", "left")
+    .on("click", update);
 
   svg.append("g")
     .attr("class", "x axis")
@@ -228,21 +243,26 @@ var graph = d3.csv(csvpath, function(data) {
     svg.selectAll(".x.axis").selectAll(".tick text")
       .attr("transform", "translate(0, 3)");
 
-  svg.append("clipPath")
-    .attr("id", "rectClip")
-    .append("rect")
-    .attr("width", 0)
-    .attr("height", height); 
+    svg.append("clipPath")
+      .attr("id", "rectClip")
+      .append("rect")
+      .attr("width", 0)
+      .attr("height", height);
 
-  var layers = svg.selectAll(".layer")
+    svg.selectAll(".layer")
       .data(layers)
       .enter()
       .append("g")
+      .attr("id", function(d) { return d.key+"Container"; })
       .attr("class", "layer");
 
-    layers.append("path")
+initiate();
+function initiate(){
+
+    svg.selectAll(".layer")
+      .append("path")
       .attr("id", function(d) { return d.key; })
-      .attr("transform", "translate(0.5,-0.5)")
+      .attr("class", "paths")
       .attr("data-legend", function(d) { return d.key; })
       .attr("d", function(d) { return area(d.values); })
       .attr("clip-path", "url(#rectClip)")
@@ -255,31 +275,67 @@ var graph = d3.csv(csvpath, function(data) {
        .transition().duration(3000)
        .attr("width", 1200);
         });
+        pathAbilities();
+};
 
-    legend = svg.append("g")
-      .attr("class","legend")
-      .attr("transform","translate(50,30)")
-     .style("font-size","12px")
-     .call(d3.legend)
+function update() {
+ 
+    svg.selectAll(".paths")
+      .data(layers)
+      .enter()
+      .append("path")
+      .attr("id", function(d) { return d.key; })
+      .attr("class", "paths")
+      .style("fill", function(d, i) { return z(i); })
+      .attr("data-legend", function(d) { return d.key; })
+      .attr("d", function(d) { return area(d.values); })
+      .attr("clip-path", "url(#rectClip)")
+      .attr("stroke", strokecolor)
+      .attr("stroke-width", "0.5px")
+      .style("opacity", 0.6);
 
-   svg.selectAll("path")
-      .on("click", transition)
+    svg.selectAll(".paths")
+      .data(layers)
+      .transition()
+      .duration(200)
+      .attr("id", function(d) { return d.key; })
+      .style("fill", function(d, i) { return z(i); })
+      .attr("d", function(d) { return area(d.values); });
+    
+
+    svg.select(".legend").remove();
+    pathAbilities();
+};
+
+function remove(target) {
+
+    svg.selectAll("#"+target).remove();
+
+    svg.selectAll(".paths")
+      .data(layers)
+      .transition()
+      .duration(200)
+      .attr("d", function(d) { return area(d.values); });
+  
+    d3.select(".legend").remove();
+    pathAbilities();
+};
+
+function pathAbilities(){
+    svg.selectAll(".paths")
+      .on("click", function (d) { remove(d.key);})
       .on("mousemove", function(d, i) {
         mousex = d3.mouse(this);
         mousex = mousex[0];
-
         var invertedx = x.invert(mousex);
         invertedx = invertedx.getMonth() + invertedx.getDate();
-
         var selected = (d.values);
         for (var k = 0; k < selected.length; k++) {
           datearray[k] = selected[k].date
           datearray[k] = datearray[k].getMonth() + datearray[k].getDate();
           }
-
         mousedate = datearray.indexOf(invertedx);
         pro = d.values[mousedate].value;
-        
         d3.select(this)
           .classed("hover", true)
           .attr("stroke-width", "0.5px")
@@ -287,7 +343,6 @@ var graph = d3.csv(csvpath, function(data) {
         tooltip.html( d.key +": €"+ pro)
           .style("visibility", "visible")
       })
-
       .on("mouseout", function(d, i) {
         svg.selectAll(".layer")
         .transition()
@@ -299,8 +354,18 @@ var graph = d3.csv(csvpath, function(data) {
         .style("opacity", 0.6),
         tooltip
         .style("visibility", "hidden");
-        });
+      });
+
+      legend = svg.append("g")
+        .attr("class","legend")
+        .attr("transform","translate(50,30)")
+        .style("font-size","12px")
+        .call(d3.legend);
+
+};
 });
+
+
 
 var is_area_plot = true;
 function transition() {
@@ -328,7 +393,7 @@ function transition() {
       .style("stroke", strokecolor)
       .attrTween("d", shapeTween(area_to_stacked, 1));
   } else {
-    y.domain([0, 450000]);
+    y.domain([0, 1200000]);
     axis.call(yAxis)
     .selectAll(".tick text")
     .attr("transform", "translate(-5,0)")
@@ -351,6 +416,8 @@ function shapeTween(shape, direction) {
     };
   };
 }
+
+
 
 };
 </script>
