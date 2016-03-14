@@ -209,14 +209,14 @@ var graph = d3.csv(csvpath, function(data) {
 
   x.domain(d3.extent(data, function(d) { return d.date; }));
   y.domain([0, d3.max(data, function(d) { return d.y0 + d.y; })+100000]);
-
+/*
   d3.select(".chart")
     .append("button")
     .attr("class", "buttons")
     .text("Update")
     .attr("float", "left")
     .on("click", update);
-
+*/
   svg.append("g")
     .attr("class", "x axis")
     .attr("transform", "translate(0," + height + ")")
@@ -306,7 +306,7 @@ function update() {
     svg.select(".legend").remove();
     pathAbilities();
 };
-
+/*
 function remove(target) {
 
     svg.selectAll("#"+target).remove();
@@ -320,7 +320,7 @@ function remove(target) {
     d3.select(".legend").remove();
     pathAbilities();
 };
-
+*/
 function pathAbilities(){
     svg.selectAll(".paths")
       .on("click", function (d) { remove(d.key);})
