@@ -36,7 +36,6 @@ body {
 }
 
 svg {
-  margin-top: 40px;
   margin-left:auto;
   margin-right:auto;
   display:block;
@@ -68,7 +67,6 @@ svg {
 </style>
 <body>
 <script src="http://d3js.org/d3.v3.js"></script>
-<script src="d3.legend.js"></script>
 <p class="title">Erakondade rahastamine 2014Q1 - 2015Q4</p>
 <div class="chart"></div>
 
@@ -202,7 +200,7 @@ var graph = d3.csv(csvpath, function(data) {
   });
 
   x.domain(d3.extent(data, function(d) { return d.date; }));
-  y.domain([d3.min(data, function(d) { return d.value; })-200000, d3.max(data, function(d) { return d.value; })+100000]);
+  y.domain([d3.min(data, function(d) { return d.value; })-200000, d3.max(data, function(d) { return d.value; })+150000]);
 
 Axis();
 
@@ -224,7 +222,7 @@ Axis();
       .attr("clip-path", "url(#rectClip)")
       .style("stroke-width", "1.5px")
       .style("stroke", "black")
-      .style("opacity", 1)
+      .style("opacity", 0.9)
       .call(function(d) {
          d3.select("#rectClip rect")
          .transition().duration(3000)
