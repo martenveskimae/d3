@@ -179,8 +179,8 @@ var svg = d3.select(".chart").append("svg")
       .attr("y",-0.5)
       .attr("width", width+0.5)
       .attr("height", height)
-      .style("fill", "#045A8D")
-      .style("opacity", 0.04);
+      .style("fill", "#e3dac9")
+      .style("opacity", 0.15);
 
 var graph = d3.csv(csvpath, function(data) {
 
@@ -200,7 +200,7 @@ var graph = d3.csv(csvpath, function(data) {
   });
 
   x.domain(d3.extent(data, function(d) { return d.date; }));
-  y.domain([d3.min(data, function(d) { return d.value; })-200000, d3.max(data, function(d) { return d.value; })+150000]);
+  y.domain([d3.min(data, function(d) { return d.value; })-200000, d3.max(data, function(d) { return d.value; })+100000]);
 
 Axis();
 
