@@ -69,9 +69,8 @@ svg {
 <body>
 <script src="http://d3js.org/d3.v3.js"></script>
 <script src="d3.legend.js"></script>
-<p class="title">Erakondade rahastamine 2013Q1 - 2015Q4</p>
+<p class="title">Erakondade rahastamine 2014Q1 - 2015Q4</p>
 <div class="chart"></div>
-<div class="circles-1"></div>
 
 <script>
 var EST = d3.locale({
@@ -345,7 +344,7 @@ svg.append("g")
       .attr("x", -7)
       .attr("dy", ".71em")
       .style("text-anchor", "end")
-      .text("Annetused eurodes");
+      .text("Bilanss eurodes");
 
     svg.selectAll(".y.axis").selectAll(".tick text")
       .attr("transform", "translate(-5, 0)");
