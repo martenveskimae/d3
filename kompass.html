@@ -137,17 +137,43 @@ var svg = d3.select(".chart").append("svg")
 var graph = d3.csv(csvpath, function(data) {
   var flatData = [];
   data.forEach(function(d) {
-    d.lrScale = + d.lrScale
-    d.conlibScale = + d.conlibScale
+    d.lrScale = +d.lrScale;
+    d.conlibScale = +d.conlibScale;
     d.party = d.party;
     d.seats = +d.seats;
     flatData.push({lrScale: d.lrScale, conlibScale: d.conlibScale, seats: d.seats, party: d.party});
     //console.log(d);
   });
 
+d3.csv("pop.csv", function(population) {
+  data.forEach(function(d) {
+    d.lrScale = +d.lrScale;
+    d.conlibScale = +d.conlibScale;
+    d.party = d.party;
+  });
+
+    svg.selectAll(".p_dot")
+      .append("g")
+      .attr("class", "population");
+
+    svg.selectAll(".population")
+      .data(population)
+      .enter()
+      .append("circle")
+      .attr("class", "popDots")
+      .style("stroke-width", "1px")
+      .style("stroke", "grey")
+      .style("opacity", 0.1)
+      .style("z-index", -1)
+      .attr("r", 4)
+      .attr("cx", xMap)
+      .attr("cy", yMap);
+  });
+
   x.domain([-100, 100]);
   y.domain([-100, 100]);
 
+/*
 svg.append("line")
   .attr("x1", 0)
   .attr("y1", 357.2)
@@ -180,6 +206,7 @@ svg.append("text")
   .attr("dy", ".71em")
   .style("text-anchor", "end")
   .text("Mediaan");
+  */
 
     svg.selectAll(".dot")
       .data(data)
