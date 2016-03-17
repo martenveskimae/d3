@@ -79,10 +79,10 @@ var EST = d3.locale({
   "shortMonths": ["Jan", "Veeb", "Märts", "Apr", "Mai", "Juun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dets"]
 });
 
-chart("data.csv", "party");
+chart("data.csv", "oldschool");
 
 var partyShow = [true, true, true, true, true, true];
-var partyArray = ["kesk", "ref", "irl", "sde", "vaba", "ekre"];
+var partyArray = ["kesk", "vaba", "ekre", "ref", "sde", "irl"];
 var datearray = [];
 var colorrange = [];
 
@@ -94,7 +94,10 @@ if (color == "blue") {
   colorrange = ["#980043", "#DD1C77", "#DF65B0", "#C994C7", "#D4B9DA", "#F1EEF6"];
   }
   else if (color == "party") {
-  colorrange = ["#109618", "#ff9900", "#3366cc", "#dc3912"];
+  colorrange = ["#109618", "#ff9900", "#3366cc", "#dc3912", "#c0c0c0", "#614126"];
+  }
+  else if (color == "oldschool") {
+  colorrange = ["url(#refPattern) #fff", "url(#keskPattern) #fff", "url(#ekrePattern) #fff", "url(#vabaPattern) #fff", "url(#sdePattern) #fff", "url(#irlPattern) #fff"];
   }
   else if (color == "orange") {
   colorrange = ["#B30000", "#E34A33", "#FC8D59", "#FDBB84", "#FDD49E", "#FEF0D9"];
@@ -116,6 +119,9 @@ var y = d3.scale.linear().range([height, 0]),
 
 var z = d3.scale.linear().range([1, 3]),
     zMap = function(d) { return z(d.seats);};
+
+var colour = d3.scale.ordinal()
+    .range(colorrange);
 
 var voronoi = d3.geom.voronoi()
     .x(function(d) { return x(d.lrScale); })
@@ -234,6 +240,7 @@ svg.append("text")
       .style("stroke", "black")
       .style("position", "fixed")
       .style("z-index", "999")
+      .style("fill", function(d, i) { return colour(i); })
       .on("click", function (d) { poptoparty(d.party); });
 
   var voronoiGroup = svg.append("g")
@@ -244,7 +251,7 @@ svg.append("text")
       .enter().append("path")
       .attr("id", function(d) { return d.point[1]; })
       .attr("d", function(d) { return "M" + d.join("L") + "Z"; })
-      .on("click", function (d) { poptoparty(d.party, d.lrScale, d.conlibScale); })
+      .on("click", function (d) { poptoparty(d.party, d.lrScale, d.conlibScale, d.seats); })
       .datum(function(d) { return d.point; });
 
 var legendBox = svg.selectAll(".legendBox")
@@ -259,18 +266,18 @@ var legendBox = svg.selectAll(".legendBox")
     .attr("class", "legendBox");
       
   legendBox.append("text")
-    .attr("x", width-100)
+    .attr("x", width-200)
     .attr("y", 100)
     .attr("class", "help")
     .style("text-anchor", "end")
-    .style("font-size", 15)
-    .html("Siin saab erakondi sisse ja välja lülitada!");
+    .style("font-size", 17)
+    .html("Kliki maastikul");
 
 help();
 function help() {
   d3.selectAll(".help")
       .transition()
-      .duration(2000)
+      .duration(7000)
       .style("opacity", 0); 
 };
     
@@ -287,7 +294,7 @@ var legend = svg.selectAll(".legend")
     .attr("y", 10)
     .attr("width", 25)
     .attr("height", 25)
-    .style("fill", function (d) { return "url(#"+ d +"Pattern) #fff"; })
+    .style("fill", function(d, i) { return colour(i); })
     .on("click", function (d, i) { 
       if (!partyShow[i]) {
       restore(d);
@@ -309,10 +316,9 @@ function initiate(target){
 d3.selectAll("#"+target+"Dot")
     .data(data.filter(function (d) { return d.party === target }))
     .attr("class", "parties")
-    .attr("r", zMap)
+    .attr("r", 2)
     .attr("cx", xMap)
-    .attr("cy", yMap)
-    .style("fill", "url(#"+target+"Pattern) #fff");
+    .attr("cy", yMap);
 
 };
 
@@ -324,7 +330,7 @@ function restore(target) {
     .attr("cy", yMap);
 
   svg.selectAll("#"+target+"Legend")
-    .style("fill", "url(#"+ target +"Pattern) #fff");
+    .style("fill", function(d, i) { return colour(i); });
 }
 
 function remove(target) {
@@ -339,7 +345,12 @@ function remove(target) {
 
 };
 
-function poptoparty(target, xp, yp){
+function poptoparty(target, xp, yp, zp){
+  d3.selectAll("#"+target+"Dot")
+    .transition()
+    .delay(2000)
+    .ease('linear')
+    .attr("r", z(zp));
 
   d3.selectAll("#"+target+"pop")
       .transition()
