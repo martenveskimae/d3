@@ -13,6 +13,7 @@ body {
 .voronoi path {
   fill: none;
   stroke: grey;
+  opacity: 0.1;
   pointer-events: all;
 }
 
@@ -132,7 +133,8 @@ var svg = d3.select(".chart").append("svg")
       .attr("width", width)
       .attr("height", height)
       .style("fill", "#e3dac9")
-      .style("opacity", 0.1);
+      .style("opacity", 0.1)
+      .style("stroke", "black");
 
 
 var graph = d3.csv(csvpath, function(data) {
