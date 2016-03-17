@@ -2,7 +2,7 @@
 <html>
 <meta charset="utf-8">
 
-<title>Valijakompass +</title>
+<title>Erakondade rahastamine</title>
 
 <style>
 
@@ -134,6 +134,7 @@ var svg = d3.select(".chart").append("svg")
       .style("fill", "#e3dac9")
       .style("opacity", 0.1);
 
+
 var graph = d3.csv(csvpath, function(data) {
   var flatData = [];
   data.forEach(function(d) {
@@ -144,6 +145,9 @@ var graph = d3.csv(csvpath, function(data) {
     flatData.push({lrScale: d.lrScale, conlibScale: d.conlibScale, seats: d.seats, party: d.party});
     //console.log(d);
   });
+
+  x.domain([-100, 100]);
+  y.domain([-100, 100]);
 
 d3.csv("pop.csv", function(population) {
   data.forEach(function(d) {
@@ -161,17 +165,25 @@ d3.csv("pop.csv", function(population) {
       .enter()
       .append("circle")
       .attr("class", "popDots")
+      .attr("id", function(d) { return d.party+"pop";})
       .style("stroke-width", "1px")
       .style("stroke", "grey")
       .style("opacity", 0.1)
-      .style("z-index", -1)
+      .style("position", "relative")
+      .style("z-index", "-1")
       .attr("r", 4)
       .attr("cx", xMap)
       .attr("cy", yMap);
-  });
 
-  x.domain([-100, 100]);
-  y.domain([-100, 100]);
+falseparty();
+function falseparty(){
+  d3.selectAll("#FALSEpop")
+      .attr("id", "false")
+      .style("opacity", "0");
+};
+
+
+});
 
 /*
 svg.append("line")
@@ -217,7 +229,10 @@ svg.append("text")
       .attr("class", "dots")
       .attr("id", function (d) { return d.party+"Dot"; })
       .style("stroke-width", "1.5px")
-      .style("stroke", "black");
+      .style("stroke", "black")
+      .style("position", "fixed")
+      .style("z-index", "999")
+      .on("click", function (d) { poptoparty(d.party); });
 
   var voronoiGroup = svg.append("g")
       .attr("class", "voronoi");
@@ -227,6 +242,7 @@ svg.append("text")
       .enter().append("path")
       .attr("id", function(d) { return d.point[1]; })
       .attr("d", function(d) { return "M" + d.join("L") + "Z"; })
+      .on("click", function (d) { poptoparty(d.party, d.lrScale, d.conlibScale); })
       .datum(function(d) { return d.point; });
 
 var legendBox = svg.selectAll(".legendBox")
@@ -320,6 +336,18 @@ function remove(target) {
     .style("fill", "white");
 
 };
+
+function poptoparty(target, xp, yp){
+
+  d3.selectAll("#"+target+"pop")
+      .transition()
+      .duration(4000)
+      .delay(function(d, i) { return i * 30; })
+      .attr("cx", x(xp))
+      .attr("cy", y(yp))
+      .style("opacity", 0);
+};
+
 Axis();
 function Axis(){
 svg.append("g")
