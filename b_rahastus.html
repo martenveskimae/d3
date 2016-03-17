@@ -10,6 +10,11 @@ body {
   font: 12px "American Typewriter Light", Baskerville;
 }
 
+.voronoi path {
+  fill: none;
+  pointer-events: all;
+}
+
 .title {
   font-size: 36px;
   text-align: center;
@@ -27,14 +32,6 @@ body {
   shape-rendering: crispEdges;
 }
 
-.buttons {
-  margin-left:auto;
-  margin-right:auto;
-  display:block;
-  align: center;
-
-}
-
 svg {
   margin-left:auto;
   margin-right:auto;
@@ -45,7 +42,6 @@ svg {
 .legendBox{
   fill:white;
   stroke:black;
-  opacity:0.8;
 }
 
 .legend rect {
@@ -58,10 +54,6 @@ svg {
     top: 200px;
     left: 60%;
     text-align: left;
-}
-.circles-1 {
-  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMCcgaGVpZ2h0PScxMCc+CiAgPHJlY3Qgd2lkdGg9JzEwJyBoZWlnaHQ9JzEwJyBmaWxsPScjZmZmJyAvPgogIDxjaXJjbGUgY3g9IjEiIGN5PSIxIiByPSIxIiBmaWxsPSIjMDAwIi8+Cjwvc3ZnPg==");
-  background-repeat: repeat;
 }
 
 </style>
@@ -116,14 +108,6 @@ var margin = {top: 50, right: 20, bottom: 60, left: 80},
     width = 1200 - margin.left - margin.right,
     height = 600 - margin.top - margin.bottom;
 
-var tooltip = d3.select("body")
-    .append("div")
-    .attr("class", "tooltip")
-    .attr("transform","translate(300,300)")
-    .style("position", "absolute")
-    .style("z-index", "20")
-    .style("visibility", "hidden");
-
 var x = d3.time.scale()
     .range([0, width]);
 
@@ -154,12 +138,6 @@ var xAxis2 = d3.svg.axis()
     .tickSize(5,0)
     .orient("bottom");
 
-var stack = d3.layout.stack()
-    .offset("wiggle")
-    .values(function(d) { return d.values; })
-    .x(function(d) { return d.date; })
-    .y(function(d) { return d.value; });
-
 var nest = d3.nest()
     .key(function(d) { return d.party; });
 
@@ -168,6 +146,11 @@ var area = d3.svg.area()
     .x(function(d) { return x(d.date); })
     .y0(function(d) { return y(0); })
     .y1(function(d) { return y(d.value); });
+
+var voronoi = d3.geom.voronoi()
+    .x(function(d) { return x(d.date); })
+    .y(function(d) { return y(d.value); })
+    .clipExtent([[0, 0], [width, height]]);
 
 var svg = d3.select(".chart").append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -180,10 +163,10 @@ var svg = d3.select(".chart").append("svg")
       .attr("width", width+0.5)
       .attr("height", height)
       .style("fill", "#e3dac9")
-      .style("opacity", 0.15);
+      .style("opacity", 0.1);
 
 var graph = d3.csv(csvpath, function(data) {
-
+  var flatData = [];
   data.forEach(function(d) {
     d.date = new Date(+d.year, +d.month-1, 1);
     d.membership = +d.membership;
@@ -196,6 +179,7 @@ var graph = d3.csv(csvpath, function(data) {
     d.balance = +d.balance;
     d.party = d.party;
     d.value = d.balance;
+    flatData.push({date: d.date, value: d.value, key: "value", party: d.party});
     //console.log(d);
   });
 
@@ -222,23 +206,84 @@ Axis();
       .attr("clip-path", "url(#rectClip)")
       .style("stroke-width", "1.5px")
       .style("stroke", "black")
-      .style("opacity", 0.9)
+      .style("opacity", 1) 
       .call(function(d) {
          d3.select("#rectClip rect")
          .transition().duration(3000)
          .attr("width", 1200);
       });
 
+  var focus = svg.append("g")
+      .attr("class", "focus")
+      .style("display", "none");
+
+  focus.append("circle")
+      .attr("r", 4.5)
+      .style("fill", "none")
+      .style("stroke", "black");
+
+  focus.append("text")
+      .attr("x", 9)
+      .attr("dy", ".35em")
+      .style("font-size", "12");
+
+  var voronoiGroup = svg.append("g")
+      .attr("class", "voronoi");
+
+  voronoiGroup.selectAll(".paths")
+      .data(voronoi(flatData))
+      .enter().append("path")
+      .attr("id", function(d) { return d.point[1]; })
+      .attr("d", function(d) { return "M" + d.join("L") + "Z"; })
+      .datum(function(d) { return d.point; })
+      .on("mouseover", mouseover)
+      .on("mouseout", mouseout);
+
+  function mouseover(d) {
+    d3.select("."+d.key);
+    focus.transition()
+    .style("display", "inline")
+    .attr("transform", "translate(" + x(d.date) + "," + y(d.value) + ")");
+    focus.select("text")
+    .attr("transform", "translate(-20,0)")
+    .style("text-anchor", "end")
+    .text(d.party+": "+d.value+"€");
+  }
+  
+  function mouseout(d) {
+    d3.select("."+d.key);
+    focus.transition()
+    .duration(1000)
+    .style("display", "none");
+  }
+
 var legendBox = svg.selectAll(".legendBox")
-    .data(partyArray)
-    .enter()
-    .append("rect")
+    .data(["1"])
+    .enter();
+
+  legendBox.append("rect")
     .attr("x", width - 90)
     .attr("y", 5)
     .attr("width", 80)
     .attr("height", 125)
     .attr("class", "legendBox");
+      
+  legendBox.append("text")
+    .attr("x", width-100)
+    .attr("y", 70)
+    .attr("class", "help")
+    .style("text-anchor", "end")
+    .style("font-size", 15)
+    .html("Siin saab erakondi sisse ja välja lülitada!");
 
+help();
+function help() {
+  d3.selectAll(".help")
+      .transition()
+      .duration(2000)
+      .style("opacity", 0); 
+};
+    
 var legend = svg.selectAll(".legend")
     .data(partyArray, function(d, i) { return d + i; })
     .enter()
@@ -269,7 +314,7 @@ var legend = svg.selectAll(".legend")
     .attr("dy", ".35em")
     .style("text-anchor", "end");
 
-partyArray.forEach (function (d, i) { return initiate(partyArray[i]);});
+partyArray.forEach(function (d, i) { return initiate(partyArray[i]);});
 function initiate(target){
 
 d3.selectAll("#"+target)
@@ -295,31 +340,6 @@ function remove(target) {
     svg.selectAll("#"+target+"Legend")
       .style("fill", "white");
 
-};
-
-pathAbilities();
-function pathAbilities(){
-    svg.selectAll(".paths")
-      .on("mousemove", function(d, i) {
-        mousex = d3.mouse(this);
-        mousex = mousex[0];
-        var invertedx = x.invert(mousex);
-        invertedx = invertedx.getMonth() + invertedx.getDate();
-        var selected = (d.values);
-        for (var k = 0; k < selected.length; k++) {
-          datearray[k] = selected[k].date
-          datearray[k] = datearray[k].getMonth() + datearray[k].getDate();
-          }
-        mousedate = datearray.indexOf(invertedx);
-        pro = d.values[mousedate].value;
-        d3.select(this)
-        tooltip.html( d.key +": €"+ pro)
-          .style("visibility", "visible")
-      })
-      .on("mouseout", function(d, i) {
-        tooltip
-        .style("visibility", "hidden");
-      });
 };
 
 function Axis(){
