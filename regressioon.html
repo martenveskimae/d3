@@ -1,0 +1,126 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Linaarregressioni</title>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+
+<style>
+
+body {
+  font: 14px "American Typewriter Light", Baskerville;
+}
+ 
+</style>
+</head>
+<body>
+<p>Vajuta ekraanile</p>
+<script type="text/javascript">
+var height = 600;
+var width = 900;
+
+var svg = d3.select("body")
+            .append("svg")
+            .attr("width", width)   
+            .attr("height", height); 
+    
+   var group = svg.append("g");
+   
+   var data = [[100,200]];
+
+    
+    
+   group.selectAll(".circles")
+   .data(data).enter().append("circle")
+   .attr("class","circles")
+   .attr("r",3)
+   .style("stroke","white")
+   .style("opacity",1)
+   .attr("cx",function(d) {return d[0];})
+   .attr("cy",function(d) {return d[1];});
+   
+    svg.append("line")
+      .attr("class", "trendline")
+      .attr("stroke", "black")
+      .attr("stroke-width", 1);
+
+    var eqText = svg.append("text")
+      .attr("id", "eq-text")
+      .style("text-anchor", "start");
+   
+   svg.on("click",addCircle);
+   
+   
+   function addCircle() {
+         
+   data.push(d3.mouse(this));
+  
+
+group.selectAll(".circles")
+   .data(data).enter().append("circle")
+   .attr("class","circles")
+   .attr("r",3)
+   .style("stroke","white")
+   .style("opacity",1)
+   .attr("cx",function(d) {return d[0];})
+   .attr("cy",function(d) {return d[1];});
+
+    var xSeries = data.map(function(d) { return parseFloat(d[0]); });
+    var ySeries = data.map(function(d) { return parseFloat(d[1]); });
+  
+    var leastSquaresCoeff = leastSquares(xSeries, ySeries);
+
+    var slope = leastSquaresCoeff[0];
+    var intercept = leastSquaresCoeff[1];
+    var rSquare = leastSquaresCoeff[2];
+    
+
+    d3.selectAll(".trendline")
+        .transition()
+        .duration(200)
+        .attr("x1", 0)
+        .attr("y1", intercept)
+        .attr("x2", width)
+        .attr("y2", width*slope + intercept);
+
+     var sign = " + ";
+     if (slope>0) { sign = " - " };
+
+      d3.select('#eq-text')
+      .transition()
+      .duration(200)
+      .attr("x", 600)
+      .attr("y", 600*slope + intercept - 30)
+      .text("y = " +  Math.round(width-intercept) + sign + Math.abs(d3.round(0-slope, 3)) + "x");
+
+
+   };
+
+    function leastSquares(xSeries, ySeries) {
+    var reduceSumFunc = function(prev, cur) { return prev + cur; };
+    
+    var xBar = xSeries.reduce(reduceSumFunc) * 1.0 / xSeries.length;
+    var yBar = ySeries.reduce(reduceSumFunc) * 1.0 / ySeries.length;
+
+    var ssXX = xSeries.map(function(d) { return Math.pow(d - xBar, 2); })
+      .reduce(reduceSumFunc);
+    
+    var ssYY = ySeries.map(function(d) { return Math.pow(d - yBar, 2); })
+      .reduce(reduceSumFunc);
+      
+    var ssXY = xSeries.map(function(d, i) { return (d - xBar) * (ySeries[i] - yBar); })
+      .reduce(reduceSumFunc);
+      
+    var slope = ssXY / ssXX;
+    var intercept = yBar - (xBar * slope);
+    var rSquare = Math.pow(ssXY, 2) / (ssXX * ssYY);
+    
+    return [slope, intercept, rSquare];
+  };
+    
+</script>
+
+
+</body>
+</html>
