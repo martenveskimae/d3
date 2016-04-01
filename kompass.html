@@ -2,7 +2,7 @@
 <html>
 <meta charset="utf-8">
 
-<title>Valijakompass +</title>
+<title>Voter +</title>
 
 <style>
 
@@ -41,11 +41,6 @@ svg {
   vertical-align: middle;
 }
 
-.legendBox{
-  fill:white;
-  stroke:black;
-}
-
 .legend rect {
   stroke: black;
 }
@@ -60,6 +55,7 @@ svg {
 
 </style>
 <body>
+<p>Click on the landscape!</p>
 <script src="http://d3js.org/d3.v3.js"></script>
 <div class="chart"></div>
 
@@ -82,7 +78,7 @@ var EST = d3.locale({
 chart("data.csv", "oldschool");
 
 var partyShow = [true, true, true, true, true, true];
-var partyArray = ["kesk", "vaba", "ekre", "ref", "sde", "irl"];
+var partyArray = ["kesk", "sde", "ekre", "vaba", "ref", "irl"];
 var datearray = [];
 var colorrange = [];
 
@@ -192,41 +188,30 @@ function falseparty(){
 
 
 });
-
 /*
-svg.append("line")
-  .attr("x1", 0)
-  .attr("y1", 357.2)
-  .attr("x2", width)
-  .attr("y2", 357.2)
+svg.append("circle")
+  .attr("r", 3)
+  .attr("cy", 357.2)
+  .attr("cx", 463.59999999999997)
   .attr("stroke-width", 1)
   .attr("stroke", "black")
-  .style("opacity", 0.7)
-svg.append("text")
-  .attr("class", "label")
-  .attr("y", 344.2)
-  .attr("x", width-8)
-  .attr("dy", ".71em")
-  .style("text-anchor", "end")
-  .text("Mediaan");
+  .style("fill", "none");
+*/
 
-svg.append("line")
-  .attr("x1", 463.59999999999997)
-  .attr("y1", 0)
-  .attr("x2", 463.59999999999997)
-  .attr("y2", height)
-  .attr("stroke-width", 1)
-  .attr("stroke", "black")
-  .style("opacity", 0.7)
-svg.append("text")
-  .attr("class", "label")
-  .attr("transform", "rotate(-90)")
-  .attr("y", 468)
-  .attr("x", -10)
-  .attr("dy", ".71em")
-  .style("text-anchor", "end")
-  .text("Mediaan");
-  */
+var drag = d3.behavior.drag()
+      .on('dragstart', function() {
+        svg.selectAll("#refDot")
+        .style('fill', 'red');
+      }) 
+      .on("drag", function() { 
+        d3.selectAll("#keskDot")
+          .attr("cx", d3.event.x)
+          .attr("cy", d3.event.y);
+        })
+      .on('dragend', function() {
+        svg.selectAll("#keskDot")
+        .style('fill', 'black');
+      });
 
     svg.selectAll(".dot")
       .data(data)
@@ -241,7 +226,8 @@ svg.append("text")
       .style("position", "fixed")
       .style("z-index", "999")
       .style("fill", function(d, i) { return colour(i); })
-      .on("click", function (d) { poptoparty(d.party); });
+      .on("click", function (d) { poptoparty(d.party); })
+      .on("click", drag);
 
   var voronoiGroup = svg.append("g")
       .attr("class", "voronoi");
@@ -254,40 +240,23 @@ svg.append("text")
       .on("click", function (d) { poptoparty(d.party, d.lrScale, d.conlibScale, d.seats); })
       .datum(function(d) { return d.point; });
 
-var legendBox = svg.selectAll(".legendBox")
-    .data(["1"])
-    .enter();
+var legendBox = svg.append("g")
+    .attr("transform", "translate(0,30)");
 
-  legendBox.append("rect")
-    .attr("x", width - 90)
-    .attr("y", 5)
-    .attr("width", 80)
-    .attr("height", 185)
-    .attr("class", "legendBox");
-      
-  legendBox.append("text")
-    .attr("x", width-200)
-    .attr("y", 100)
-    .attr("class", "help")
-    .style("text-anchor", "end")
-    .style("font-size", 17)
-    .html("Kliki maastikul");
-
-help();
-function help() {
-  d3.selectAll(".help")
-      .transition()
-      .duration(7000)
-      .style("opacity", 0); 
-};
-    
-var legend = svg.selectAll(".legend")
+var legend = legendBox.selectAll(".legendBox")
     .data(partyArray, function(d, i) { return d + i; })
     .enter()
     .append("g")
     .attr("class", "legend")
     .attr("transform", function(d, i) { return "translate(0,"+ i * 30 +")"; });
-
+    
+  legend.append("rect")
+    .attr("x", width - 40)
+    .attr("y", 10)
+    .attr("width", 25)
+    .attr("height", 25)
+    .style("fill", "white")
+    .style("stroke", "black");
   legend.append("rect")
     .attr("id", function (d) { return d+"Legend"; })
     .attr("x", width - 40)
@@ -325,23 +294,19 @@ d3.selectAll("#"+target+"Dot")
 function restore(target) {
   d3.selectAll("#"+target+"Dot")
     .data(data.filter(function (d) { return d.party === target }))
-    .attr("r", zMap)
-    .attr("cx", xMap)
-    .attr("cy", yMap);
+    .style("display", null);
 
   svg.selectAll("#"+target+"Legend")
-    .style("fill", function(d, i) { return colour(i); });
+    .style("opacity", 1);
 }
 
 function remove(target) {
 
   svg.selectAll("#"+target+"Dot")
-    .attr("r", null)
-    .attr("cx", null)
-    .attr("cy", null);
+    .style("display", "none");
 
   svg.selectAll("#"+target+"Legend")
-    .style("fill", "white");
+    .style("opacity", 0);
 
 };
 
