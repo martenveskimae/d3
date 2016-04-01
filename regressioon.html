@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Linaarregressioni</title>
+<title>Linear regression</title>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/topojson.v1.min.js"></script>
 
@@ -35,7 +35,7 @@ svg {
 </style>
 </head>
 <body>
-<p class="title">kliki või tapi ekraanil</p>
+<p class="title">Click or tap on the graph</p>
 <div class="chart"></div>
 
 <script type="text/javascript">
@@ -157,7 +157,7 @@ function addCircle() {
     .attr("x1", 0)
     .attr("y1", intercept)
     .attr("x2", width)
-    .attr("y2", width*slope + intercept);
+    .attr("y2", height*slope + intercept);
 
   var sign = " + ";
   if (slope>0) { sign = " - " };
