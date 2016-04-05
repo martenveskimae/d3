@@ -1,0 +1,332 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Õppekavade inventuur</title>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+
+<style>
+
+body {
+  font: 12px "American Typewriter Light", Baskerville;
+}
+
+svg {
+  margin-left:auto;
+  margin-right:auto;
+  display:block;
+  vertical-align: middle;
+}
+
+.node {
+  cursor: pointer;
+}
+
+.node circle {
+  fill: #fff;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 1.5px;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+
+
+.dot {
+  stroke: black;
+  stroke-width: 1;
+}
+
+.tooltip {
+    position: absolute;
+    text-align: left;
+    width: 90px;
+    height: auto;
+    padding: 10px;
+    background-color: white;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+    -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+}
+
+.tick line{
+  opacity: 0.2;
+}
+
+</style>
+</head>
+<body>
+<table>
+<tr>
+<td>
+<div class="chart"></div>
+</td><td>
+<div class="scatter"></div>
+</td></tr></table>
+<script>
+
+var data = [
+{ 'name' : 'Andragoogika', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Andragoogika', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Akadeemilise kirjutamise alused', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Konfliktidega toimetulek koolis', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Võrdlev koolikorraldus', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Sotsiaalsed probleemid virtuaalmaailmas', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Hariduskorralduse praktika', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Hariduslik nõustamine ja konsulteerimine', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Haridusõigus ja tööõigus õppeasutuses', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Karjääriplaneerimine', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Nõustamisoskuste treening', 'parent' : 'psühholoogia instituut' },
+{ 'name' : 'Nõustamisoskuste treening', 'parent' : 'psühholoogia instituut' },
+{ 'name' : 'Juhtimiskäitumine', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Uurimused kasvatusteadustes', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Mitmekesisus hariduses', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Mitmekesisus hariduses', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Läbirääkimisoskused', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Haridusasutuse strateegiline juhtimine', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Hariduskorraldus ja haridusjuhtimine', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Magistriõppe seminar', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Magistritöö', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Magistritöö', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Magistritöö', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Magistritöö', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Magistritöö', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Magistritöö', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Rahvusvahelised organisatsioonid ja võrdlevad haridusuuringud', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Inimene ja organisatsioon', 'parent' : 'psühholoogia instituut' },
+{ 'name' : 'Algaja õpetaja juhendamine', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Haridusasutuse haridustehnoloogilise valdkonna analüüs', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'HEV-lapsed ja hariduskorraldus', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Kogenud haridusjuhi töö analüüs', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Mentorlus', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Nõustamine, konsulteerimine ja sekkumine haridusasutuses mentoritele', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Õppeasutuse ja kohaliku omavalitsuse seosed', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Õppimist toetava hindamise strateegiad', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Suhtekorralduse alused haridusjuhtidele', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Kasvatusteooria ja kasvatuspsühholoogia', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'Magistrandi õppepraktika', 'parent' : 'haridusteaduste instituut' },
+{ 'name' : 'haridusteaduste instituut', 'parent' : 'sotsiaalteaduste valdkond' },
+{ 'name' : 'psühholoogia instituut', 'parent' : 'sotsiaalteaduste valdkond' },
+{ 'name' : 'sotsiaalteaduste valdkond', 'parent' : null }
+    ];
+
+// *********** Convert flat data into a nice tree ***************
+// create a name: node map
+var dataMap = data.reduce(function(map, node) {
+	map[node.name] = node;
+	return map;
+}, {});
+
+// create the tree array
+var treeData = [];
+data.forEach(function(node) {
+	// add to parent
+	var parent = dataMap[node.parent];
+	if (parent) {
+		// create child array if it doesn't exist
+		(parent.children || (parent.children = []))
+			// add node to child array
+			.push(node);
+	} else {
+		// parent is null or missing
+		treeData.push(node);
+	}
+});
+
+// ************** Generate the tree diagram	 *****************
+var width = 300,
+    height = 700;
+
+var cluster = d3.layout.cluster()
+    .size([height, width - 160]);
+
+var diagonal = d3.svg.diagonal()
+    .projection(function(d) { return [d.y, d.x]; });
+
+var svg = d3.select(".chart").append("svg")
+    .attr("width", width+500)
+    .attr("height", height)
+  .append("g")
+    .attr("transform", "translate(200,0)");
+
+root = treeData[0];
+  
+update(root);
+
+function update(root) {
+
+  var nodes = cluster.nodes(root),
+      links = cluster.links(nodes);
+
+  var link = svg.selectAll(".link")
+      .data(links)
+    .enter().append("path")
+      .attr("class", "link")
+      .attr("d", diagonal);
+
+  var node = svg.selectAll(".node")
+      .data(nodes)
+    .enter().append("g")
+      .attr("class", "node")
+      .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; })
+
+  node.append("circle")
+      .attr("r", 4.5);
+
+  node.append("text")
+      .attr("dx", function(d) { return d.children ? -8 : 8; })
+      .attr("dy", 3)
+      .style("text-anchor", function(d) { return d.children ? "end" : "start"; })
+      .text(function(d) { return d.name; });
+};
+
+d3.select(self.frameElement).style("height", height + "px");
+
+
+var margin = {top: 20, right: 20, bottom: 30, left: 40},
+    width = 500 - margin.left - margin.right,
+    height = 700 - margin.top - margin.bottom;
+
+var xValue = function(d) { return d.reganuid;}, 
+    xScale = d3.scale.linear().range([0, width]),
+    xMap = function(d) { return xScale(xValue(d));},
+    xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+
+var yValue = function(d) { return d.date;}, 
+    yScale = d3.scale.linear().range([height, 0]), 
+    yMap = function(d) { return yScale(yValue(d));},
+    yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+var dValue = function(d) { return d.kattuvus; },
+    dScale = d3.scale.linear().range([2, 11]),
+    dMap = function(d) { return dScale(dValue(d));};
+
+var tooltip = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+
+var instituut = function(d) { return d.instituut;};
+var color = d3.scale.ordinal()
+  .domain(["haridusteaduste instituut", "psühholoogia instituut"])
+  .range(["#3366cc", "#dc3912"]);
+
+function colores_google(n) {
+  var colores_g = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
+  return colores_g[n % colores_g.length];
+}
+
+
+d3.csv("aineteKattuvus.csv", function(error, data) {
+
+  data.forEach(function(d) {
+    d.aine = d.Aine;
+    d.kattuvus = +d.Kattuvus;
+    d.date = +d.Õpiväljund;
+    d.lühikirjeldus = +d.Lühikirjeldus;
+    d.instituut = d.Instituut;
+    d.reganuid = +d.Reganuid;
+    //console.log(d);
+  });
+
+var svg = d3.select(".scatter").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+  xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
+  yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
+  dScale.domain([d3.min(data, dValue)-1, d3.max(data, dValue)+1]);
+
+    svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis)
+    .append("text")
+      .attr("class", "label")
+      .attr("x", width)
+      .attr("y", -6)
+      .style("text-anchor", "end")
+      .text("Registreerunuid");
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("class", "label")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Õpiväljundid");
+
+  svg.selectAll(".dot")
+      .data(data)
+      .enter().append("circle")
+      .attr("class", "dot")
+      .attr("id", function(d) { return d.instituut ; } )
+      .attr("r", dMap)
+      .attr("cx", xMap)
+      .attr("cy", yMap)
+      .style("opacity", .7)
+      .style("fill", function(d,i) { return color(instituut(d)); } )
+      .on("mouseover", function(d) {
+          tooltip.transition()
+               .duration(200)
+               .style("opacity", 1);
+          tooltip.html(d.Aine + " - " + yValue(d))
+               .style("left", (d3.event.pageX + 5) + "px")
+               .style("top", (d3.event.pageY - 28) + "px");
+      })
+      .on("mouseout", function(d) {
+          tooltip.transition()
+               .duration(500)
+               .style("opacity", 0);
+      });
+
+  var legend = svg.selectAll(".legend")
+      .data(color.domain())
+      .enter().append("g")
+      .attr("id", instituut)
+      .attr("class", "legend")
+      .attr("transform", function(d, i) { return "translate(0," + i * 30 + ")"; });
+
+  legend.append("rect")
+      .attr("x", width - 18)
+      .attr("width", 25)
+      .attr("height", 25)
+      .attr("id", instituut)
+      .style("fill", color)
+      .style("opacity", 0.8);
+
+  legend.append("text")
+      .attr("x", width - 24)
+      .attr("y", 13)
+      .attr("dy", ".35em")
+      .style("text-anchor", "end")
+      .text(function(d) { return d;});
+
+});
+
+</script>
+	
+  </body>
+</html>
+
