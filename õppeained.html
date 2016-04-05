@@ -291,7 +291,7 @@ var svg = d3.select(".scatter").append("svg")
           tooltip.transition()
                .duration(200)
                .style("opacity", 1);
-          tooltip.html(d.Aine + " - " + yValue(d))
+          tooltip.html(d.Aine + "</br>Õppekavsid: " + dValue(d))
                .style("left", (d3.event.pageX + 5) + "px")
                .style("top", (d3.event.pageY - 28) + "px");
       })
