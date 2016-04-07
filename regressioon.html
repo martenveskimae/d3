@@ -38,6 +38,7 @@ svg {
 <body>
 <p class="title">Click or tap on the graph</p>
 <div class="chart"></div>
+<button onclick="random()">Random 100</button>
 <script type="text/javascript">
 var margin = {top: 20, right: 20, bottom: 20, left: 20},
     width = 700 - margin.left - margin.right,
@@ -361,6 +362,15 @@ function leastSquares(xSeries, ySeries) {
 
 function ci95(p, n) {
     return Math.sqrt(Math.abs(p*(1-p)/n)*1.96);
+};
+
+function random(){
+  for (i=0;i<100;i++){
+    var randomX = Math.random() * (5 - -5) + -5;
+    var randomY = Math.random() * (5 - -5) + -5;
+    data.push({x: randomX,y: randomY});
+    update();
+  }
 };
     
 </script>
