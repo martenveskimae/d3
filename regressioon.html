@@ -18,7 +18,7 @@ body {
   margin-top: 30px;
 }
 
-svg {
+table {
   margin-left:auto;
   margin-right:auto;
   display:block;
@@ -37,8 +37,11 @@ svg {
 </head>
 <body>
 <p class="title">Click or tap on the graph</p>
+<table width="900"><tr><td>
 <div class="chart"></div>
+</td><td>
 <button onclick="random()">Random 100</button>
+</td></tr></table>
 <script type="text/javascript">
 var margin = {top: 20, right: 20, bottom: 20, left: 20},
     width = 700 - margin.left - margin.right,
