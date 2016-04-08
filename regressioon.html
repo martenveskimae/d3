@@ -176,10 +176,13 @@ function addCircle() {
   update();
 };
 
-function update(){  
+function update(){
+
   group.selectAll(".circles")
+   .data(data)
    .transition()
    .duration(200)
+   .delay(function(d, i) { return i * 5; })
    .attr("cx", function(d){ return x(d.x); })
    .attr("cy", function(d){ return y(d.y); });
 
@@ -224,8 +227,10 @@ function update(){
   };
 
   d3.selectAll(".lines")
+    .data(data)
     .transition()
     .duration(200)
+    .delay(function(d, i) { return i * 5; })
     .attr("x1", function(d){ return x(d.x) ; })
     .attr("y1", function(d){ return y(d.y) ; })
     .attr("x2", function(d){ return x(d.x) ; })
@@ -405,9 +410,11 @@ function random(){
         randomY = Math.random() * (5 - -5) + -5;
     */
     data.push({x: randomX,y: randomY});
+
+    if(i === 99) {
+      update(); }
   }
 
-  update();
 };
     
 </script>
