@@ -408,9 +408,10 @@ function ci95(p, n) {
 function random(){
   data.length=0;
   for (i=0;i<100;i++){
-    var rnd = d3.random.normal(0, 2.5);
-    var randomX = rnd(),
-        randomY = rnd();
+    var rndX = d3.random.normal(0, 2.5);
+    var rndY = d3.random.normal(0, 1);
+    var randomX = rndX(),
+        randomY = rndY();
     /*
     var randomX = Math.random() * (5 - -5) + -5,
         randomY = Math.random() * (5 - -5) + -5;
