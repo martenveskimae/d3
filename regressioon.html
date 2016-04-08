@@ -46,6 +46,10 @@ button {
 button:hover {
   background-color: #666666;
 }
+
+#table {
+  font: 15px "American Typewriter Light", Baskerville;
+}
  
 </style>
 </head>
@@ -54,6 +58,7 @@ button:hover {
 <table width="900"><tr><td>
 <div class="chart"></div>
 </td><td>
+<div class="table"></div>
 <button onclick="random()">Random 100</button>
 </td></tr></table>
 <script type="text/javascript">
@@ -338,6 +343,7 @@ function update(){
     .attr("y", ytextLoc)
     .text("y = " +  d3.round(interceptLoc, 2) + sign + Math.abs(d3.round(0-slope, 2)) + "x, r2 = " + d3.round(rSquare,2));
 
+  tableStats(d3.round(interceptLoc, 2), d3.round(0-slope, 2), data.length, d3.round(rSquare,2))
 };
 
 Axis()
@@ -416,7 +422,137 @@ function random(){
   }
 
 };
-    
+
+table()
+function table() {
+  var width = 300;
+  var height = 300;
+  var svg = d3.select(".table").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .append("g");
+
+svg.append("text")
+  .attr("x", 40)
+  .attr("y", 15)
+  .attr("id", "table")
+  .text("Table 1. Interactive regression model");
+
+svg.append("line")
+  .attr("x1", 0)
+  .attr("x2", width)
+  .attr("y1", 30)
+  .attr("y2", 30)
+  .style("stroke", "black")
+  .style("stroke-width", 1.5);
+
+svg.append("text")
+  .attr("x", width/2-20)
+  .attr("y", 50)
+  .attr("id", "table")
+  .attr("text-anchor", "end")
+  .text("Variable x");
+
+svg.append("text")
+  .attr("x", width/2+20)
+  .attr("y", 50)
+  .attr("id", "table")
+  .attr("class", "slope")
+  .attr("text-anchor", "beginning");
+
+svg.append("text")
+  .attr("x", width/2+20)
+  .attr("y", 70)
+  .attr("id", "table")
+  .attr("class", "slopeD")
+  .attr("text-anchor", "beginning");
+
+svg.append("text")
+  .attr("x", width/2-20)
+  .attr("y", 90)
+  .attr("id", "table")
+  .attr("text-anchor", "end")
+  .text("Constant");
+
+svg.append("text")
+  .attr("x", width/2+20)
+  .attr("y", 90)
+  .attr("class", "intercept")
+  .attr("id", "table")
+  .attr("text-anchor", "beginning");
+
+svg.append("text")
+  .attr("x", width/2+20)
+  .attr("y", 110)
+  .attr("class", "interceptD")
+  .attr("id", "table")
+  .attr("text-anchor", "beginning");
+
+svg.append("text")
+  .attr("x", width/2-20)
+  .attr("y", 170)
+  .attr("id", "table")
+  .attr("text-anchor", "end")
+  .text("N");
+
+svg.append("text")
+  .attr("x", width/2+20)
+  .attr("y", 170)
+  .attr("class", "num")
+  .attr("id", "table")
+  .attr("text-anchor", "beginning");
+
+svg.append("text")
+  .attr("x", width/2-20)
+  .attr("y", 150)
+  .attr("id", "table")
+  .attr("text-anchor", "end")
+  .text("R2");
+
+svg.append("text")
+  .attr("x", width/2+20)
+  .attr("y", 150)
+  .attr("class", "R")
+  .attr("id", "table")
+  .attr("text-anchor", "beginning");
+
+svg.append("line")
+  .attr("x1", 0)
+  .attr("x2", width)
+  .attr("y1", 185)
+  .attr("y2", 185)
+  .style("stroke", "black")
+  .style("stroke-width", 1.5);
+
+svg.append("text")
+  .attr("x", 10)
+  .attr("y", 205)
+  .text("*p<0.05, ** p<0.01, ***p<0.001");
+
+};
+
+function tableStats(intercept, slope, num, R){
+
+d3.selectAll(".slope")
+  .text(slope);
+
+d3.selectAll(".intercept")
+  .text(intercept);
+
+d3.selectAll(".interceptD")
+  .text("(   )");
+
+d3.selectAll(".slopeD")
+  .text("(   )");
+
+d3.selectAll(".num")
+  .text(num);
+
+d3.selectAll(".R")
+  .text(R);
+
+}
+
 </script>
 
 
