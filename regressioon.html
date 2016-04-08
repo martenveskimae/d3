@@ -245,6 +245,11 @@ function update(){
     .style("opacity",0.1)
     .style("stroke-dasharray", (3, 3));
 
+  group.selectAll(".lines")
+    .data(data)
+    .exit()
+    .remove();
+
   svg.selectAll(".ciLine")
     .transition()
     .duration(200)
