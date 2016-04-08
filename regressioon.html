@@ -330,8 +330,8 @@ function update(){
     .text("y =" + sign + Math.abs(d3.round(0-slope, 2)));
 
 
-  var xtextLoc = width-120,
-      ytextLoc = xtextLoc*slope + intercept - 50,
+  var xtextLoc = width-100,
+      ytextLoc = xtextLoc*slope + intercept - 30,
       interceptLoc = y.invert((width/2)*slope + intercept);
 
   if (ytextLoc>height-30) { ytextLoc = height-30 };
@@ -341,7 +341,7 @@ function update(){
     .duration(200)
     .attr("x", xtextLoc)
     .attr("y", ytextLoc)
-    .text("y = " +  d3.round(interceptLoc, 2) + sign + Math.abs(d3.round(0-slope, 2)) + "x, r2 = " + d3.round(rSquare,2));
+    .text("y = " +  d3.round(interceptLoc, 2) + sign + Math.abs(d3.round(0-slope, 2)) + "x");
 
   tableStats(d3.round(interceptLoc, 2), d3.round(0-slope, 2), data.length, d3.round(rSquare,2))
 };
