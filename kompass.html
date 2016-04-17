@@ -55,9 +55,9 @@ svg {
 
 </style>
 <body>
-<p>Click on the landscape!</p>
+
 <script src="http://d3js.org/d3.v3.js"></script>
-<div class="chart"></div>
+<div class="chart"><p>Click anywhere on the <i></i>political landscape</i>!</p></div>
 
 <script>
 var EST = d3.locale({
@@ -135,7 +135,7 @@ var svg = d3.select(".chart").append("svg")
       .attr("width", width)
       .attr("height", height)
       .style("fill", "#e3dac9")
-      .style("opacity", 0.1)
+      .style("opacity", 0.05)
       .style("stroke", "black");
 
 
