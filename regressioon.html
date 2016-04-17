@@ -32,6 +32,9 @@ table {
   shape-rendering: crispEdges;
   stroke-dasharray: 2,2;
 }
+.buttonDiv {
+  text-align: center;
+}
 button {
     background-color: null;
     border: none;
@@ -59,7 +62,7 @@ button:hover {
 <div class="chart"></div>
 </td><td>
 <div class="table"></div>
-<button onclick="random()">Random 100</button>
+<div class="buttonDiv"><button onclick="random()">Random 100</button></div>
 </td></tr></table>
 <script type="text/javascript">
 var margin = {top: 20, right: 20, bottom: 20, left: 20},
@@ -219,18 +222,6 @@ function update(){
 
   var ciCapWidth = 10;
 
-  function number (n) {
-    function range(obj){
-        if (obj.x < n+1.25 && obj.x > n-1.25) {
-            return true;
-        }
-    }
-    if (data.filter(range).length < 1) {
-    return 0.5; } else {
-    return data.filter(range).length;  
-    };
-  };
-
   d3.selectAll(".lines")
     .data(data)
     .transition()
@@ -357,7 +348,7 @@ svg.append("g")
     .attr("x", width-7)
     .attr("y", -7)
     .style("text-anchor", "end")
-    .text("x-Axis");
+    .text("x-axis");
 
   svg.append("g")
       .attr("class", "y axis")
@@ -370,12 +361,24 @@ svg.append("g")
       .attr("x", -7)
       .attr("dy", ".71em")
       .style("text-anchor", "end")
-      .text("y-Axis");
+      .text("y-axis");
 
   svg.selectAll(".y.axis").selectAll(".tick text")
       .attr("transform", "translate(-5, 0)");
   svg.selectAll(".x.axis").selectAll(".tick text")
       .attr("transform", "translate(0, 3)");
+};
+
+function number (n) {
+  function range(obj){
+      if (obj.x < n+1.25 && obj.x > n-1.25) {
+        return true;
+      }
+  }
+  if (data.filter(range).length < 1) {
+    return 0.5; } else {
+    return data.filter(range).length;  
+  };
 };
 
 function leastSquares(xSeries, ySeries) {
@@ -408,7 +411,7 @@ function ci95(p, n) {
 function random(){
   data.length=0;
   for (i=0;i<100;i++){
-    var rndX = d3.random.normal(0, 2.5);
+    var rndX = d3.random.normal(0, 2);
     var rndY = d3.random.normal(0, 1);
     var randomX = rndX(),
         randomY = rndY();
@@ -421,7 +424,6 @@ function random(){
     if(i === 99) {
       update(); }
   }
-
 };
 
 table()
@@ -508,7 +510,7 @@ svg.append("text")
   .attr("y", 150)
   .attr("id", "table")
   .attr("text-anchor", "end")
-  .text("R2");
+  .text("r-sqr");
 
 svg.append("text")
   .attr("x", width/2+20)
@@ -541,10 +543,10 @@ d3.selectAll(".intercept")
   .text(intercept);
 
 d3.selectAll(".interceptD")
-  .text("(   )");
+  .text("("+d3.round(ci95(intercept, number(0)),2)+")");
 
 d3.selectAll(".slopeD")
-  .text("(   )");
+  .text("("+d3.round(ci95(slope, number(1))-ci95(intercept, number(0)),2)+")");
 
 d3.selectAll(".num")
   .text(num);
