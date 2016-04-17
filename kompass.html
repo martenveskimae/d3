@@ -286,7 +286,7 @@ function initiate(target){
 d3.selectAll("#"+target+"Dot")
     .data(data.filter(function (d) { return d.party === target }))
     .attr("class", "parties")
-    .attr("r", 2)
+    .attr("r", 5)
     .attr("cx", xMap)
     .attr("cy", yMap);
 
