@@ -15,8 +15,9 @@ body {
 }
 
 .chart {
-  position: absolute;
-  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 svg {
@@ -79,34 +80,33 @@ svg {
 </style>
 </head>
 <body>
-<table>
-<tr>
-<td>
 <div class="chart"></div>
-</td><td>
-<div class="scatter"></div>
-</td></tr></table>
 <script>
 // ************** Generate the tree diagram  *****************
-var margin = {top: 20, right: 120, bottom: 20, left: 200},
-  width = 1300 - margin.right - margin.left,
-  height = 1200 - margin.top - margin.bottom;
-  
+var zoom = d3.behavior.zoom()
+    .center([radius / 2, radius / 2])
+    .scaleExtent([1, 10])
+    .on("zoom", zoomed);
+
+
 var i = 0,
     duration = 750,
     root;
 
-var tree = d3.layout.tree()
-  .size([height, width]);
+var radius = 1200 / 2;
 
-var diagonal = d3.svg.diagonal()
-  .projection(function(d) { return [d.y, d.x/1.4]; });
+var cluster = d3.layout.cluster()
+    .size([360, radius - 120]);
+
+var diagonal = d3.svg.diagonal.radial()
+    .projection(function(d) { return [d.y, d.x / 180 * Math.PI]; });
 
 var svg = d3.select(".chart").append("svg")
-  .attr("width", width + margin.right + margin.left)
-  .attr("height", height + margin.top + margin.bottom)
+    .attr("width", radius * 2)
+    .attr("height", radius * 2)
   .append("g")
-  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    .attr("transform", "translate(" + radius + "," + radius + ")")
+    .call(zoom);
 
 // load the external data
 d3.csv("õppepuu.csv", function(error, data) {
@@ -153,14 +153,19 @@ data.forEach(function(node) {
 
 d3.select(self.frameElement).style("height", "1600px");
 
+
+function zoomed() {
+  nodeEnter.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+}
+
 function update(source) {
 
   // Compute the new tree layout.
-  var nodes = tree.nodes(root).reverse(),
-      links = tree.links(nodes);
+  var nodes = cluster.nodes(root).reverse(),
+      links = cluster.links(nodes);
 
   // Normalize for fixed-depth.
-  nodes.forEach(function(d) { d.y = d.depth * 240; });
+  nodes.forEach(function(d) { d.y = d.depth * 140; });
   // Update the nodes…
   var node = svg.selectAll("g.node")
       .data(nodes.sort(function(a,b) { return d3.ascending(a.name,b.name); }), function(d) { return d.id || (d.id = ++i); });
@@ -168,7 +173,7 @@ function update(source) {
   // Enter any new nodes at the parent's previous position.
   var nodeEnter = node.enter().append("g")
       .attr("class", "node")
-      .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
+      .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + d.y + ")"; })
       .on("click", click);
 
   nodeEnter.append("circle")
@@ -176,23 +181,25 @@ function update(source) {
       .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
 
   nodeEnter.append("text")
-      .attr("x", function(d) { return d.children || d._children ? -10 : 10; })
       .attr("dy", ".35em")
-      .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+      .attr("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
+      .attr("transform", function(d) { return d.x < 180 ? "translate(8)" : "rotate(180)translate(-8)"; })
       .text(function(d) { return d.name; })
       .style("fill-opacity", 1e-6);
 
   // Transition nodes to their new position.
   var nodeUpdate = node.transition()
       .duration(duration)
-      .attr("transform", function(d) { return "translate(" + d.y + "," + d.x/1.4 + ")"; });
+      .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + d.y + ")"; })
 
   nodeUpdate.select("circle")
       .attr("r", 4.5)
       .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
 
   nodeUpdate.select("text")
-      .style("fill-opacity", 1);
+      .style("fill-opacity", 1)
+      .attr("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
+      .attr("transform", function(d) { return d.x < 180 ? "translate(8)" : "rotate(180)translate(-8)"; });
 
   // Transition exiting nodes to the parent's new position.
   var nodeExit = node.exit().transition()
