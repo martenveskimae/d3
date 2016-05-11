@@ -1,3 +1,6 @@
+
+
+
 function chordMpr (data) {
   var mpr = {}, mmap = {}, n = 0,
       matrix = [], filter, accessor;
@@ -31,9 +34,9 @@ function chordMpr (data) {
       console.log(elem);
     })
   },
-  mpr.addToMap = function (value, info) {
+  mpr.addToMap = function (value, info, sum) {
     if (!mmap[value]) {
-      mmap[value] = { name: value, id: n++, data: info }
+      mmap[value] = { name: value, id: n++, data: info, sum: sum }
     }
   },
   mpr.addValuesToMap = function (varName, info) {
@@ -50,7 +53,7 @@ function chordMpr (data) {
 //*******************************************************************
 //  CHORD READER
 //*******************************************************************
-function chordRdr (matrix, mmap) {
+function chordRdr (matrix, mmap, data) {
   return function (d) {
     var i,j,s,t,g,m = {};
     if (d.source) {
@@ -60,20 +63,26 @@ function chordRdr (matrix, mmap) {
       m.sname = s[0].name;
       m.sdata = d.source.value;
       m.svalue = +d.source.value;
-      m.stotal = 100//_.reduce(matrix[i], function (k, n) { return k + n }, 0);
+      m.stotal = 100;
       m.tname = t[0].name;
       m.tdata = d.target.value;
       m.tvalue = +d.target.value;
-      m.ttotal = 100//_.reduce(matrix[j], function (k, n) { return k + n }, 0);
+      m.ttotal = 100;
     } else {
       g = _.where(mmap, {id: d.index });
       m.gname = g[0].name;
       m.gdata = g[0].data;
-      m.gvalue = d.value;
+      m.gvalue = g[0].sum;
     }
-    m.mtotal = _.reduce(matrix, function (m1, n1) { 
-      return m1 + _.reduce(n1, function (m2, n2) { return m2 + n2}, 0);
-    }, 0);
+
+    var sum = d3.nest()
+            .key(function(d){ return d.sum })
+            .entries(data);
+
+    m.mtotal = d3.nest()
+            .rollup(function(d) {return d3.sum(d, function(g) {return g.key; });})
+            .entries(sum);
+
     return m;
   }
 }
