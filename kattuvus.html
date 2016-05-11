@@ -214,8 +214,8 @@
           function groupTip (d) {
             var p = d3.format(".1%"), q = d3.format(",.3r")
             return "" 
-                + d.gname + ": " + d.gvalue + "<br/>"
-                + p(d.gvalue/d.mtotal) + " koondkattuvusest (" + q(d.mtotal) + ")"
+                + d.gname + ": " + d.gvalue + " kohustuslikku õppeainet<br/>"
+                + p(d.gvalue/d.mtotal) + " valdkonna kohustuslikest ainetest (" + q(d.mtotal) + ")"
           }
 
           function mouseover(d, i) {
