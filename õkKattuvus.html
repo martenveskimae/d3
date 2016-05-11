@@ -202,11 +202,11 @@
           function chordTip (d) {
             var p = d3.format(".2%"), q = d3.format(",.3r")
             return ""
-              + p(d.svalue/d.stotal) + " "
-              + d.sname + " - > " + d.tname
-              + (d.sname === d.tname ? "": ("</br>"
-              + p(d.tvalue/d.ttotal) + " "
-              + d.tname + " - > " + d.sname))
+              + p(d.svalue/d.stotal) + " '"
+              + d.sname + "' ➜ '" + d.tname
+              + (d.sname === d.tname ? "'": ("'</br>"
+              + p(d.tvalue/d.ttotal) + " '"
+              + d.tname + "' ➜ '" + d.sname + "'"))
           }
 
           function groupTip (d) {
