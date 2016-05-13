@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <meta charset="utf-8">
-<title>Õppekavade kattuvus</title>
+<title>Õppekavade kattuvus (kohustuslikud ained)</title>
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -61,7 +61,7 @@
     </style>
   </head>
   <body>
-    <p class="title">Õppekavade kattuvus</p>
+    <p class="title">Õppekavade kattuvus (kohustuslikud ained)</p>
     <div class="chart"></div>
     <div id="tooltip"></div>
     <script src="http://d3js.org/d3.v3.js"></script>
@@ -87,7 +87,7 @@
       var svg2 = svg0.append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-      d3.csv('õppekavad.csv', function (error, data) {
+      d3.csv('õppekavad_koh.csv', function (error, data) {
       var taseSeries = d3.nest()
             .key(function(d) { return d.aste; })
             .entries(data);
@@ -157,7 +157,7 @@
         dataSelector(inst);
       }
       function dataSelector (inst){
-        d3.csv('õppekavad.csv', function (error, data) {
+        d3.csv('õppekavad_koh.csv', function (error, data) {
         if(inst!=="") {
           var mpr = chordMpr(data.sort(function (a,b) {return d3.ascending(a.instituut, b.instituut) || +a.aste - +b.aste ;})
             .filter(function (d) { return d.instituut === inst; })
@@ -270,8 +270,8 @@
           function groupTip (d) {
             var p = d3.format(".1%"), q = d3.format(",.3r")
             return "" 
-                + d.gname + ": " + d.gvalue + " õppeainet<br/>"
-                + p(d.gvalue/d.mtotal) + " valdkonna ainetest (" + q(d.mtotal) + ")"
+                + d.gname + ": " + d.gvalue + " kohustuslikku õppeainet<br/>"
+                + p(d.gvalue/d.mtotal) + " valdkonna kohustuslikest ainetest (" + q(d.mtotal) + ")"
           }
 
           function mouseover(d, i) {

@@ -34,9 +34,9 @@ function chordMpr (data) {
       console.log(elem);
     })
   },
-  mpr.addToMap = function (value, info, sum) {
+  mpr.addToMap = function (value, aste, sum, instituut) {
     if (!mmap[value]) {
-      mmap[value] = { name: value, id: n++, data: info, sum: sum }
+      mmap[value] = { name: value, id: n++, data: aste, sum: sum , instituut: instituut}
     }
   },
   mpr.addValuesToMap = function (varName, info) {
@@ -71,6 +71,7 @@ function chordRdr (matrix, mmap, data) {
     } else {
       g = _.where(mmap, {id: d.index });
       m.gname = g[0].name;
+      m.ginst = g[0].instituut;
       m.gdata = g[0].data;
       m.gvalue = g[0].sum;
     }
