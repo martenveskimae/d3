@@ -7,9 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
       body {
-          background: url(texture-noise.png);
+          background: url(space.jpg);
           margin: 0;
-          font: 14px "American Typewriter Light", Baskerville;
+          font: 14px "Comic Sans MS", cursive, sans-serif;
+          color: #FF00FF;
       }
       #tooltip {
         color: white;
@@ -30,6 +31,10 @@
         margin-top: 40px;
         border-bottom: 1px solid black;
         margin-bottom: -1px;
+        animation: blinker 0.4s linear infinite;
+      }
+      @keyframes blinker {  
+        100% { opacity: 0.0; }
       }
       .chart {
         margin-left:auto;
@@ -111,6 +116,7 @@
       legend.append("text")
               .attr("y", 13)
               .style("font-size", "12px")
+              .style("stroke", "red")
               .attr("dy", ".35em")
               .style("text-anchor", "start")
               .attr("transform", "translate(15,-9)")
@@ -123,27 +129,21 @@
           .append("g")
           .attr("transform", function(d, i) { return "translate(1000,"+ i*30 +")"; })
           .on("mouseover", function(d){
-              d3.selectAll(".groupPath")
-                .style("opacity", 0.1);
-              d3.selectAll(".chord")
-                .style("visibility", "hidden");
-              d3.selectAll(".text")
-                .style("opacity", 0.1);
               d3.selectAll("[id='"+d.key+"']")
-                .style("visibility", "visible")
-                .style("opacity", 1);
+                .transition()
+                .duration(200)
+                .attr("transform", "scale(1.01)");
           })
           .on("mouseout", function(d){
-              d3.selectAll(".groupPath")
-                .style("opacity", 1);
-              d3.selectAll(".chord")
-                .style("visibility", "visible");
-              d3.selectAll(".text")
-                .style("opacity", 1);
+              d3.selectAll("[id='"+d.key+"']")
+                .transition()
+                .duration(200)
+                .attr("transform", "scale(1)");
           })
           .append("text")
           .attr("text-anchor", "end")
-          .style("font-size", "12px")
+          .style("stroke", "red")
+          .style("font-size", "13px")
           .text(function(d) { return d.key; });
 
       });
@@ -226,11 +226,10 @@
             .attr("id", function(d) { return rdr(d).ginst; })
             .attr("d", arc);
 
-        g.append("svg:text")
+        g.attr("id", function(d) { return rdr(d).ginst; }).append("svg:text")
             .each(function(d) { d.angle = (d.startAngle + d.endAngle) / 2; })
-            .attr("class", "text")
-            .attr("id", function(d) { return rdr(d).ginst; })
             .attr("dy", ".35em")
+            .style("stroke", "red")
             .style("font-size", "10px")
             .attr("text-anchor", function(d) { return d.angle > Math.PI ? "end" : null; })
             .attr("transform", function(d) {
