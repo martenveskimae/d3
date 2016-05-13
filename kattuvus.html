@@ -31,7 +31,7 @@
         margin-top: 40px;
         border-bottom: 1px solid black;
         margin-bottom: -1px;
-        animation: blinker 0.5s infinite;
+        animation: blinker 0.7s infinite;
       }
       @keyframes blinker {  
         100% { opacity: 0; }
@@ -81,7 +81,7 @@
             .domain(["1", "2", "3", "4", "5"])
             .range(["#c7001e", "#f6a580", "#cccccc", "#92c6db", "#32639C"]);
 
-      var fill2 = d3.scale.ordinal()
+      var õppeastmed = d3.scale.ordinal()
             .domain(["bakalaureuseõpe (3+2)", "magistriõpe (3+2)", "doktoriõpe", "integreeritud õpe (bakalaureus+magister)", "rakenduskõrgharidusõpe"]);
 
       svg0 = d3.select(".chart").append("svg")
@@ -92,37 +92,47 @@
       var svg2 = svg0.append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-      d3.csv('õppekavad.csv', function (error, data) {
-      var taseSeries = d3.nest()
+      //*******************************************************************
+      //  CREATE MATRIX AND MAP
+      //*******************************************************************
+      dataSelector("");
+      function update(inst){
+        d3.selectAll("#circle").remove();
+        dataSelector(inst);
+      }
+      function dataSelector (inst){
+        d3.csv('õppekavad.csv', function (error, data) {
+
+        var taseSeries = d3.nest()
             .key(function(d) { return d.aste; })
             .entries(data);
 
-      var instituutSeries = d3.nest()
+        var instituutSeries = d3.nest()
             .key(function(d) { return d.instituut; })
             .entries(data.sort(function (a,b) {return d3.ascending(a.instituut, b.instituut);}));
 
-      var legend = svg2.selectAll(".legend")
+        var legend = svg2.selectAll(".legend")
             .data(taseSeries)
             .enter()
             .append("g")
             .attr("transform", function(d, i) { return "translate(0," + i * 30 + ")"; });
 
-      legend.append("circle")
+        legend.append("circle")
               .attr("r", 6)
               .attr("cx", 5)
               .attr("cy", 5)
               .attr("fill", function(d) { return fill(d.key); }) ;
 
-      legend.append("text")
+        legend.append("text")
               .attr("y", 13)
               .style("font-size", "12px")
               .style("stroke", "red")
               .attr("dy", ".35em")
               .style("text-anchor", "start")
               .attr("transform", "translate(15,-9)")
-              .text(function(d) { return fill2.domain()[+d.key - 1] ;});
+              .text(function(d) { return õppeastmed.domain()[+d.key - 1] ;});
 
-      var insts = svg2.selectAll("insts")
+        var insts = svg2.selectAll("insts")
           .append("g")
           .data(instituutSeries)
           .enter()
@@ -146,18 +156,7 @@
           .style("font-size", "13px")
           .text(function(d) { return d.key; });
 
-      });
 
-      //*******************************************************************
-      //  CREATE MATRIX AND MAP
-      //*******************************************************************
-      dataSelector("");
-      function update(inst){
-        d3.selectAll("#circle").remove();
-        dataSelector(inst);
-      }
-      function dataSelector (inst){
-        d3.csv('õppekavad.csv', function (error, data) {
         if(inst!=="") {
           var mpr = chordMpr(data.sort(function (a,b) {return d3.ascending(a.instituut, b.instituut) || +a.aste - +b.aste ;})
             .filter(function (d) { return d.instituut === inst; })
