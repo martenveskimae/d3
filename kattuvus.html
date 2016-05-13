@@ -31,10 +31,10 @@
         margin-top: 40px;
         border-bottom: 1px solid black;
         margin-bottom: -1px;
-        animation: blinker 0.4s linear infinite;
+        animation: blinker 0.5s infinite;
       }
       @keyframes blinker {  
-        100% { opacity: 0.0; }
+        100% { opacity: 0; }
       }
       .chart {
         margin-left:auto;
@@ -204,10 +204,23 @@
             .outerRadius(r0 + 20);
 
         var svg = svg0.append("g")
-            .attr("id", "circle")
+            .attr("class", "circle")
             .attr("transform", "translate(" + w / 2.1 + "," + h / 2.1 + ")");
             svg.append("circle")
                 .attr("r", r0 + 20);
+
+        var start = Date.now();
+        startAnimation();
+        function startAnimation() {
+        d3.timer(function() {
+            var angle = (Date.now() - start);
+            var transform = function() {
+                return "translate(" + w / 2.1 + "," + h / 2.1 + ")rotate(" + angle/100 + ")";
+            };
+            d3.selectAll(".circle")
+                .attr("transform", transform);
+        });
+      };
 
         var rdr = chordRdr(matrix, mmap, data);
         chord.matrix(matrix);
