@@ -199,20 +199,6 @@ svg.append("circle")
   .style("fill", "none");
 */
 
-var drag = d3.behavior.drag()
-      .on('dragstart', function() {
-        svg.selectAll("#refDot")
-        .style('fill', 'red');
-      }) 
-      .on("drag", function() { 
-        d3.selectAll("#keskDot")
-          .attr("cx", d3.event.x)
-          .attr("cy", d3.event.y);
-        })
-      .on('dragend', function() {
-        svg.selectAll("#keskDot")
-        .style('fill', 'black');
-      });
 
     svg.selectAll(".dot")
       .data(data)
@@ -225,10 +211,9 @@ var drag = d3.behavior.drag()
       .style("stroke-width", "1.5px")
       .style("stroke", "black")
       .style("position", "fixed")
-      .style("z-index", "999")
+      .attr("r", z(zp))
       .style("fill", function(d, i) { return colour(i); })
-      .on("click", function (d) { poptoparty(d.party); })
-      .on("click", drag);
+      .on("click", function (d) { poptoparty(d.party); });
 
   var voronoiGroup = svg.append("g")
       .attr("class", "voronoi");
@@ -251,19 +236,17 @@ var legend = legendBox.selectAll(".legendBox")
     .attr("class", "legend")
     .attr("transform", function(d, i) { return "translate(0,"+ i * 30 +")"; });
     
-  legend.append("rect")
-    .attr("x", width - 40)
-    .attr("y", 10)
-    .attr("width", 25)
-    .attr("height", 25)
+  legend.append("circle")
+    .attr("cx", width - 40)
+    .attr("cy", 10)
+    .attr("r", 7)
     .style("fill", "white")
     .style("stroke", "black");
-  legend.append("rect")
+  legend.append("circle")
     .attr("id", function (d) { return d+"Legend"; })
-    .attr("x", width - 40)
-    .attr("y", 10)
-    .attr("width", 25)
-    .attr("height", 25)
+    .attr("cx", width - 40)
+    .attr("cy", 10)
+    .attr("r", 7)
     .style("fill", function(d, i) { return colour(i); })
     .on("click", function (d, i) { 
       if (!partyShow[i]) {
@@ -312,11 +295,6 @@ function remove(target) {
 };
 
 function poptoparty(target, xp, yp, zp){
-  d3.selectAll("#"+target+"Dot")
-    .transition()
-    .delay(2000)
-    .ease('linear')
-    .attr("r", z(zp));
 
   d3.selectAll("#"+target+"pop")
       .transition()
