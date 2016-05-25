@@ -17,11 +17,6 @@ body {
   margin-top: 40px;
 }
 
-.line {
-  fill:none;
-  stroke-width: 1;
-}
-
 .axis path,
 .axis line {
   fill: none;
@@ -38,24 +33,14 @@ svg {
 }
 
 .dot {
-  stroke: black;
-  stroke-width: 1;
+  stroke: #000;
 }
 
 .tooltip {
-    position: absolute;
-    text-align: left;
-    width: 51px;
-    height: auto;
-    padding: 10px;
-    background-color: white;
-    -webkit-border-radius: 10px;
-    -moz-border-radius: 10px;
-    border-radius: 10px;
-    -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
-    -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
-    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
-    pointer-events: none;
+  position: absolute;
+  width: 200px;
+  height: 28px;
+  pointer-events: none;
 }
 
 .tick line{
@@ -81,53 +66,14 @@ var yValue = function(d) { return d.support;},
     yMap = function(d) { return yScale(yValue(d));},
     yAxis = d3.svg.axis().scale(yScale).orient("left").innerTickSize(-width);
 
-var party = function(d) { return d.party;};
+var cValue = function(d) { return d.party;};
 var color = d3.scale.ordinal()
   .domain(["ref", "kesk", "irl", "sde"])
   .range(["#ff9900", "#109618", "#3366cc", "#dc3912"]);
 
-var dValue = function(d) { return d.news; },
-    dScale = d3.scale.linear().range([2, 7]),
+var dValue = function(d) { return d.skp_yearly; },
+    dScale = d3.scale.linear().range([1, 5]),
     dMap = function(d) { return dScale(dValue(d));};
-
-/*
-var trendlinedom = d3.scale.ordinal()
-  .domain(["1"])
-  .range(["1"]);
-var eValue = function(d) { return d.news; },
-    eScale = d3.scale.linear().range([height, 0]);
-
-var supportline = d3.svg.line()
-    .x(function(d) { return xScale(d.date); })
-    .y(function(d) { return yScale(d.support); })
-    .interpolate("bundle")
-    .tension(.5);
-
-var newsline = d3.svg.line()
-    .x(function(d) { return xScale(d.date); })
-    .y(function(d) { return eScale(d.news); })
-    .interpolate("bundle");
-*/
-
-
-var tooltip = d3.select("body").append("div")
-    .attr("class", "tooltip")
-    .style("opacity", 0);
-
-d3.csv("toetus.csv", function(error, data) {
-
-  data.forEach(function(d) {
-    d.year = +d.year;
-    d.month = +d.month;
-    d.date = new Date(+d.year, +d.month-1, 1);
-    d.support = Math.round(+d.support*100);
-    d.skp_yearly = +d.skp_yearly;
-    d.cycle = +d.cycle*d.cycle;
-    d.party = d.party;
-    d.news = +d.news;
-    d.newspercent = +d.newspercent;
-    //console.log(d);
-  });
 
 var svg = d3.select("body").append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -135,64 +81,41 @@ var svg = d3.select("body").append("svg")
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  var elections = svg.append("line")
-  .attr("x1", 460)
-  .attr("y1", 0)
-  .attr("x2", 460)
-  .attr("y2", height)
-  .attr("stroke-width", 1)
-  .attr("stroke", "black")
-  svg.append("text")
-  .attr("class", "label")
-  .attr("transform", "rotate(-90)")
-  .attr("y", 466)
-  .attr("dy", ".71em")
-  .style("text-anchor", "end")
-  .text("Riigikogu valimised");
+var tooltip = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+
+var party = function(d) { return d.party;};
+
+var partyShow = [true, true, true, true];
+
+var number = 1000,
+    ciCapWidth = 6;
+
+function ci95(p, n) {
+    return Math.sqrt(Math.abs(p*(1-p)/n)*1.96);
+};
+
+d3.csv("toetus.csv", function(error, data) {
+
+  data.forEach(function(d) {
+    d.year = +d.year;
+    d.month = +d.month;
+    d.date = new Date(+d.year, +d.month-1, 1);
+    d.unemp = +d.unemp*d.unemp;
+    d.support = Math.round(+d.support*100);
+    d.skp_yearly = +d.skp_yearly;
+    d.cycle = +d.cycle*d.cycle;
+    d.party = d.party;
+    d.gdpgr = +d.gdpgr;
+    d.bruto = +d.bruto;
+    //console.log(d);
+  });
 
   xScale.domain(d3.extent(data, function(d) { return d.date; }));
   yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
   dScale.domain([d3.min(data, dValue), d3.max(data, dValue)]);
-  //eScale.domain([d3.min(data, eValue), d3.max(data, eValue)]);
 
-/*
-var domain0 = [+new Date(2007, 2, 1), +new Date(2015, 3, 1)],
-    domain1 = [+new Date(2015, 2, 1), +new Date(2019, 2, 1)];
-
-var x2 = d3.time.scale.utc()
-    .domain(domain0)
-    .range([0, width]);
-
-var xAxis2 = d3.svg.axis()
-    .scale(x2);
-
-var gAxis = svg.append("g")
-    .attr("class", "x axis")
-    .attr("transform", "translate(0," + height + ")")
-    .call(xAxis2)
-
-transition();
-setInterval(transition, 10000);
-
-
-function transition() {
-  gAxis.transition().duration(8500).tween("axis", function(d, i) {
-    var i = d3.interpolate(domain0, domain1);
-    return function(t) {
-      x2.domain(i(t));
-      gAxis.call(xAxis2);
-    }
-  });
-}
-*/
-/*
-    svg.append("text")
-      .attr("class", "label")
-      .attr("x", width)
-      .attr("y", height-6)
-      .style("text-anchor", "end")
-      .text("Aeg");
-*/
     svg.append("g")
       .attr("class", "x axis")
       .attr("transform", "translate(0," + height + ")")
@@ -214,39 +137,72 @@ function transition() {
       .attr("dy", ".71em")
       .style("text-anchor", "end")
       .text("Toetus");
-/*
-var dataNest = d3.nest()
-  .key(function(d) {return d.party;})
-  .entries(data);
 
-dataNest.forEach(function(d) {
-        svg.append("path")
-            .attr("class", "line")
-            .attr("id", function() { return d.key; })
-            .attr("d", supportline(d.values))
-            .style("opacity", .1)
-            .style("stroke", function() {
-                return d.color = color(d.key); });
+  svg.append("line")
+    .attr("x1", 460)
+    .attr("y1", 0)
+    .attr("x2", 460)
+    .attr("y2", height)
+    .attr("stroke-width", 1)
+    .attr("stroke", "black")
+  svg.append("text")
+    .attr("class", "label")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 466)
+    .attr("dy", ".71em")
+    .style("text-anchor", "end")
+    .text("Riigikogu valimised");
 
-         svg.append("path")
-            .attr("class", "line")
-            .attr("id", function() { return d.key + "news"; })
-            .attr("d", newsline(d.values))
-            .style("opacity", .1)
-            .style("stroke", function() {
-                return d.color = color(d.key); });
-});
-*/
+  svg.selectAll(".ciLine")
+    .data(data)
+    .enter()
+    .append("line")
+    .attr("class", "ciLine")
+    .attr("id", party)
+    .attr("stroke", "black")
+    .attr("stroke-width", 1.2)
+    .attr("id", party)
+    .attr("x1", xMap)
+    .attr("y1", function(d){ return yScale(d.support+ci95(d.support, 1000)); })
+    .attr("x2", xMap)
+    .attr("y2", function(d){ return yScale(d.support-ci95(d.support, 1000)); });
+  
+  svg.selectAll(".upperCap")
+    .data(data)
+    .enter()
+    .append("line")
+    .attr("class", "upperCap")
+    .attr("stroke", "black")
+    .attr("stroke-width", 1.2)
+    .attr("id", party)
+    .attr("x1", function(d){ return xScale(d.date)-(ciCapWidth/2); })
+    .attr("y1", function(d){ return yScale(d.support+ci95(d.support, 1000)); })
+    .attr("x2", function(d){ return xScale(d.date)+(ciCapWidth/2); })
+    .attr("y2", function(d){ return yScale(d.support+ci95(d.support, 1000)); })
+
+  svg.selectAll(".lowerCap")
+    .data(data)
+    .enter()
+    .append("line")
+    .attr("class", "lowerCap")
+    .attr("stroke", "black")
+    .attr("id", party)
+    .attr("stroke-width", 1.2)
+    .attr("x1", function(d){ return xScale(d.date)-(ciCapWidth/2); })
+    .attr("y1", function(d){ return yScale(d.support-ci95(d.support, 1000)); })
+    .attr("x2", function(d){ return xScale(d.date)+(ciCapWidth/2); })
+    .attr("y2", function(d){ return yScale(d.support-ci95(d.support, 1000)); })
+
   svg.selectAll(".dot")
       .data(data)
       .enter().append("circle")
       .attr("class", "dot")
-      .attr("id", function(d) { return party(d) + "dot"; })
+      .attr("id", party)
       .attr("r", dMap)
       .attr("cx", xMap)
       .attr("cy", yMap)
       .style("opacity", .7)
-      .style("fill", function(d) { return color(party(d));})
+      .style("fill", function(d) { return color(cValue(d));})
       .on("mouseover", function(d) {
           tooltip.transition()
                .duration(200)
@@ -269,132 +225,49 @@ dataNest.forEach(function(d) {
       .attr("class", "legend")
       .attr("transform", function(d, i) { return "translate(0," + i * 30 + ")"; });
 
-/*
-  var lineop = svg.selectAll(".lineop")
-      .data(trendlinedom.domain())
-      .enter()
-      .append("g")
-      .attr("id", "lineop")
-      .attr("class", "legend")
-      .attr("transform", "translate(0, 121)");
-  lineop.append("rect")
-      .attr("x", width - 17)
-      .attr("width", 23)
-      .attr("height", 23)
-      .attr("id", party)
-      .style("stroke", "#ff9900")
-      .style("stroke-width", 2)
-      .style("fill", "white")
-      .on("mouseover", function(d){
-            d3.selectAll(".line")
-            .transition()
-            .duration(700)
-            .style("opacity", 1);
-            d3.selectAll(".dot")
-            .transition()
-            .duration(700)
-            .style("opacity", .1);
-      })
-      .on("mouseout", function(d){
-            d3.selectAll(".line")
-            .transition()
-            .duration(700)
-            .style("opacity", .1);
-            d3.selectAll(".dot")
-            .transition()
-            .duration(700)
-            .style("opacity", .7);
-
-      });
-      
-  lineop.append("text")
-      .attr("x", width - 24)
-      .attr("y", 13)
-      .attr("dy", ".35em")
-      .attr("class", "label")
-      .style("text-anchor", "end")
-      .text("trend");
-*/
-
-  legend.append("rect")
-      .attr("x", width - 18)
-      .attr("width", 25)
-      .attr("height", 25)
-      .attr("id", party)
+  legend.append("circle")
+      .attr("r", 7)
+      .attr("cx", width - 18)
+      .attr("id", function(d){ return "legend"+[d]; })
       .style("fill", color)
-      .on("mouseover", function(d){
-            d3.selectAll(".dot")
-            .transition()
-            .duration(700)
-            .style("opacity", .1);
-            d3.selectAll("#" + [d] + "dot")
-            .transition()
-            .duration(700)
-            .style("opacity", 1);
-      })
-      .on("mouseout", function(d){
-          d3.selectAll("#" + [d] + "dot")
-            .transition()
-            .duration(700)
-            .style("opacity", .1);
-          d3.selectAll(".dot")
-            .transition()
-            .duration(700)
-            .style("opacity", .7);
+      .style("stroke", "black")
+      .on("click", function(d, i){
+        if (!partyShow[i]) {
+          d3.selectAll("#" + [d])
+          .transition()
+          .duration(100)
+          .style("opacity",1);
 
+          d3.selectAll("#legend" + [d])
+          .transition()
+          .duration(100)
+          .style("fill", color);
+
+        } else {
+          d3.selectAll("#" + [d])
+          .transition()
+          .duration(100)
+          .style("opacity",0);
+
+          d3.selectAll("#legend" + [d])
+          .transition()
+          .duration(100)
+          .style("fill", "white");
+
+        }
+        partyShow[i] =! partyShow[i];
       });
 
   legend.append("text")
-      .attr("x", width - 24)
-      .attr("y", 13)
+      .attr("x", width - 32)
       .attr("dy", ".35em")
       .style("text-anchor", "end")
-      .text(function(d) { return d;});
-
-/*
-d3.csv("makro.csv", function(error, makro) {
-
-  makro.forEach(function(d) {
-    d.year = +d.year;
-    d.month = +d.month;
-    d.date = new Date(+d.year, +d.month-1, 1);
-    d.gdpgr_yearly = +d.gdpgr_yearly;
-    d.cycle = +d.cycle*d.cycle;
-    d.bruto = +d.bruto;
-    d.refer = +d.refer;
-    console.log(d);
-  });
-
-var cValue = function(d) { return d.gdpgr_yearly; },
-    cScale = d3.scale.linear()
-    .range([height-100, 0])
-    .domain([d3.min(makro, cValue), d3.max(makro, cValue)]);
-
-var gdpline = d3.svg.line() 
-  .x(function(d){ return xScale(d.date);}) 
-  .y(function(d){ return cScale(d.gdpgr_yearly);})
-  .interpolate("bundle")
-  .tension(1);
-
-var dataNest = d3.nest()
-  .key(function(d) {return d.refer;})
-  .entries(makro);
-
-dataNest.forEach(function(d) {
-
-  svg.append("path")
-    .attr("class", "line")
-    .attr("id", "gdp")
-    .attr("d", gdpline(d.values))
-    .attr("stroke-width", 1)
-    .attr("stroke", "black");
-
-});
-});
-*/
-
+      .text(function(d) { return d;})
 });
 
+function ci95(p, n) {
+    return Math.sqrt(Math.abs(p*(1-p)/n)*1.96);
+};
 
 </script>
 </body>
