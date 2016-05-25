@@ -2,7 +2,7 @@
 <html>
 <meta charset="utf-8">
 
-<title>Voter +</title>
+<title>Landscape +</title>
 
 <style>
 
@@ -76,7 +76,7 @@ var EST = d3.locale({
   "shortMonths": ["Jan", "Veeb", "Märts", "Apr", "Mai", "Juun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dets"]
 });
 
-chart("data.csv", "oldschool");
+chart("data.csv", "party");
 
 var partyShow = [true, true, true, true, true, true];
 var partyArray = ["kesk", "sde", "ekre", "vaba", "ref", "irl"];
@@ -91,7 +91,7 @@ if (color == "blue") {
   colorrange = ["#980043", "#DD1C77", "#DF65B0", "#C994C7", "#D4B9DA", "#F1EEF6"];
   }
   else if (color == "party") {
-  colorrange = ["#109618", "#ff9900", "#3366cc", "#dc3912", "#c0c0c0", "#614126"];
+  colorrange = ["#109618", "#dc3912", "#614126", "#c0c0c0", "#ff9900","#3366cc"];
   }
   else if (color == "oldschool") {
   colorrange = ["url(#refPattern) #fff", "url(#keskPattern) #fff", "url(#ekrePattern) #fff", "url(#vabaPattern) #fff", "url(#sdePattern) #fff", "url(#irlPattern) #fff"];
@@ -130,15 +130,6 @@ var svg = d3.select(".chart").append("svg")
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-    svg.append("rect")
-      .attr("x", 0)
-      .attr("y", 0)
-      .attr("width", width)
-      .attr("height", height)
-      .style("fill", "#e3dac9")
-      .style("opacity", 0.01)
-      .style("stroke", "black");
-
 
 var graph = d3.csv(csvpath, function(data) {
   var flatData = [];
@@ -148,7 +139,6 @@ var graph = d3.csv(csvpath, function(data) {
     d.party = d.party;
     d.seats = +d.seats;
     flatData.push({lrScale: d.lrScale, conlibScale: d.conlibScale, seats: d.seats, party: d.party});
-    //console.log(d);
   });
 
   x.domain([-100, 100]);
@@ -172,11 +162,10 @@ d3.csv("pop.csv", function(population) {
       .attr("class", "popDots")
       .attr("id", function(d) { return d.party+"pop";})
       .style("stroke-width", "1px")
-      .style("stroke", "grey")
-      .style("opacity", 0.1)
-      .style("position", "relative")
-      .style("z-index", "-1")
-      .attr("r", 4)
+      .style("stroke", "black")
+      .style("opacity", 0.2)
+      .style("fill", "white")
+      .attr("r", 3)
       .attr("cx", xMap)
       .attr("cy", yMap);
 
@@ -189,16 +178,7 @@ function falseparty(){
 
 
 });
-/*
-svg.append("circle")
-  .attr("r", 3)
-  .attr("cy", 357.2)
-  .attr("cx", 463.59999999999997)
-  .attr("stroke-width", 1)
-  .attr("stroke", "black")
-  .style("fill", "none");
-*/
-
+  Axis();
 
     svg.selectAll(".dot")
       .data(data)
@@ -210,10 +190,7 @@ svg.append("circle")
       .attr("id", function (d) { return d.party+"Dot"; })
       .style("stroke-width", "1.5px")
       .style("stroke", "black")
-      .style("position", "fixed")
-      .attr("r", z(zp))
-      .style("fill", function(d, i) { return colour(i); })
-      .on("click", function (d) { poptoparty(d.party); });
+      .style("fill", function(d, i) { return colour(i); });
 
   var voronoiGroup = svg.append("g")
       .attr("class", "voronoi");
@@ -247,20 +224,12 @@ var legend = legendBox.selectAll(".legendBox")
     .attr("cx", width - 40)
     .attr("cy", 10)
     .attr("r", 7)
-    .style("fill", function(d, i) { return colour(i); })
-    .on("click", function (d, i) { 
-      if (!partyShow[i]) {
-      restore(d);
-      } else {
-      remove(d);
-      }
-      partyShow[i] =! partyShow[i];
-      });
+    .style("fill", function(d, i) { return colour(i); });
 
   legend.append("text")
     .text(function (d) { return d; })
-    .attr("x", width - 45)
-    .attr("y", 21)
+    .attr("x", width - 52)
+    .attr("y", 9)
     .attr("dy", ".35em")
     .style("text-anchor", "end");
 
@@ -269,7 +238,7 @@ function initiate(target){
 d3.selectAll("#"+target+"Dot")
     .data(data.filter(function (d) { return d.party === target }))
     .attr("class", "parties")
-    .attr("r", 5)
+    .attr("r", function(d){ return z(d.seats);} )
     .attr("cx", xMap)
     .attr("cy", yMap);
 
@@ -305,7 +274,6 @@ function poptoparty(target, xp, yp, zp){
       .style("opacity", 0);
 };
 
-Axis();
 function Axis(){
 svg.append("g")
     .attr("class", "x axis")
@@ -349,3 +317,4 @@ svg.append("g")
 <svg height="10" width="10" xmlns="http://www.w3.org/2000/svg" version="1.1"> <defs> <pattern id="vabaPattern" patternUnits="userSpaceOnUse" width="10" height="10"> <image xlink:href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMCcgaGVpZ2h0PScxMCc+CiAgPHJlY3Qgd2lkdGg9JzEwJyBoZWlnaHQ9JzEwJyBmaWxsPSd3aGl0ZScgLz4KICA8cmVjdCB4PScwJyB5PScwJyB3aWR0aD0nNCcgaGVpZ2h0PSc0JyBmaWxsPSdibGFjaycgLz4KPC9zdmc+" x="0" y="0" width="10" height="10"> </image> </pattern> </defs> </svg></body>
 </div>
 </html>
+
