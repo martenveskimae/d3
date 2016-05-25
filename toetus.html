@@ -93,7 +93,7 @@ var number = 1000,
     ciCapWidth = 6;
 
 function ci95(p, n) {
-    return Math.sqrt(Math.abs(p*(1-p)/n)*1.96);
+    return Math.sqrt(Math.abs(p*(1-p)/n))*1.96 ;
 };
 
 d3.csv("toetus.csv", function(error, data) {
