@@ -163,9 +163,9 @@ d3.csv("toetus.csv", function(error, data) {
     .attr("stroke-width", 1.2)
     .attr("id", party)
     .attr("x1", xMap)
-    .attr("y1", function(d){ return yScale(d.support+ci95(d.support, 1000)); })
+    .attr("y1", function(d){ return yScale(d.support+ci95(d.support, number)); })
     .attr("x2", xMap)
-    .attr("y2", function(d){ return yScale(d.support-ci95(d.support, 1000)); });
+    .attr("y2", function(d){ return yScale(d.support-ci95(d.support, number)); });
   
   svg.selectAll(".upperCap")
     .data(data)
@@ -176,9 +176,9 @@ d3.csv("toetus.csv", function(error, data) {
     .attr("stroke-width", 1.2)
     .attr("id", party)
     .attr("x1", function(d){ return xScale(d.date)-(ciCapWidth/2); })
-    .attr("y1", function(d){ return yScale(d.support+ci95(d.support, 1000)); })
+    .attr("y1", function(d){ return yScale(d.support+ci95(d.support, number)); })
     .attr("x2", function(d){ return xScale(d.date)+(ciCapWidth/2); })
-    .attr("y2", function(d){ return yScale(d.support+ci95(d.support, 1000)); })
+    .attr("y2", function(d){ return yScale(d.support+ci95(d.support, number)); })
 
   svg.selectAll(".lowerCap")
     .data(data)
@@ -189,9 +189,9 @@ d3.csv("toetus.csv", function(error, data) {
     .attr("id", party)
     .attr("stroke-width", 1.2)
     .attr("x1", function(d){ return xScale(d.date)-(ciCapWidth/2); })
-    .attr("y1", function(d){ return yScale(d.support-ci95(d.support, 1000)); })
+    .attr("y1", function(d){ return yScale(d.support-ci95(d.support, number)); })
     .attr("x2", function(d){ return xScale(d.date)+(ciCapWidth/2); })
-    .attr("y2", function(d){ return yScale(d.support-ci95(d.support, 1000)); })
+    .attr("y2", function(d){ return yScale(d.support-ci95(d.support, number)); })
 
   svg.selectAll(".dot")
       .data(data)
