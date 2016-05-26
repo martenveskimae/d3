@@ -2,7 +2,7 @@
 <html>
 <meta charset="utf-8">
 
-<title>Landscape +</title>
+<title>Kompass +</title>
 
 <style>
 
@@ -57,7 +57,7 @@ svg {
 <body>
 
 <script src="http://d3js.org/d3.v3.js"></script>
-<p class="title">Click anywhere on the <i>political landscape</i>!</p>
+/*<p class="title">Click anywhere on the <i>political landscape</i>!</p>*/
 <div class="chart"></div>
 
 <script>
@@ -284,7 +284,7 @@ svg.append("g")
     .attr("x", width-7)
     .attr("y", -7)
     .style("text-anchor", "end")
-    .text("Left-right");
+    .text("Vasak-parem");
 
   svg.append("g")
       .attr("class", "y axis")
@@ -297,7 +297,7 @@ svg.append("g")
       .attr("x", -7)
       .attr("dy", ".71em")
       .style("text-anchor", "end")
-      .text("Conservative-liberal");
+      .text("Konservatiivne-liberaalne");
 
   svg.selectAll(".y.axis").selectAll(".tick text")
       .attr("transform", "translate(-5, 0)");
