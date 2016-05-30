@@ -7,10 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
       body {
-          background: url(space.jpg);
+          background: url(texture-noise.png);
           margin: 0;
-          font: 14px "Comic Sans MS", cursive, sans-serif;
-          color: #FF00FF;
+          font: 14px "American Typewriter Light", Baskerville;
       }
       #tooltip {
         color: white;
@@ -31,10 +30,6 @@
         margin-top: 40px;
         border-bottom: 1px solid black;
         margin-bottom: -1px;
-        animation: blinker 0.7s infinite;
-      }
-      @keyframes blinker {  
-        100% { opacity: 0; }
       }
       .chart {
         margin-left:auto;
@@ -81,7 +76,7 @@
             .domain(["1", "2", "3", "4", "5"])
             .range(["#c7001e", "#f6a580", "#cccccc", "#92c6db", "#32639C"]);
 
-      var õppeastmed = d3.scale.ordinal()
+      var fill2 = d3.scale.ordinal()
             .domain(["bakalaureuseõpe (3+2)", "magistriõpe (3+2)", "doktoriõpe", "integreeritud õpe (bakalaureus+magister)", "rakenduskõrgharidusõpe"]);
 
       svg0 = d3.select(".chart").append("svg")
@@ -91,6 +86,67 @@
 
       var svg2 = svg0.append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+      d3.csv('õppekavad_koh.csv', function (error, data) {
+      var taseSeries = d3.nest()
+            .key(function(d) { return d.aste; })
+            .entries(data);
+
+      var instituutSeries = d3.nest()
+            .key(function(d) { return d.instituut; })
+            .entries(data.sort(function (a,b) {return d3.ascending(a.instituut, b.instituut);}));
+
+      var legend = svg2.selectAll(".legend")
+            .data(taseSeries)
+            .enter()
+            .append("g")
+            .attr("transform", function(d, i) { return "translate(0," + i * 30 + ")"; });
+
+      legend.append("circle")
+              .attr("r", 6)
+              .attr("cx", 5)
+              .attr("cy", 5)
+              .attr("fill", function(d) { return fill(d.key); }) ;
+
+      legend.append("text")
+              .attr("y", 13)
+              .style("font-size", "12px")
+              .attr("dy", ".35em")
+              .style("text-anchor", "start")
+              .attr("transform", "translate(15,-9)")
+              .text(function(d) { return fill2.domain()[+d.key - 1] ;});
+
+      var insts = svg2.selectAll("insts")
+          .append("g")
+          .data(instituutSeries)
+          .enter()
+          .append("g")
+          .attr("transform", function(d, i) { return "translate(1000,"+ i*30 +")"; })
+          .on("mouseover", function(d){
+              d3.selectAll(".groupPath")
+                .style("opacity", 0.1);
+              d3.selectAll(".chord")
+                .style("visibility", "hidden");
+              d3.selectAll(".text")
+                .style("opacity", 0.1);
+              d3.selectAll("[id='"+d.key+"']")
+                .style("visibility", "visible")
+                .style("opacity", 1);
+          })
+          .on("mouseout", function(d){
+              d3.selectAll(".groupPath")
+                .style("opacity", 1);
+              d3.selectAll(".chord")
+                .style("visibility", "visible");
+              d3.selectAll(".text")
+                .style("opacity", 1);
+          })
+          .append("text")
+          .attr("text-anchor", "end")
+          .style("font-size", "12px")
+          .text(function(d) { return d.key; });
+
+      });
 
       //*******************************************************************
       //  CREATE MATRIX AND MAP
@@ -102,61 +158,6 @@
       }
       function dataSelector (inst){
         d3.csv('õppekavad.csv', function (error, data) {
-
-        var taseSeries = d3.nest()
-            .key(function(d) { return d.aste; })
-            .entries(data);
-
-        var instituutSeries = d3.nest()
-            .key(function(d) { return d.instituut; })
-            .entries(data.sort(function (a,b) {return d3.ascending(a.instituut, b.instituut);}));
-
-        var legend = svg2.selectAll(".legend")
-            .data(taseSeries)
-            .enter()
-            .append("g")
-            .attr("transform", function(d, i) { return "translate(0," + i * 30 + ")"; });
-
-        legend.append("circle")
-              .attr("r", 6)
-              .attr("cx", 5)
-              .attr("cy", 5)
-              .attr("fill", function(d) { return fill(d.key); }) ;
-
-        legend.append("text")
-              .attr("y", 13)
-              .style("font-size", "12px")
-              .style("stroke", "red")
-              .attr("dy", ".35em")
-              .style("text-anchor", "start")
-              .attr("transform", "translate(15,-9)")
-              .text(function(d) { return õppeastmed.domain()[+d.key - 1] ;});
-
-        var insts = svg2.selectAll("insts")
-          .append("g")
-          .data(instituutSeries)
-          .enter()
-          .append("g")
-          .attr("transform", function(d, i) { return "translate(1000,"+ i*30 +")"; })
-          .on("mouseover", function(d){
-              d3.selectAll("[id='"+d.key+"']")
-                .transition()
-                .duration(200)
-                .attr("transform", "scale(1.01)");
-          })
-          .on("mouseout", function(d){
-              d3.selectAll("[id='"+d.key+"']")
-                .transition()
-                .duration(200)
-                .attr("transform", "scale(1)");
-          })
-          .append("text")
-          .attr("text-anchor", "end")
-          .style("stroke", "red")
-          .style("font-size", "13px")
-          .text(function(d) { return d.key; });
-
-
         if(inst!=="") {
           var mpr = chordMpr(data.sort(function (a,b) {return d3.ascending(a.instituut, b.instituut) || +a.aste - +b.aste ;})
             .filter(function (d) { return d.instituut === inst; })
@@ -203,23 +204,10 @@
             .outerRadius(r0 + 20);
 
         var svg = svg0.append("g")
-            .attr("class", "circle")
+            .attr("id", "circle")
             .attr("transform", "translate(" + w / 2.1 + "," + h / 2.1 + ")");
             svg.append("circle")
                 .attr("r", r0 + 20);
-
-        var start = Date.now();
-        startAnimation();
-        function startAnimation() {
-        d3.timer(function() {
-            var angle = (Date.now() - start);
-            var transform = function() {
-                return "translate(" + w / 2.1 + "," + h / 2.1 + ")rotate(" + angle/100 + ")";
-            };
-            d3.selectAll(".circle")
-                .attr("transform", transform);
-        });
-      };
 
         var rdr = chordRdr(matrix, mmap, data);
         chord.matrix(matrix);
@@ -238,10 +226,11 @@
             .attr("id", function(d) { return rdr(d).ginst; })
             .attr("d", arc);
 
-        g.attr("id", function(d) { return rdr(d).ginst; }).append("svg:text")
+        g.append("svg:text")
             .each(function(d) { d.angle = (d.startAngle + d.endAngle) / 2; })
+            .attr("class", "text")
+            .attr("id", function(d) { return rdr(d).ginst; })
             .attr("dy", ".35em")
-            .style("stroke", "red")
             .style("font-size", "10px")
             .attr("text-anchor", function(d) { return d.angle > Math.PI ? "end" : null; })
             .attr("transform", function(d) {
@@ -281,8 +270,8 @@
           function groupTip (d) {
             var p = d3.format(".1%"), q = d3.format(",.3r")
             return "" 
-                + d.gname + ": " + d.gvalue + " õppeainet<br/>"
-                + p(d.gvalue/d.mtotal) + " valdkonna ainetest (" + q(d.mtotal) + ")"
+                + d.gname + ": " + d.gvalue + " kohustuslikku õppeainet<br/>"
+                + p(d.gvalue/d.mtotal) + " valdkonna kohustuslikest ainetest (" + q(d.mtotal) + ")"
           }
 
           function mouseover(d, i) {
