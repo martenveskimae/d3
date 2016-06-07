@@ -55,8 +55,8 @@
 
 <body>
   <script src="http://d3js.org/d3.v3.js"></script>
-  <script src="bilanss.js"></script>
-  <script src="total.js"></script>
+  <script src="graph1.js"></script>
+  <script src="graph2.js"></script>
   <p class="title">ERJK</p>
   <div id="container">
     <div class="bilanss"></div>
@@ -83,7 +83,8 @@
     partyArray = ["kesk", "ref", "irl", "sde"];
     datearray = [];
     colorrange = [];
-    bilanss("b_rahastus.csv", "party");
+    graph1("b_rahastus.csv", "party");
+    graph2("b_rahastus.csv", "party");
 
   </script>
 </body>
