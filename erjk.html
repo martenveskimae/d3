@@ -59,8 +59,8 @@
   <script src="graph2.js"></script>
   <p class="title">ERJK</p>
   <div id="container">
-    <div class="bilanss"></div>
-    <div class="total"></div>
+    <div class="graph1"></div>
+    <div class="graph2"></div>
   </div>
   <script>
 
@@ -80,11 +80,11 @@
     });
 
     partyShow = [true, true, true, true, true, true];
-    partyArray = ["kesk", "ref", "irl", "sde"];
+    partyArray = ["kesk", "ref", "irl", "sde", "vaba", "ekre"];
     datearray = [];
     colorrange = [];
-    graph1("b_rahastus.csv", "party");
-    graph2("b_rahastus.csv", "party");
+    graph1("erjk.txt", "party", "graph1");
+    graph2("b_rahastus.csv", "party", "graph2");
 
   </script>
 </body>

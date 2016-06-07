@@ -1,4 +1,4 @@
-function graph1(csvpath, color) {
+function graph1(csvpath, color, location) {
   if (color == "blue") {
     colorrange = ["#045A8D", "#2B8CBE", "#74A9CF", "#A6BDDB", "#D0D1E6", "#F1EEF6"];
   }
@@ -18,7 +18,7 @@ function graph1(csvpath, color) {
   var format = d3.time.format("%m/%d/%y"),
   bisectDate = d3.bisector(function(d) { return d.date; }).left;
 
-  var margin = {top: 50, right: 40, bottom: 60, left: 80},
+  var margin = {top: 50, right: 70, bottom: 60, left: 80},
   width = 600 - margin.left - margin.right,
   height = 300 - margin.top - margin.bottom;
 
@@ -61,7 +61,7 @@ function graph1(csvpath, color) {
   .x(function(d) { return x(d.date); })
   .y(function(d) { return y(d.exp); });
 
-  var svg = d3.select(".bilanss").append("svg")
+  var svg = d3.select("."+location).append("svg")
   .attr("width", width + margin.left + margin.right)
   .attr("height", height + margin.top + margin.bottom)
   .append("g")
@@ -74,7 +74,7 @@ function graph1(csvpath, color) {
   .style("text-anchor", "middle")
   .style("font-size", "14px");
 
-  var graph = d3.csv(csvpath, function(data) {
+  var graph = d3.tsv(csvpath, function(data) {
     data.forEach(function(d) {
       d.date = new Date(+d.year, +d.month-1, 1);
       d.membership = +d.membership;
@@ -91,9 +91,24 @@ function graph1(csvpath, color) {
     });
 
     x.domain(d3.extent(data, function(d) { return d.date; }));
-    y.domain([d3.min(data, function(d) { return d.value; })-10, d3.max(data, function(d) { return d.value; })+10]);
 
-    Axis();
+    var button = svg.append("g")
+    .attr("transform", function(d) { return "translate("+ (width+20) + "," + (height/5) +")";});
+
+    button.append("rect")
+    .attr("class", "button")
+    .attr("width", "40px")
+    .attr("height", "20px")
+    .style("fill", "none")
+    .style("stroke", 1)
+    .style("stroke-color", "black")
+    .attr("ry", 20/10);
+
+    button.append("text")
+    .attr("x", 38)
+    .attr("y", 13)
+    .style("text-anchor", "end")
+    .text("Vaheta");
 
     var nest = d3.nest()
     .key(function(d) { return d.party; })
@@ -113,9 +128,10 @@ function graph1(csvpath, color) {
       .attr("dy", ".35em");
     });
 
-    income()
+    Axis();
+    income();
+
     function income() {
-      yAxis.tickValues([-80, -40, 0, 40, 80, 120]);
       y.domain([d3.min(data, function(d) { return d.value; })-10, d3.max(data, function(d) { return d.value; })+10]);
 
       d3.select(".y.axis")
@@ -131,14 +147,14 @@ function graph1(csvpath, color) {
       d3.selectAll(".line")
       .data(nest)
       .transition()
-      .duration(200)
+      .duration(transitionTime)
       .attr("d", function(d){ return line(d.values); })
       .style("stroke", function(d,i){ return z(i); });
 
       d3.selectAll(".partyText")
       .data(nest)
       .transition()
-      .duration(200)
+      .duration(transitionTime)
       .attr("transform", function(d,i) {
         var lastValue = nest[i].values[(nest[i].values.length-1)].value;
         return "translate(" + (width+3) + "," + y(lastValue) + ")"; })
@@ -146,19 +162,23 @@ function graph1(csvpath, color) {
 
       d3.select(".graphTitle")
       .transition()
+      .duration(transitionTime)
+      .text("Sissetuleku muutus võrrelduna eelmise aasta sama perioodiga");
+      d3.select(".ylabel")
+      .transition()
       .duration(200)
-      .text("Joonis 1. Erakondade sissetuleku muutus võrrelduna eelmise aasta sama kvartaliga");
+      .text("Muutus protsentides");
 
       d3.select(".zeroLine")
       .transition()
       .duration(transitionTime)
       .attr("y1", y(0))
-      .attr("y2", y(0));
+      .attr("y2", y(0))
+      .style("display", "inline");
     }
 
     function exp(){
-      yAxis.tickValues([0, 20, 40, 60, 80, 100]);
-      y.domain([d3.min(data, function(d) { return d.exp; })-10, d3.max(data, function(d) { return d.exp; })+10]);
+      y.domain([d3.min(data, function(d) { return d.exp; })-100000, d3.max(data, function(d) { return d.exp; })+100000]);
 
       d3.select(".y.axis")
       .transition()
@@ -189,17 +209,22 @@ function graph1(csvpath, color) {
       d3.select(".graphTitle")
       .transition()
       .duration(200)
-      .text("Muu joonis");
+      .text("Erakondade tehtud kulutused");
+      d3.select(".ylabel")
+      .transition()
+      .duration(200)
+      .text("Summa eurodes");
 
       d3.select(".zeroLine")
       .transition()
       .duration(transitionTime)
       .attr("y1", y(0))
-      .attr("y2", y(0));
+      .attr("y2", y(0))
+      .style("display", "none");
     }
 
     var switcher = [true];
-    svg.on("click", function(d){
+    button.on("click", function(d){
       if (!switcher[0]) {
         income();
       } else {
@@ -304,18 +329,16 @@ function graph1(csvpath, color) {
       .attr("transform", "translate(0," + (height+25) + ")")
       .call(xAxis2);
 
-      yAxis.tickValues([-80, -40, 0, 40, 80, 120]);
       svg.append("g")
       .attr("class", "y axis")
       .call(yAxis)
       .append("text")
-      .attr("class", "label")
+      .attr("class", "ylabel")
       .attr("transform", "rotate(-90)")
       .attr("y", 6)
       .attr("x", -7)
       .attr("dy", ".71em")
-      .style("text-anchor", "end")
-      .text("Muutus protsentides");
+      .style("text-anchor", "end");
 
       svg.selectAll(".y.axis").selectAll(".tick text")
       .attr("transform", "translate(-5, 0)");
@@ -333,6 +356,5 @@ function graph1(csvpath, color) {
     };
 
   });
-
 
 };
