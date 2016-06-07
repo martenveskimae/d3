@@ -1,4 +1,4 @@
-function graph2(csvpath, color) {
+function graph2(csvpath, color, location) {
   if (color == "blue") {
     colorrange = ["#045A8D", "#2B8CBE", "#74A9CF", "#A6BDDB", "#D0D1E6", "#F1EEF6"];
   }
@@ -30,7 +30,7 @@ root.fixed = true;
 
 force.start();
 
-var svg2 = d3.select(".total").append("svg:svg")
+var svg2 = d3.select("."+location).append("svg:svg")
     .attr("width", w)
     .attr("height", h);
 
