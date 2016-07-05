@@ -242,7 +242,8 @@ function graph2(csvpath, color, location, w, h) {
     .attr("cx", width + 10)
     .attr("cy", 10)
     .attr("r", 5)
-    .style("fill", function(d, i) { return z(i); });
+    .style("stroke", function(d, i) { return z(i); })
+    .style("fill", "none");
 
     legend.append("text")
     .text(function (d) { return d; })
