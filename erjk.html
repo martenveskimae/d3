@@ -6,11 +6,13 @@
 <head>
   <style>
     body {
+      margin: 0;
       font: 12px "American Typewriter Light", Baskerville;
     }
-    .voronoi path {
+    path {
       fill: none;
       pointer-events: all;
+      stroke: 1;
     }
     .title {
       font-size: 36px;
@@ -37,6 +39,9 @@
       margin-right:auto;
       display:block;
       vertical-align: middle;
+      position: absolute;
+      top: 0;
+      left: 0;
     }
     .tooltip{
 
@@ -50,6 +55,15 @@
     #container > div {
       width: 900px;
     }
+    .node {
+      fill: none;
+      stroke: #ccc;
+      shape-rendering: crispEdges;
+    }
+    .overlay {
+      fill: none;
+      pointer-events: all;
+    }
   </style>
 </head>
 
@@ -57,11 +71,11 @@
   <script src="http://d3js.org/d3.v3.js"></script>
   <script src="graph1.js"></script>
   <script src="graph2.js"></script>
-  <p class="title">ERJK</p>
   <div id="container">
     <div class="graph1"></div>
     <div class="graph2"></div>
   </div>
+  <div class="graph1big"></div>
   <script>
 
     var EST = d3.locale({
@@ -76,15 +90,17 @@
       "days": ["Pühapäev", "Esmaspäev", "Teisipäev", "Kolmapäev", "Neljapäev", "Reede", "Laupäev"],
       "shortDays": ["Pühap", "Esmasp", "Teisip", "Kolmap", "Neljap", "Reede", "Laup"],
       "months": ["Jaanuar", "Veebruar", "Märts", "Aprill", "Mai", "Juuni", "Juuli", "August", "September", "Oktoober", "November", "Detsember"],
-      "shortMonths": ["Jan", "Veeb", "Märts", "Apr", "Mai", "Juun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dets"]
+      "shortMonths": ["Jan", "Veebr", "Märts", "Apr", "Mai", "Juuni", "Juuli", "Aug", "Sep", "Okt", "Nov", "Dets"]
     });
 
     partyShow = [true, true, true, true, true, true];
     partyArray = ["kesk", "ref", "irl", "sde", "vaba", "ekre"];
     datearray = [];
     colorrange = [];
-    graph1("erjk.txt", "party", "graph1");
-    graph2("b_rahastus.csv", "party", "graph2");
+
+    //graph1("erjk.txt", "party", "graph1", 600, 300);
+    graph2("annetused.txt", "party", "graph2", 600, 300);
+    //graph1("erjk.txt", "party", "graph1big", 1200, 600);
 
   </script>
 </body>
