@@ -100,7 +100,7 @@ function graph2(csvpath, color, location, w, h) {
       reload(partyArray[this.selectedIndex]);
     });
 
-    reload("vaba");
+    reload("kesk");
     function reload(selectedParty){
       nest = [];
       nodes = [];
