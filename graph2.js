@@ -12,7 +12,7 @@ function graph2(csvpath, color, location, w, h) {
     colorrange = ["#B30000", "#E34A33", "#FC8D59", "#FDBB84", "#FDD49E", "#FEF0D9"];
   };
 
-  var margin = {top: 50, right: 80, bottom: 120, left: 80},
+  var margin = {top: 10, right: 80, bottom: 120, left: 80},
   width = 1000,
   height = 180,
   radius = 10,
