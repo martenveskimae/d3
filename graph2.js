@@ -83,6 +83,8 @@ function graph2(csvpath, color, location, w, h) {
     initialData = [];
     initialData = data;
 
+    y.domain([d3.min(data, function(d) { return d.sum; })-30000, d3.max(data, function(d) { return d.sum; })+10000]);
+
     var dropDown = d3.select("."+location)
     .append("select")
     .attr("name", "partyList")
@@ -110,7 +112,6 @@ function graph2(csvpath, color, location, w, h) {
       data = initialData.filter(function(d) { return d.party === selectedParty && d.sum > 0; });
 
       x.domain(d3.extent(data, function(d) { return d.date; }));
-      y.domain([d3.min(data, function(d) { return d.sum; })-30000, d3.max(data, function(d) { return d.sum; })+10000]);
 
       nest = d3.nest()
       .key(function(d){return d.party;})
