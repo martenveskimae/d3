@@ -86,6 +86,8 @@ function graph2(csvpath, color, location, w, h) {
     var dropDown = d3.select("."+location)
     .append("select")
     .attr("name", "partyList")
+    .style("top", margin.top + height + 110 + "px")
+    .style("left", margin.left + 5 + "px")
     .selectAll("option")
     .data(partyArray)
     .enter()
