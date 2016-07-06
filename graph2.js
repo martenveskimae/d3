@@ -13,8 +13,8 @@ function graph2(csvpath, color, location, w, h) {
   };
 
   var margin = {top: 10, right: 80, bottom: 120, left: 80},
-  width = 1000,
-  height = 180,
+  width = w,
+  height = h,
   radius = 10,
   multiplier = window.devicePixelRatio,
   wMulti = width * multiplier,
@@ -27,21 +27,15 @@ function graph2(csvpath, color, location, w, h) {
   r = d3.scale.log().range([1, 10]),
   z = d3.scale.ordinal().range(colorrange)
   .domain(["kesk", "ref", "irl", "sde", "vaba", "ekre"]),
-  xA1 = d3.svg.axis()
-  .scale(x)
+  xA1 = d3.axisBottom(x)
   .tickFormat(EST.timeFormat("%b"))
   .tickSize(5,0)
-  .orient("bottom")
   .tickSize(-height, 0, 4),
-  xA2 = d3.svg.axis()
-  .scale(x)
+  xA2 = d3.axisBottom(x)
   .ticks(d3.time.years, 1)
   .tickFormat(d3.time.format("%Y"))
-  .tickSize(5,0)
-  .orient("bottom"),
-  yA2 = d3.svg.axis()
-  .scale(y2)
-  .orient("left")
+  .tickSize(5,0),
+  yA2 = d3.axisLeft(y2)
   .ticks(3, "s")
   .tickSize(0, 0, 3);
 
@@ -129,8 +123,6 @@ function graph2(csvpath, color, location, w, h) {
       y2.domain([d3.min(nodesData, function(d) { return d.total; }), d3.max(nodesData, function(d) { return d.total; })]);
 
       function createNodes() {
-        nodes = [];
-        nodesData = [];
         nest.forEach(function(d) {
           var partyPush = d.key;
           d.values.forEach(function(e) {
@@ -138,9 +130,11 @@ function graph2(csvpath, color, location, w, h) {
           });
         });
         nodes.forEach(function(d){
-         nodesData.push(d.values);
+         nodesData.push(d.value);
        });
       }
+
+      y2.domain([d3.min(nodesData, function(d) { return d.total; }), d3.max(nodesData, function(d) { return d.total; })]);
 
       nestData = d3.nest()
       .key(function(d){return d.party;})
@@ -177,29 +171,23 @@ function graph2(csvpath, color, location, w, h) {
       d3.selectAll(".x.axis1")
       .transition()
       .duration(transitionTime)
-      .ease("sin-in-out")
       .call(xA1);
 
       d3.selectAll(".x.axis2")
       .transition()
       .duration(transitionTime)
-      .ease("sin-in-out")
       .call(xA2);
     }
+
     function canvas(){
-      data.forEach(function(d) { d.x = x(d[date]); d.y = y(d[sum]); });
+      data.forEach(function(d) { d.x = x(d[date]); d.y = y(d[sum]) - 30 ; });
 
-      var force = d3.layout.force()
-      .nodes(data)
-      .size([width, height*3])
-      .charge(-11)
-      .gravity(0)
-      .chargeDistance(10)
-      .friction(.3);
+      var simulation = d3.forceSimulation(data)
+      .force("x", d3.forceX(function(d) { return x(d[date]); }).strength(1))
+      .force("collide", d3.forceCollide(2));
 
-      force.on("tick", function(d) {
+      simulation.on("tick", function(d) {
         clear();
-        data.forEach(initialPosition(d.alpha));
         data.forEach(bounded());
         data.forEach(function(d) {
           context.beginPath();
@@ -211,10 +199,8 @@ function graph2(csvpath, color, location, w, h) {
           context.stroke();
           context.closePath();
         });
-
       });
-
-      force.start();
+      
     }
 
     var legendSize = svg.selectAll(".legendSize")
@@ -250,7 +236,7 @@ function graph2(csvpath, color, location, w, h) {
     
     legendParty.append("circle")
     .attr("id", function (d) { return d+"Legend"; })
-    .attr("cx", width - 300)
+    .attr("cx", width - 310)
     .attr("cy", height + 100)
     .attr("r", 5)
     .style("stroke", function(d, i) { return z(i); })
@@ -258,17 +244,19 @@ function graph2(csvpath, color, location, w, h) {
 
     legendParty.append("text")
     .text(function (d) { return d; })
-    .attr("x", width - 290)
+    .attr("x", width - 300)
     .attr("y", height + 99)
     .attr("dy", ".35em")
     .style("text-anchor", "start");
 
     svg.append("g")
     .attr("class", "x axis1")
+    .attr("id", "axis")
     .attr("transform", "translate(0," + (height+40) + ")")
     .call(xA1);
     svg.append("g")
     .attr("class", "x axis2")
+    .attr("id", "axis")
     .attr("transform", "translate(0," + (height+50) + ")")
     .call(xA2);
 
@@ -276,12 +264,6 @@ function graph2(csvpath, color, location, w, h) {
       context.clearRect(0, 0, wMulti, hMulti);
     };
 
-    function initialPosition(alpha) {
-      return function(d) {
-        d.x += (x(d[date]) - d.x) * .8 * alpha;
-        d.y += (y(d[sum]) - d.y) * .03 * alpha;
-      };
-    }
     function bounded() {
       return function(d) {
         d.x = Math.max(radius, Math.min(width - radius, d.x));
