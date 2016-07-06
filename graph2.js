@@ -231,8 +231,10 @@ function graph2(csvpath, color, location, w, h) {
     .style("stroke", 1)
     .style("fill", "none");
 
+    f=d3.format(",");
+
     legendSize.append("text")
-    .text(function (d,i) { return "€" + Math.pow(10,i); })
+    .text(function (d,i) { return "€" + f(Math.pow(10,i)); })
     .attr("x", 20)
     .attr("y", height + 100)
     .attr("dy", ".35em")
