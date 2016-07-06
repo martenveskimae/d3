@@ -215,7 +215,7 @@ function graph2(csvpath, color, location, w, h) {
     .attr("cx", 10)
     .attr("cy", height + 100)
     .attr("r", function (d,i) {return r(Math.pow(10,i))/6;})
-    .style("stroke", 1)
+    .style("stroke", "black")
     .style("fill", "none");
 
     f=d3.format(",");
