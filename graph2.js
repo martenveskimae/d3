@@ -12,8 +12,8 @@ function graph2(csvpath, color, location, w, h) {
     colorrange = ["#B30000", "#E34A33", "#FC8D59", "#FDBB84", "#FDD49E", "#FEF0D9"];
   };
 
-  var margin = {top: 50, right: 120, bottom: 70, left: 80},
-  width = 800,
+  var margin = {top: 50, right: 80, bottom: 120, left: 80},
+  width = 1000,
   height = 180,
   radius = 10,
   multiplier = window.devicePixelRatio,
@@ -86,7 +86,6 @@ function graph2(csvpath, color, location, w, h) {
     var dropDown = d3.select("."+location)
     .append("select")
     .attr("name", "partyList")
-    .style("position", "absolute")
     .selectAll("option")
     .data(partyArray)
     .enter()
@@ -215,40 +214,47 @@ function graph2(csvpath, color, location, w, h) {
       force.start();
     }
 
-    var legend = svg.selectAll(".legend")
+    var legendSize = svg.selectAll(".legendSize")
     .data(partyArray, function(d, i) { return d + i; })
     .enter()
     .append("g")
     .attr("class", "legend")
-    .attr("transform", function(d, i) { return "translate(0,"+ i * 15 +")"; });
+    .attr("transform", function(d, i) { return "translate("+ i * 60 +",0)"; });
 
-    legend.append("circle")
+    legendSize.append("circle")
     .attr("id", function (d,i) { return "size "+i; })
-    .attr("cx", width + 70)
-    .attr("cy", 10)
+    .attr("cx", 10)
+    .attr("cy", height + 100)
     .attr("r", function (d,i) {return r(Math.pow(10,i))/6;})
     .style("stroke", 1)
     .style("fill", "none");
 
-    legend.append("text")
-    .text(function (d,i) { return Math.pow(10,i); })
-    .attr("x", width + 80)
-    .attr("y", 10)
+    legendSize.append("text")
+    .text(function (d,i) { return "€" + Math.pow(10,i); })
+    .attr("x", 20)
+    .attr("y", height + 100)
     .attr("dy", ".35em")
     .style("text-anchor", "start");
+
+    var legendParty = svg.selectAll(".legendParty")
+    .data(partyArray, function(d, i) { return d + i; })
+    .enter()
+    .append("g")
+    .attr("class", "legend")
+    .attr("transform", function(d, i) { return "translate("+ i * 55 +",0)"; });
     
-    legend.append("circle")
+    legendParty.append("circle")
     .attr("id", function (d) { return d+"Legend"; })
-    .attr("cx", width + 10)
-    .attr("cy", 10)
+    .attr("cx", width - 300)
+    .attr("cy", height + 100)
     .attr("r", 5)
     .style("stroke", function(d, i) { return z(i); })
     .style("fill", "none");
 
-    legend.append("text")
+    legendParty.append("text")
     .text(function (d) { return d; })
-    .attr("x", width + 20)
-    .attr("y", 9)
+    .attr("x", width - 290)
+    .attr("y", height + 99)
     .attr("dy", ".35em")
     .style("text-anchor", "start");
 
