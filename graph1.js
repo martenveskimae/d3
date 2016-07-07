@@ -1,4 +1,4 @@
-function graph1(csvpath, color, location) {
+function graph1(csvpath, color, location, w, h) {
   if (color == "blue") {
     colorrange = ["#045A8D", "#2B8CBE", "#74A9CF", "#A6BDDB", "#D0D1E6", "#F1EEF6"];
   }
@@ -15,41 +15,25 @@ function graph1(csvpath, color, location) {
   strokecolor = colorrange[0];
   strokecolor2 = function (d, i) { return z(i);};
 
-  var format = d3.time.format("%m/%d/%y"),
-  bisectDate = d3.bisector(function(d) { return d.date; }).left;
+  var format = d3.timeFormat("%m/%d/%y");
 
   var margin = {top: 50, right: 70, bottom: 60, left: 80},
-  width = 600 - margin.left - margin.right,
-  height = 300 - margin.top - margin.bottom;
+  width = w - margin.left - margin.right,
+  height = h - margin.top - margin.bottom;
 
-  var x = d3.time.scale()
-  .range([0, width]);
-
-  var y = d3.scale.linear()
-  .range([height, 0]);
-
-  var z = d3.scale.ordinal()
-  .range(colorrange);
-
-  var yAxis = d3.svg.axis()
-  .scale(y)
-  .orient("left")
-  .tickSize(-width, 0, 4);
-
-  var xAxis1 = d3.svg.axis()
-  .scale(x)
-  .tickFormat(EST.timeFormat("%B"))
+  var x = d3.time.scale().range([0, width]),
+  y = d3.scaleLinear().range([height, 0]),
+  z = d3.scaleOrdinal().range(colorrange),
+  yAxis = d3.axisLeft(y)
+  .tickSize(-width, 0, 4),
+  xAxis1 = d3.axisBottom(x)
+  .tickFormat(EST.timeFormat("%b"))
   .tickSize(5,0)
-  .orient("bottom")
-  .ticks(10)
-  .tickSize(-height, 0, 4);
-
-  var xAxis2 = d3.svg.axis()
-  .scale(x)
+  .tickSize(-height, 0, 4),
+  xAxis2 = d3.axisBottom(x)
   .ticks(d3.time.years, 1)
-  .tickFormat(d3.time.format("%Y"))
-  .tickSize(5,0)
-  .orient("bottom");
+  .tickFormat(d3.timeFormat("%Y"))
+  .tickSize(5,0);
 
   var line = d3.svg.line()
   .interpolate("cardinal")  
@@ -61,7 +45,18 @@ function graph1(csvpath, color, location) {
   .x(function(d) { return x(d.date); })
   .y(function(d) { return y(d.exp); });
 
-  var svg = d3.select("."+location).append("svg")
+  var voronoi = d3.geom.voronoi()
+  .x(function(d) { return x(d.date); })
+  .y(function(d) { return y(d.value); })
+  .clipExtent([[0, 0], [width, height]]);
+
+  var voronoi2 = d3.geom.voronoi()
+  .x(function(d) { return x(d.date); })
+  .y(function(d) { return y(d.exp); })
+  .clipExtent([[0, 0], [width, height]]);
+
+  var svg = d3.select("."+location)
+  .append("svg")
   .attr("width", width + margin.left + margin.right)
   .attr("height", height + margin.top + margin.bottom)
   .append("g")
@@ -75,6 +70,7 @@ function graph1(csvpath, color, location) {
   .style("font-size", "14px");
 
   var graph = d3.tsv(csvpath, function(data) {
+    flatData = [];
     data.forEach(function(d) {
       d.date = new Date(+d.year, +d.month-1, 1);
       d.membership = +d.membership;
@@ -88,6 +84,7 @@ function graph1(csvpath, color, location) {
       d.balance = +d.balance;
       d.party = d.party;
       d.value = d.kvartal;
+      flatData.push({date: d.date, exp: d.exp, value: d.value, key: "value", party: d.party});
     });
 
     x.domain(d3.extent(data, function(d) { return d.date; }));
@@ -114,6 +111,13 @@ function graph1(csvpath, color, location) {
     .key(function(d) { return d.party; })
     .entries(data.sort(function(a, b){ return a.date - b.date; }));
     var transitionTime = 500;
+    var voronoiGroup = svg.append("g")
+    .attr("class", "voronoi");
+    var vorr = voronoiGroup.selectAll(".voronoi")
+    .data(voronoi(flatData))
+    .enter()
+    .append("path")
+    .attr("class", "vorPath");
 
     nest.forEach(function(d, i) {
       var partyLines = svg.append("g")
@@ -137,7 +141,6 @@ function graph1(csvpath, color, location) {
       d3.select(".y.axis")
       .transition()
       .duration(transitionTime)
-      .ease("sin-in-out")
       .call(yAxis);
       d3.select(".y.axis").selectAll(".tick text")
       .transition()
@@ -175,6 +178,13 @@ function graph1(csvpath, color, location) {
       .attr("y1", y(0))
       .attr("y2", y(0))
       .style("display", "inline");
+
+      d3.selectAll(".vorPath")
+      .data(voronoi(flatData))
+      .transition()
+      .duration(transitionTime)
+      .attr("d", function(d) { return "M" + d.join("L") + "Z"; });
+
     }
 
     function exp(){
@@ -183,7 +193,6 @@ function graph1(csvpath, color, location) {
       d3.select(".y.axis")
       .transition()
       .duration(transitionTime)
-      .ease("sin-in-out")
       .call(yAxis);
       d3.select(".y.axis").selectAll(".tick text")
       .transition()
@@ -221,6 +230,12 @@ function graph1(csvpath, color, location) {
       .attr("y1", y(0))
       .attr("y2", y(0))
       .style("display", "none");
+
+      d3.selectAll(".vorPath")
+      .data(voronoi2(flatData))
+      .transition()
+      .duration(transitionTime)
+      .attr("d", function(d) { return "M" + d.join("L") + "Z"; });
     }
 
     var switcher = [true];
@@ -257,6 +272,7 @@ function graph1(csvpath, color, location) {
     .style("opacity", "0");
 
     mousePerLine.append("text")
+    .attr("class", "tooltip")
     .attr("transform", "translate(10,3)");
 
     mouseG.append('svg:rect')
@@ -291,9 +307,6 @@ function graph1(csvpath, color, location) {
 
       d3.selectAll(".mouse-per-line")
       .attr("transform", function(d, i) {
-        var xDate = x.invert(mouse[0]),
-        bisect = d3.bisector(function(d) { return d.date; }).right;
-        idx = bisect(nest[i].values[i].value, xDate);
 
         var beginning = 0,
         end = lines[i].getTotalLength(),
@@ -310,27 +323,28 @@ function graph1(csvpath, color, location) {
           else break;
         }
 
-        d3.select(this).select('text')
-        .attr("class", "tooltip")
-        .text(y.invert(pos.y).toFixed(0));
-
+        
+        
+        d3.select(this).select("text").text(d3.round(y.invert(pos.y)));
         return "translate(" + mouse[0] + "," + pos.y +")";
       });
     });
 
-
     function Axis(){
       svg.append("g")
       .attr("class", "x axis")
+      .attr("id", "axis")
       .attr("transform", "translate(0," + height + ")")
       .call(xAxis1);
       svg.append("g")
       .attr("class", "x axis")
+      .attr("id", "axis")
       .attr("transform", "translate(0," + (height+25) + ")")
       .call(xAxis2);
 
       svg.append("g")
       .attr("class", "y axis")
+      .attr("id", "axis")
       .call(yAxis)
       .append("text")
       .attr("class", "ylabel")

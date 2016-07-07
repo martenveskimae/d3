@@ -22,10 +22,10 @@ function graph2(csvpath, color, location, w, h) {
   transitionTime = 700;
 
   var x = d3.time.scale().range([0, width]),
-  y = d3.scale.linear().range([height, 0]),
-  y2 = d3.scale.log().range([height+40, height+5]),
-  r = d3.scale.log().range([1, 10]),
-  z = d3.scale.ordinal().range(colorrange)
+  y = d3.scaleLinear().range([height, 0]),
+  y2 = d3.scaleLog().range([height+40, height+5]),
+  r = d3.scaleLog().range([1, 10]),
+  z = d3.scaleOrdinal().range(colorrange)
   .domain(["kesk", "ref", "irl", "sde", "vaba", "ekre"]),
   xA1 = d3.axisBottom(x)
   .tickFormat(EST.timeFormat("%b"))
@@ -33,7 +33,7 @@ function graph2(csvpath, color, location, w, h) {
   .tickSize(-height, 0, 4),
   xA2 = d3.axisBottom(x)
   .ticks(d3.time.years, 1)
-  .tickFormat(d3.time.format("%Y"))
+  .tickFormat(d3.timeFormat("%Y"))
   .tickSize(5,0),
   yA2 = d3.axisLeft(y2)
   .ticks(3, "s")
