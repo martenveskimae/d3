@@ -136,7 +136,7 @@ function graph1(csvpath, color, location, w, h) {
       .attr("transform", "rotate(-90)")
       .attr("dy", ".71em")
       .style("text-anchor", "end")
-      .text("Riigikogu 2015");
+      .text("RK 2015");
 
       svg.append("line")
       .attr("class", "KOVlG1")
