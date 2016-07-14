@@ -6,7 +6,7 @@ function graph2(csvpath, color, location, w, h) {
     colorrange = ["#980043", "#DD1C77", "#DF65B0", "#C994C7", "#D4B9DA", "#F1EEF6"];
   }
   else if (color == "party") {
-    colorrange = ["#109618", "#ff9900", "#3366cc", "#dc3912", "#d3d3d3", "#7a5230"];
+    colorrange = ["#109618", "#ff9900", "#3366cc", "#dc3912", "#888888", "#7a5230"];
   }
   else if (color == "orange") {
     colorrange = ["#B30000", "#E34A33", "#FC8D59", "#FDBB84", "#FDD49E", "#FEF0D9"];
@@ -19,7 +19,8 @@ function graph2(csvpath, color, location, w, h) {
   multiplier = window.devicePixelRatio,
   wMulti = width * multiplier,
   hMulti = height * multiplier,
-  transitionTime = 700;
+  transitionTime = 700,
+  nrTicks = 25;
 
   var x = d3.time.scale().range([0, width]),
   y = d3.scaleLinear().range([height, 0]),
@@ -27,20 +28,25 @@ function graph2(csvpath, color, location, w, h) {
   r = d3.scaleLog().range([1, 10]),
   z = d3.scaleOrdinal().range(colorrange)
   .domain(["kesk", "ref", "irl", "sde", "vaba", "ekre"]),
-  xA1 = d3.axisBottom(x)
+  xA1a = d3.axisBottom(x)
   .tickFormat(EST.timeFormat("%b"))
   .tickSize(5,0)
-  .tickSize(-height, 0, 4),
+  .ticks(nrTicks/3),
+  xA1b = d3.axisBottom(x)
+  .tickFormat("")
+  .ticks(nrTicks)
+  .tickSize(5,0),
   xA2 = d3.axisBottom(x)
   .ticks(d3.time.years, 1)
   .tickFormat(d3.timeFormat("%Y"))
-  .tickSize(5,0),
+  .tickSize(0,0),
   yA2 = d3.axisLeft(y2)
   .ticks(3, "s")
   .tickSize(0, 0, 3);
 
   var svg = d3.select("."+location)
   .append("svg")
+  .attr("class", "svgGraph2")
   .attr("width", width + margin.left + margin.right)
   .attr("height", height + margin.top + margin.bottom)
   .append("g")
@@ -48,18 +54,19 @@ function graph2(csvpath, color, location, w, h) {
 
   var base = d3.select("."+location);
   var chart = base.append("canvas")
+  .attr("class", "canvas")
   .style("left", margin.left + "px")
   .style("top", margin.top + 10 + "px")
   .attr("width", wMulti)
   .attr("height", hMulti)
   .style("width", function(){ return width + "px"; })
-  .style("height", function(){ return height + "px"; })
-  .style("position", "absolute");
+  .style("height", function(){ return height + "px"; });
 
   var context = chart.node().getContext("2d");
   context.scale(multiplier,multiplier);
 
   var line = d3.svg.line() 
+  .interpolate("linear")
   .x(function(d) { return x(d.date); })
   .y(function(d) { return y2(d.total); });
 
@@ -109,7 +116,7 @@ function graph2(csvpath, color, location, w, h) {
 
       nest = d3.nest()
       .key(function(d){return d.party;})
-      .key(function(d) { return d.date;})
+      .key(function(d) { return d.date;})//d3.time.month(d.date);})
       .rollup(function(d) { 
         return {
           date: d[0].date,
@@ -143,17 +150,14 @@ function graph2(csvpath, color, location, w, h) {
       nestData.forEach(function(d, i) {
         var partyLines = svg.append("g")
         .append("path")
-        .attr("class", "line");
+        .attr("class", "lineGraph2")
+        .style("fill", "none");
 
-        partyLines.append("text")
-        .attr("class", "partyText")
-        .attr("dy", ".35em");
       });
 
       d3.selectAll(".line")
       .data(nestData)
-      .attr("id", function(d){return d.key;})
-      .style("fill", "none");
+      .attr("id", function(d){return d.key;});
 
       lines();
       canvas();
@@ -161,19 +165,24 @@ function graph2(csvpath, color, location, w, h) {
 
     function lines() {
 
-      d3.selectAll(".line")
+      d3.selectAll(".lineGraph2")
       .data(nestData)
       .transition()
       .duration(transitionTime)
       .attr("d", function(d){ return line(d.values); })
-      .style("stroke", function(d,i){ return z(d.values[0].party); });
+      .style("stroke", function(d){ return z(d.values[0].party); });
 
-      d3.selectAll(".x.axis1")
+      d3.select(".x.axis1aGraph2")
       .transition()
       .duration(transitionTime)
-      .call(xA1);
+      .call(xA1a);
 
-      d3.selectAll(".x.axis2")
+      d3.select(".x.axis1bGraph2")
+      .transition()
+      .duration(transitionTime)
+      .call(xA1b);
+
+      d3.select(".x.axis2Graph2")
       .transition()
       .duration(transitionTime)
       .call(xA2);
@@ -221,7 +230,7 @@ function graph2(csvpath, color, location, w, h) {
     f=d3.format(",");
 
     legendSize.append("text")
-    .text(function (d,i) { return "€" + f(Math.pow(10,i)); })
+    .text(function (d,i) { return  f(Math.pow(10,i)) + "€"; })
     .attr("x", 20)
     .attr("y", height + 100)
     .attr("dy", ".35em")
@@ -250,14 +259,19 @@ function graph2(csvpath, color, location, w, h) {
     .style("text-anchor", "start");
 
     svg.append("g")
-    .attr("class", "x axis1")
+    .attr("class", "x axis1aGraph2")
     .attr("id", "axis")
-    .attr("transform", "translate(0," + (height+40) + ")")
-    .call(xA1);
+    .attr("transform", "translate(0," + (height + 40) + ")")
+    .call(xA1a);
     svg.append("g")
-    .attr("class", "x axis2")
+    .attr("class", "x axis1bGraph2")
     .attr("id", "axis")
-    .attr("transform", "translate(0," + (height+50) + ")")
+    .attr("transform", "translate(0," + (height + 40) + ")")
+    .call(xA1b);
+    svg.append("g")
+    .attr("class", "x axis2Graph2")
+    .attr("id", "axis")
+    .attr("transform", "translate(0," + (height+ 60) + ")")
     .call(xA2);
 
     function clear(){

@@ -7,7 +7,8 @@
   <style>
     body {
       margin: 0;
-      font: 12px "American Typewriter Light", Baskerville;
+      font-size: 11px;
+      font-family: -apple-system, "American Typewriter Light", Baskerville;
     }
     path {
       fill: none;
@@ -19,56 +20,50 @@
       text-align: center;
       margin-top: 30px;
     }
-    .tick line{
-      opacity: 0;
-    }
-    .x.axis .tick line{
-      opacity: 0;
-    }
-    .y.axis .tick line{
+    .y.axisGraph1 .tick line{
       opacity: .1;
+    }
+    .x.axis .tick{
+      opacity: 1;
     }
     .domain {
       fill: none;
       stroke: none;
-      shape-rendering: crispEdges;
     }
     #axis {
-      font: 12px "American Typewriter Light", Baskerville;
+      font-size: 13px;
+      font-family: -apple-system, "American Typewriter Light", Baskerville;
     }
-    svg {
+    #container {
+      width: 80%;
+      top: 80px;
       margin-left:auto;
       margin-right:auto;
+      position: relative;
+    }
+    #container div {
+      height: 250px;
+    }
+    svg {
       display:block;
-      vertical-align: middle;
-      position: absolute;
+      position: relative;
       top: 0;
       left: 0;
     }
-    .tooltip{
-
+    .svgGraph2 {
+      position: absolute;
     }
-    #container {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: nowrap;
-      justify-content: space-between;
-    }
-    #container > div {
-      width: 900px;
+    .canvas {
+      position: absolute;
     }
     .node {
       fill: none;
       stroke: #ccc;
       shape-rendering: crispEdges;
     }
-    .overlay {
-      fill: none;
-      pointer-events: all;
-    }
     select {
       width: 80px;
-      position: absolute;
+      position: relative;
     }
   </style>
 </head>
@@ -80,7 +75,7 @@
   <script src="graph2.js"></script>
   <div id="container">
     <div class="graph1"></div>
-    <div class="graph2"></div>
+    <div class="graph2" style="position: relative;"></div>
   </div>
   <div class="graph1big"></div>
   <script>
@@ -89,7 +84,7 @@
       "decimal": ".",
       "thousands": ",",
       "grouping": [3],
-      "currency": ["$", ""],
+      "currency": ["", "€"],
       "dateTime": "%a %b %e %X %Y",
       "date": "%m-%d-%Y",
       "time": "%H:%M:%S",
@@ -102,10 +97,11 @@
 
     partyShow = [true, true, true, true, true, true];
     partyArray = ["kesk", "ref", "irl", "sde", "vaba", "ekre"];
-    datearray = [];
+    datearray = []; 
+
     colorrange = [];
 
-    //graph1("erjk.txt", "party", "graph1", 1000, 300);
+    graph1("annetused.txt", "party", "graph1", 1000, 200);
     graph2("annetused.txt", "party", "graph2", 1000, 180);
     //graph1("erjk.txt", "party", "graph1big", 1200, 600);
 

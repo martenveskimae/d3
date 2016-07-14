@@ -6,54 +6,38 @@ function graph1(csvpath, color, location, w, h) {
     colorrange = ["#980043", "#DD1C77", "#DF65B0", "#C994C7", "#D4B9DA", "#F1EEF6"];
   }
   else if (color == "party") {
-    colorrange = ["#109618", "#ff9900", "#3366cc", "#dc3912"];
+    colorrange = ["#109618", "#ff9900", "#3366cc", "#dc3912", "#888888", "#7a5230"];
   }
   else if (color == "orange") {
     colorrange = ["#B30000", "#E34A33", "#FC8D59", "#FDBB84", "#FDD49E", "#FEF0D9"];
   };
 
-  strokecolor = colorrange[0];
-  strokecolor2 = function (d, i) { return z(i);};
-
-  var format = d3.timeFormat("%m/%d/%y");
-
-  var margin = {top: 50, right: 70, bottom: 60, left: 80},
-  width = w - margin.left - margin.right,
-  height = h - margin.top - margin.bottom;
+  var margin = {top: 10, right: 80, bottom: 120, left: 80},
+  width = w,
+  height = h,
+  transitionTime = 700
+  nrTicks = 25;
 
   var x = d3.time.scale().range([0, width]),
   y = d3.scaleLinear().range([height, 0]),
-  z = d3.scaleOrdinal().range(colorrange),
-  yAxis = d3.axisLeft(y)
-  .tickSize(-width, 0, 4),
-  xAxis1 = d3.axisBottom(x)
+  z = d3.scaleOrdinal().range(colorrange)
+  .domain(["kesk", "ref", "irl", "sde", "vaba", "ekre"]),
+  xA1a = d3.axisBottom(x)
   .tickFormat(EST.timeFormat("%b"))
-  .tickSize(5,0)
-  .tickSize(-height, 0, 4),
-  xAxis2 = d3.axisBottom(x)
+  .ticks(nrTicks/3)
+  .tickSize(5,0),
+  xA1b = d3.axisBottom(x)
+  .tickFormat("")
+  .ticks(nrTicks)
+  .tickSize(5,0),
+  xA2 = d3.axisBottom(x)
   .ticks(d3.time.years, 1)
   .tickFormat(d3.timeFormat("%Y"))
-  .tickSize(5,0);
-
-  var line = d3.svg.line()
-  .interpolate("cardinal")  
-  .x(function(d) { return x(d.date); })
-  .y(function(d) { return y(d.value); });
-
-  var line2 = d3.svg.line()
-  .interpolate("cardinal")  
-  .x(function(d) { return x(d.date); })
-  .y(function(d) { return y(d.exp); });
-
-  var voronoi = d3.geom.voronoi()
-  .x(function(d) { return x(d.date); })
-  .y(function(d) { return y(d.value); })
-  .clipExtent([[0, 0], [width, height]]);
-
-  var voronoi2 = d3.geom.voronoi()
-  .x(function(d) { return x(d.date); })
-  .y(function(d) { return y(d.exp); })
-  .clipExtent([[0, 0], [width, height]]);
+  .tickSize(0,0),
+  yA = d3.axisLeft(y)
+  .tickFormat(EST.numberFormat("$,f"))
+  .ticks(4)
+  .tickSize(-width+12);
 
   var svg = d3.select("."+location)
   .append("svg")
@@ -62,313 +46,188 @@ function graph1(csvpath, color, location, w, h) {
   .append("g")
   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  var title = svg.append("text")
-  .attr("x", width/2)
-  .attr("y", -15)
-  .attr("class", "graphTitle")
-  .style("text-anchor", "middle")
-  .style("font-size", "14px");
+  var line = d3.svg.line() 
+  .interpolate("step")
+  .x(function(d) { return x(d.date); })
+  .y(function(d) { return y(d.total); });
 
-  var graph = d3.tsv(csvpath, function(data) {
-    flatData = [];
+  d3.tsv("annetused.txt", function(error, data) {
+
+    var date = "date",
+    sum  = "sum",
+    party = "party";
     data.forEach(function(d) {
-      d.date = new Date(+d.year, +d.month-1, 1);
-      d.membership = +d.membership;
-      d.donation = +d.donation;
-      d.government = +d.government;
-      d.loan = +d.loan;
-      d.private = d.donation+d.membership;
-      d.sum = +d.total;
-      d.exp = +d.exp;
-      d.kvartal = +d.kvartal;
-      d.balance = +d.balance;
-      d.party = d.party;
-      d.value = d.kvartal;
-      flatData.push({date: d.date, exp: d.exp, value: d.value, key: "value", party: d.party});
+      d[date] = new Date(+d.year, +d.month-1, +d.day);
+      d[sum] = +d.sum+1;
+      d.name = d.name;
+      d[party] = d.party;
     });
+    initialData = [];
+    initialData = data;
 
-    x.domain(d3.extent(data, function(d) { return d.date; }));
+    reload();
+    function reload(){
+      nest = [];
+      nodes = [];
+      nodesData = [];
+      nestData = [];
 
-    var button = svg.append("g")
-    .attr("transform", function(d) { return "translate("+ (width+20) + "," + (height/5) +")";});
+      data = initialData.filter(function(d) { return d.sum > 0; });
 
-    button.append("rect")
-    .attr("class", "button")
-    .attr("width", "40px")
-    .attr("height", "20px")
-    .style("fill", "none")
-    .style("stroke", 1)
-    .style("stroke-color", "black")
-    .attr("ry", 20/10);
+      x.domain(d3.extent(data, function(d) { return d.date; }));
 
-    button.append("text")
-    .attr("x", 38)
-    .attr("y", 13)
-    .style("text-anchor", "end")
-    .text("Vaheta");
+      nest = d3.nest()
+      .key(function(d){return d.party;})
+      .key(function(d) { return d3.timeMonth(d.date);})
+      .rollup(function(d) { 
+        return {
+          date: d[0].date,
+          party: d[0].party,
+          total: d3.sum(d,function(g){return g.sum;})
+        };
+      })
+      .entries(data);
 
-    var nest = d3.nest()
-    .key(function(d) { return d.party; })
-    .entries(data.sort(function(a, b){ return a.date - b.date; }));
-    var transitionTime = 500;
-    var voronoiGroup = svg.append("g")
-    .attr("class", "voronoi");
-    var vorr = voronoiGroup.selectAll(".voronoi")
-    .data(voronoi(flatData))
+      createNodes();
+      y.domain([d3.min(nodesData, function(d) { return d.total; }), d3.max(nodesData, function(d) { return d.total; })]);
+
+      function createNodes() {
+        nest.forEach(function(d) {
+          var partyPush = d.key;
+          d.values.forEach(function(e) {
+            nodes.push(e);
+          });
+        });
+        nodes.forEach(function(d){
+         nodesData.push(d.value);
+       });
+      }
+
+      y.domain([d3.min(nodesData, function(d) { return d.total; }), d3.max(nodesData, function(d) { return d.total; })]);
+
+      nestData = d3.nest()
+      .key(function(d){return d.party;})
+      .entries(nodesData.sort(function(a, b){ return a.date - b.date; }));
+
+      nestData.forEach(function(d, i) {
+        var partyLines = svg.append("g")
+
+        partyLines.append("path")
+        .attr("class", "lineGraph1")
+        .style("fill", "none")
+        .style("stroke-width", 2);
+
+        partyLines.append("text")
+        .attr("class", "partyTextGraph1")
+        .attr("dy", ".35em");
+      });
+
+      d3.selectAll(".lineGraph1")
+      .data(nestData)
+      .attr("id", function(d){return d.key;});
+
+      lines();
+    }
+    /*
+    svg.selectAll(".uued")
+    .data(nodesData)
     .enter()
-    .append("path")
-    .attr("class", "vorPath");
+    .append("line")
+    .attr("x1", function(d){return x(d.date)-7 ;} )
+    .attr("x2", function(d){return x(d.date)+7 ;} )
+    .attr("y1", function(d){return y(d.total) ;} )
+    .attr("y2", function(d){return y(d.total) ;} )
+    .style("stroke", function(d){return z(d.party) ;} )
+    .style("stroke-width", 3);
+    */
 
-    nest.forEach(function(d, i) {
-      var partyLines = svg.append("g")
-      .datum(data);
+    function lines() {
 
-      partyLines.append("path")
-      .attr("class", "line")
-      .style("fill", "none");
-
-      partyLines.append("text")
-      .attr("class", "partyText")
-      .attr("dy", ".35em");
-    });
-
-    Axis();
-    income();
-
-    function income() {
-      y.domain([d3.min(data, function(d) { return d.value; })-10, d3.max(data, function(d) { return d.value; })+10]);
-
-      d3.select(".y.axis")
-      .transition()
-      .duration(transitionTime)
-      .call(yAxis);
-      d3.select(".y.axis").selectAll(".tick text")
-      .transition()
-      .duration(transitionTime)
-      .attr("transform", "translate(-5, 0)");
-
-      d3.selectAll(".line")
-      .data(nest)
+      d3.selectAll(".lineGraph1")
+      .data(nestData)
       .transition()
       .duration(transitionTime)
       .attr("d", function(d){ return line(d.values); })
-      .style("stroke", function(d,i){ return z(i); });
+      .style("stroke", function(d){ return z(d.values[0].party); });
 
-      d3.selectAll(".partyText")
-      .data(nest)
+      d3.selectAll(".partyTextGraph1")
+      .data(nestData)
+      .attr("x", width-10)
+      .attr("y", function(d,i){ 
+        var lastValue = nestData[i].values[(nestData[i].values.length-1)].total;
+        return y(lastValue);})
+      .style("fill", function(d){ return z(d.values[0].party); })
+      .text(function(d) { return d.values[0].party; });
+
+      d3.select(".x.axisA1aGraph1")
       .transition()
       .duration(transitionTime)
-      .attr("transform", function(d,i) {
-        var lastValue = nest[i].values[(nest[i].values.length-1)].value;
-        return "translate(" + (width+3) + "," + y(lastValue) + ")"; })
-      .text(function(d,i) { return data[i].party; });
-
-      d3.select(".graphTitle")
+      .call(xA1a);
+      d3.select(".x.axisA1bGraph1")
       .transition()
       .duration(transitionTime)
-      .text("Sissetuleku muutus võrrelduna eelmise aasta sama perioodiga");
-      d3.select(".ylabel")
-      .transition()
-      .duration(200)
-      .text("Muutus protsentides");
-
-      d3.select(".zeroLine")
+      .call(xA1b);
+      d3.select(".x.axisA2Graph1")
       .transition()
       .duration(transitionTime)
-      .attr("y1", y(0))
-      .attr("y2", y(0))
-      .style("display", "inline");
-
-      d3.selectAll(".vorPath")
-      .data(voronoi(flatData))
+      .call(xA2);
+      d3.select(".y.axisGraph1")
       .transition()
       .duration(transitionTime)
-      .attr("d", function(d) { return "M" + d.join("L") + "Z"; });
+      .call(yA);
 
+      arrangeLabels();
     }
 
-    function exp(){
-      y.domain([d3.min(data, function(d) { return d.exp; })-100000, d3.max(data, function(d) { return d.exp; })+100000]);
-
-      d3.select(".y.axis")
-      .transition()
-      .duration(transitionTime)
-      .call(yAxis);
-      d3.select(".y.axis").selectAll(".tick text")
-      .transition()
-      .duration(transitionTime)
-      .attr("transform", "translate(-5, 0)");
-
-      d3.selectAll(".line")
-      .data(nest)
-      .transition()
-      .duration(transitionTime)
-      .attr("d", function(d){ return line2(d.values); })
-      .style("stroke", function(d,i){ return z(i); });
-
-      d3.selectAll(".partyText")
-      .data(nest)
-      .transition()
-      .duration(transitionTime)
-      .attr("transform", function(d,i) {
-        var lastValue = nest[i].values[(nest[i].values.length-1)].exp;
-        return "translate(" + (width+3) + "," + y(lastValue) + ")"; })
-      .text(function(d,i) { return data[i].party; });
-
-      d3.select(".graphTitle")
-      .transition()
-      .duration(200)
-      .text("Erakondade tehtud kulutused");
-      d3.select(".ylabel")
-      .transition()
-      .duration(200)
-      .text("Summa eurodes");
-
-      d3.select(".zeroLine")
-      .transition()
-      .duration(transitionTime)
-      .attr("y1", y(0))
-      .attr("y2", y(0))
-      .style("display", "none");
-
-      d3.selectAll(".vorPath")
-      .data(voronoi2(flatData))
-      .transition()
-      .duration(transitionTime)
-      .attr("d", function(d) { return "M" + d.join("L") + "Z"; });
-    }
-
-    var switcher = [true];
-    button.on("click", function(d){
-      if (!switcher[0]) {
-        income();
-      } else {
-        exp(); 
+    function arrangeLabels() {
+      var move = 1;
+      while(move > 0) {
+        move = 0;
+        d3.selectAll(".partyTextGraph1")
+        .each(function() {
+         var that = this,
+         a = this.getBoundingClientRect();
+         d3.selectAll(".partyTextGraph1")
+         .each(function() {
+          if(this != that) {
+            var b = this.getBoundingClientRect();
+            if((Math.abs(a.top - b.top) * 3 < (a.height + b.height))) {
+                var dy = (Math.max(0, a.bottom - b.top) + Math.min(0, a.top - b.bottom)) * .02,
+                    tt = d3.transform(d3.select(this).attr("transform")),
+                    to = d3.transform(d3.select(that).attr("transform"));
+                    move += Math.abs(dy);
+                
+                to.translate = [ 0, to.translate[1] + dy ];
+                tt.translate = [ 0, tt.translate[1] - dy ];
+                d3.select(this).attr("transform", "translate(" + tt.translate + ")");
+                d3.select(that).attr("transform", "translate(" + to.translate + ")");
+                a = this.getBoundingClientRect();
+              }
+            }
+          });
+       });
       }
-      switcher[0] =! switcher[0];
-    });
+    }
 
-    var lines = document.getElementsByClassName('line');
-    var mouseG = svg.append("g")
-    .attr("class", "mouse-over-effects");
-
-    mouseG.append("path")
-    .attr("class", "mouse-line")
-    .style("stroke", "black")
-    .style("stroke-width", "1px")
-    .style("opacity", "0");
-
-    var mousePerLine = mouseG.selectAll('.mouse-per-line')
-    .data(nest)
-    .enter()
-    .append("g")
-    .attr("class", "mouse-per-line");
-
-    mousePerLine.append("circle")
-    .attr("r", 6)
-    .style("stroke", function(d,i) { return z(i); })
-    .style("fill", "none")
-    .style("stroke-width", "1px")
-    .style("opacity", "0");
-
-    mousePerLine.append("text")
-    .attr("class", "tooltip")
-    .attr("transform", "translate(10,3)");
-
-    mouseG.append('svg:rect')
-    .attr('width', width)
-    .attr('height', height)
-    .attr('fill', 'none')
-    .attr('pointer-events', 'all')
-    .on('mouseout', function() {
-      d3.select(".mouse-line")
-      .style("opacity", "0");
-      d3.selectAll(".mouse-per-line circle")
-      .style("opacity", "0");
-      d3.selectAll(".mouse-per-line text")
-      .style("opacity", "0");
-    })
-    .on('mouseover', function() {
-      d3.select(".mouse-line")
-      .style("opacity", "1");
-      d3.selectAll(".mouse-per-line circle")
-      .style("opacity", "1");
-      d3.selectAll(".mouse-per-line text")
-      .style("opacity", "1");
-    })
-    .on('mousemove', function() {
-      var mouse = d3.mouse(this);
-      d3.selectAll(".mouse-line")
-      .attr("d", function() {
-        var d = "M" + mouse[0] + "," + height;
-        d += " " + mouse[0] + "," + 0;
-        return d;
-      });
-
-      d3.selectAll(".mouse-per-line")
-      .attr("transform", function(d, i) {
-
-        var beginning = 0,
-        end = lines[i].getTotalLength(),
-        target = null;
-
-        while (true){
-          target = Math.floor((beginning + end) / 2);
-          pos = lines[i].getPointAtLength(target);
-          if ((target === end || target === beginning) && pos.x !== mouse[0]) {
-            break;
-          }
-          if (pos.x > mouse[0])      end = target;
-          else if (pos.x < mouse[0]) beginning = target;
-          else break;
-        }
-
-        
-        
-        d3.select(this).select("text").text(d3.round(y.invert(pos.y)));
-        return "translate(" + mouse[0] + "," + pos.y +")";
-      });
-    });
-
-    function Axis(){
       svg.append("g")
-      .attr("class", "x axis")
+      .attr("class", "x axisA1aGraph1")
       .attr("id", "axis")
-      .attr("transform", "translate(0," + height + ")")
-      .call(xAxis1);
+      .attr("transform", "translate(0," + (height + 5) + ")")
+      .call(xA1a);
       svg.append("g")
-      .attr("class", "x axis")
+      .attr("class", "x axisA1bGraph1")
+      .attr("id", "axis")
+      .attr("transform", "translate(0," + (height + 5) + ")")
+      .call(xA1b);
+      svg.append("g")
+      .attr("class", "x axisA2Graph1")
       .attr("id", "axis")
       .attr("transform", "translate(0," + (height+25) + ")")
-      .call(xAxis2);
-
+      .call(xA2);
       svg.append("g")
-      .attr("class", "y axis")
+      .attr("class", "y axisGraph1")
       .attr("id", "axis")
-      .call(yAxis)
-      .append("text")
-      .attr("class", "ylabel")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 6)
-      .attr("x", -7)
-      .attr("dy", ".71em")
-      .style("text-anchor", "end");
+      .call(yA);
 
-      svg.selectAll(".y.axis").selectAll(".tick text")
-      .attr("transform", "translate(-5, 0)");
-      svg.selectAll(".x.axis").selectAll(".tick text")
-      .attr("transform", "translate(0, 3)");
-
-      svg.append("line")
-      .attr("class", "zeroLine")
-      .attr("x1", 0)
-      .attr("x2", width)
-      .attr("y1", y(0))
-      .attr("y2", y(0))
-      .attr("stroke-width", 1)
-      .attr("stroke", "black")
-    };
-
-  });
-
+    });
 };
