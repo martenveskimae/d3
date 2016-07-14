@@ -126,6 +126,42 @@ function graph1(csvpath, color, location, w, h) {
       .data(nestData)
       .attr("id", function(d){return d.key;});
 
+      svg.append("line")
+      .attr("class", "RKlG1")
+      .attr("y1", 0)
+      .attr("y2", height)
+      .attr("stroke", "black")
+      svg.append("text")
+      .attr("class", "RKG1")
+      .attr("transform", "rotate(-90)")
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Riigikogu 2015");
+
+      svg.append("line")
+      .attr("class", "KOVlG1")
+      .attr("y1", 0)
+      .attr("y2", height)
+      .attr("stroke", "black")
+      svg.append("text")
+      .attr("class", "KOVG1")
+      .attr("transform", "rotate(-90)")
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("KOV 2013");
+
+      svg.append("line")
+      .attr("class", "EPlG1")
+      .attr("y1", 0)
+      .attr("y2", height)
+      .attr("stroke", "black")
+      svg.append("text")
+      .attr("class", "EPG1")
+      .attr("transform", "rotate(-90)")
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("EP 2014");
+
       lines();
     }
     /*
@@ -158,6 +194,39 @@ function graph1(csvpath, color, location, w, h) {
         return y(lastValue);})
       .style("fill", function(d){ return z(d.values[0].party); })
       .text(function(d) { return d.values[0].party; });
+
+      d3.select(".RKlG1")
+      .transition()
+      .duration(transitionTime)
+      .attr("x1", x(new Date(2015,2,1)))
+      .attr("x2", x(new Date(2015,2,1)));
+
+      d3.select(".RKG1")
+      .transition()
+      .duration(transitionTime)
+      .attr("y", x(new Date(2015,2,1))+5);
+
+      d3.select(".KOVlG1")
+      .transition()
+      .duration(transitionTime)
+      .attr("x1", x(new Date(2013,9,20)))
+      .attr("x2", x(new Date(2013,9,20)));
+
+      d3.select(".KOVG1")
+      .transition()
+      .duration(transitionTime)
+      .attr("y", x(new Date(2013,9,20))+5);
+
+      d3.select(".EPlG1")
+      .transition()
+      .duration(transitionTime)
+      .attr("x1", x(new Date(2014,4,25)))
+      .attr("x2", x(new Date(2014,4,25)));
+
+      d3.select(".EPG1")
+      .transition()
+      .duration(transitionTime)
+      .attr("y", x(new Date(2014,4,25))+5);
 
       d3.select(".x.axisA1aGraph1")
       .transition()
