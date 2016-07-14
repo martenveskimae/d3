@@ -217,7 +217,7 @@ function graph2(csvpath, color, location, w, h) {
     .enter()
     .append("g")
     .attr("class", "legend")
-    .attr("transform", function(d, i) { return "translate("+ i * 60 +",0)"; });
+    .attr("transform", function(d, i) { return "translate("+ i * 70 +",0)"; });
 
     legendSize.append("circle")
     .attr("id", function (d,i) { return "size "+i; })

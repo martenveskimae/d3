@@ -115,7 +115,7 @@ function graph1(csvpath, color, location, w, h) {
         partyLines.append("path")
         .attr("class", "lineGraph1")
         .style("fill", "none")
-        .style("stroke-width", 2);
+        .style("stroke-width", 1.5);
 
         partyLines.append("text")
         .attr("class", "partyTextGraph1")
@@ -192,42 +192,42 @@ function graph1(csvpath, color, location, w, h) {
           if(this != that) {
             var b = this.getBoundingClientRect();
             if((Math.abs(a.top - b.top) * 3 < (a.height + b.height))) {
-                var dy = (Math.max(0, a.bottom - b.top) + Math.min(0, a.top - b.bottom)) * .02,
-                    tt = d3.transform(d3.select(this).attr("transform")),
-                    to = d3.transform(d3.select(that).attr("transform"));
-                    move += Math.abs(dy);
-                
-                to.translate = [ 0, to.translate[1] + dy ];
-                tt.translate = [ 0, tt.translate[1] - dy ];
-                d3.select(this).attr("transform", "translate(" + tt.translate + ")");
-                d3.select(that).attr("transform", "translate(" + to.translate + ")");
-                a = this.getBoundingClientRect();
-              }
+              var dy = (Math.max(0, a.bottom - b.top) + Math.min(0, a.top - b.bottom)) * .02,
+              tt = d3.transform(d3.select(this).attr("transform")),
+              to = d3.transform(d3.select(that).attr("transform"));
+              move += Math.abs(dy);
+
+              to.translate = [ 0, to.translate[1] + dy ];
+              tt.translate = [ 0, tt.translate[1] - dy ];
+              d3.select(this).attr("transform", "translate(" + tt.translate + ")");
+              d3.select(that).attr("transform", "translate(" + to.translate + ")");
+              a = this.getBoundingClientRect();
             }
-          });
+          }
+        });
        });
       }
     }
 
-      svg.append("g")
-      .attr("class", "x axisA1aGraph1")
-      .attr("id", "axis")
-      .attr("transform", "translate(0," + (height + 5) + ")")
-      .call(xA1a);
-      svg.append("g")
-      .attr("class", "x axisA1bGraph1")
-      .attr("id", "axis")
-      .attr("transform", "translate(0," + (height + 5) + ")")
-      .call(xA1b);
-      svg.append("g")
-      .attr("class", "x axisA2Graph1")
-      .attr("id", "axis")
-      .attr("transform", "translate(0," + (height+25) + ")")
-      .call(xA2);
-      svg.append("g")
-      .attr("class", "y axisGraph1")
-      .attr("id", "axis")
-      .call(yA);
+    svg.append("g")
+    .attr("class", "x axisA1aGraph1")
+    .attr("id", "axis")
+    .attr("transform", "translate(0," + (height + 5) + ")")
+    .call(xA1a);
+    svg.append("g")
+    .attr("class", "x axisA1bGraph1")
+    .attr("id", "axis")
+    .attr("transform", "translate(0," + (height + 5) + ")")
+    .call(xA1b);
+    svg.append("g")
+    .attr("class", "x axisA2Graph1")
+    .attr("id", "axis")
+    .attr("transform", "translate(0," + (height+25) + ")")
+    .call(xA2);
+    svg.append("g")
+    .attr("class", "y axisGraph1")
+    .attr("id", "axis")
+    .call(yA);
 
-    });
+  });
 };

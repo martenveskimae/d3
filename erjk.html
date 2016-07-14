@@ -7,24 +7,11 @@
   <style>
     body {
       margin: 0;
-      font-size: 11px;
-      font-family: -apple-system, "American Typewriter Light", Baskerville;
-    }
-    path {
-      fill: none;
-      pointer-events: all;
-      stroke: 1;
-    }
-    .title {
-      font-size: 36px;
-      text-align: center;
-      margin-top: 30px;
+      font-size: 12px;
+      font-family: 'San Francisco', Helvetica, Arial, san-serif;;
     }
     .y.axisGraph1 .tick line{
       opacity: .1;
-    }
-    .x.axis .tick{
-      opacity: 1;
     }
     .domain {
       fill: none;
@@ -32,7 +19,7 @@
     }
     #axis {
       font-size: 13px;
-      font-family: -apple-system, "American Typewriter Light", Baskerville;
+      font-family: 'San Francisco', Helvetica, Arial, san-serif;;
     }
     #container {
       width: 80%;
@@ -56,11 +43,6 @@
     .canvas {
       position: absolute;
     }
-    .node {
-      fill: none;
-      stroke: #ccc;
-      shape-rendering: crispEdges;
-    }
     select {
       width: 80px;
       position: relative;
@@ -74,8 +56,9 @@
   <script src="graph1.js"></script>
   <script src="graph2.js"></script>
   <div id="container">
-    <div class="graph1"></div>
+    <div class="graph1" style="position: relative;"></div>
     <div class="graph2" style="position: relative;"></div>
+    <div class="graph3" style="position: relative;"></div>
   </div>
   <div class="graph1big"></div>
   <script>
@@ -102,8 +85,8 @@
     colorrange = [];
 
     graph1("annetused.txt", "party", "graph1", 1000, 200);
+    //graph3("annetused.txt", "party", "graph3", 1000, 200);
     graph2("annetused.txt", "party", "graph2", 1000, 180);
-    //graph1("erjk.txt", "party", "graph1big", 1200, 600);
 
   </script>
 </body>
