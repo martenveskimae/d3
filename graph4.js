@@ -122,7 +122,6 @@ function graph4(csvpath, color, location, w, h) {
       .key(function(d){return d.party;})
       .entries(nodesData
         .sort(function(a, b){ return d3.ascending(a.party, b.party); })
-        .sort(function(a, b){ return a.date - b.date; })
         .filter(function(d) { return d.small == 1; }));
 
       nestData.forEach(function(d, i) {
@@ -151,7 +150,6 @@ function graph4(csvpath, color, location, w, h) {
       .key(function(d){return d.party;})
       .entries(nodesData
         .sort(function(a, b){ return d3.ascending(a.party, b.party); })
-        .sort(function(a, b){ return a.date - b.date; })
         .filter(function(d) { return d.small == 0; }));
 
       nestData2.forEach(function(d, i) {
@@ -222,7 +220,7 @@ function graph4(csvpath, color, location, w, h) {
     function bigLines() {
 
       d3.selectAll(".line2Graph4")
-      .data(nestData2)
+      .data(nestData2.sort(function(a, b){ return a.date - b.date; }))
       .transition()
       .duration(transitionTime)
       .attr("d", function(d){ return line(d.values); })
@@ -251,7 +249,7 @@ function graph4(csvpath, color, location, w, h) {
       .style("stroke", function(d){ return z(d.values[0].party); });
 
       d3.selectAll(".partyTextGraph4")
-      .data(nestData)
+      .data(nestData.sort(function(a, b){ return a.date - b.date; }))
       .attr("x", width-10)
       .attr("y", function(d,i){ 
         var lastValue = nestData[i].values[(nestData[i].values.length-1)].total;
