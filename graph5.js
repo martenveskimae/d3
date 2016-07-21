@@ -68,12 +68,12 @@ function graph5(csvpath, color, location, w, h) {
       .attr("width", x.bandwidth());
 
   svg.append("g")
-    .attr("class", "x axisA1aGraph4")
+    .attr("class", "x axisA1aGraph5")
     .attr("id", "axis")
     .attr("transform", "translate(0," + (height + 5) + ")")
     .call(d3.axisBottom(x));
     svg.append("g")
-    .attr("class", "x axisA2Graph4")
+    .attr("class", "x axisA2Graph5")
     .attr("id", "axis")
     .call(yA);
 
