@@ -1,4 +1,4 @@
-function graph1(csvpath, color, location, w, h) {
+function graph3(csvpath, color, location, w, h) {
   if (color == "blue") {
     colorrange = ["#045A8D", "#2B8CBE", "#74A9CF", "#A6BDDB", "#D0D1E6", "#F1EEF6"];
   }
@@ -19,7 +19,7 @@ function graph1(csvpath, color, location, w, h) {
   nrTicks = 25;
 
   var x = d3.time.scale().range([0, width]),
-  y = d3.scaleLinear().range([height, 0]),
+  y = d3.scaleLog().range([height, 0]),
   z = d3.scaleOrdinal().range(colorrange)
   .domain(["kesk", "ref", "irl", "sde", "vaba", "ekre"]),
   xA1a = d3.axisBottom(x)
@@ -35,13 +35,15 @@ function graph1(csvpath, color, location, w, h) {
   .tickFormat(d3.timeFormat("%Y"))
   .tickSize(0,0),
   yA = d3.axisLeft(y)
-  .tickFormat(EST.numberFormat("$,f"))
-  .ticks(4)
+  .tickFormat(EST.numberFormat(".,f"))
+  .ticks(2)
+  .tickSize(-width+12),
+  yA1 = d3.axisLeft(y)
+  .tickFormat("")
   .tickSize(-width+12);
 
   var svg = d3.select("."+location)
   .append("svg")
-  .attr("class", "svgGraph1")
   .attr("width", width + margin.left + margin.right)
   .attr("height", height + margin.top + margin.bottom)
   .append("g")
@@ -52,12 +54,12 @@ function graph1(csvpath, color, location, w, h) {
   .attr("y", -20)
   .attr("class", "graphTitle")
   .style("text-anchor", "middle")
-  .text("Rahaliste annetuste summa kuude lõikes");
+  .text("Rahaliste annetuste arv kuude lõikes");
 
   var line = d3.line() 
   .x(function(d) { return x(d.date); })
   .y(function(d) { return y(d.total); })
-  .curve(d3.curveStep);
+  .curve(d3.curveMonotoneX);
 
   d3.tsv("annetused.txt", function(error, data) {
 
@@ -91,7 +93,7 @@ function graph1(csvpath, color, location, w, h) {
         return {
           date: d[0].date,
           party: d[0].party,
-          total: d3.sum(d,function(g){return g.sum;}) - d.length
+          total: d.length
         };
       })
       .entries(data);
@@ -101,7 +103,6 @@ function graph1(csvpath, color, location, w, h) {
 
       function createNodes() {
         nest.forEach(function(d) {
-          var partyPush = d.key;
           d.values.forEach(function(e) {
             nodes.push(e);
           });
@@ -121,50 +122,50 @@ function graph1(csvpath, color, location, w, h) {
         var partyLines = svg.append("g")
 
         partyLines.append("path")
-        .attr("class", "lineGraph1")
+        .attr("class", "lineGraph3")
         .style("fill", "none")
         .style("stroke-width", 1.5);
 
         partyLines.append("text")
-        .attr("class", "partyTextGraph1")
+        .attr("class", "partyTextGraph3")
         .attr("dy", ".35em");
       });
 
-      d3.selectAll(".lineGraph1")
+      d3.selectAll(".lineGraph3")
       .data(nestData)
       .attr("id", function(d){return d.key;});
 
       svg.append("line")
-      .attr("class", "RKlG1")
+      .attr("class", "RKlG3")
       .attr("y1", 0)
       .attr("y2", height)
       .attr("stroke", "black")
       svg.append("text")
-      .attr("class", "RKG1")
+      .attr("class", "RKG3")
       .attr("transform", "rotate(-90)")
       .attr("dy", ".71em")
       .style("text-anchor", "end")
       .text("RK 2015");
 
       svg.append("line")
-      .attr("class", "KOVlG1")
+      .attr("class", "KOVlG3")
       .attr("y1", 0)
       .attr("y2", height)
       .attr("stroke", "black")
       svg.append("text")
-      .attr("class", "KOVG1")
+      .attr("class", "KOVG3")
       .attr("transform", "rotate(-90)")
       .attr("dy", ".71em")
       .style("text-anchor", "end")
       .text("KOV 2013");
 
       svg.append("line")
-      .attr("class", "EPlG1")
+      .attr("class", "EPlG3")
       .attr("y1", 0)
       .attr("y2", height)
       .attr("stroke", "black")
       svg.append("text")
-      .attr("class", "EPG1")
+      .attr("class", "EPG3")
       .attr("transform", "rotate(-90)")
       .attr("dy", ".71em")
       .style("text-anchor", "end")
@@ -172,29 +173,17 @@ function graph1(csvpath, color, location, w, h) {
 
       lines();
     }
-    /*
-    svg.selectAll(".uued")
-    .data(nodesData)
-    .enter()
-    .append("line")
-    .attr("x1", function(d){return x(d.date)-7 ;} )
-    .attr("x2", function(d){return x(d.date)+7 ;} )
-    .attr("y1", function(d){return y(d.total) ;} )
-    .attr("y2", function(d){return y(d.total) ;} )
-    .style("stroke", function(d){return z(d.party) ;} )
-    .style("stroke-width", 3);
-    */
 
     function lines() {
 
-      d3.selectAll(".lineGraph1")
+      d3.selectAll(".lineGraph3")
       .data(nestData)
       .transition()
       .duration(transitionTime)
       .attr("d", function(d){ return line(d.values); })
       .style("stroke", function(d){ return z(d.values[0].party); });
 
-      d3.selectAll(".partyTextGraph1")
+      d3.selectAll(".partyTextGraph3")
       .data(nestData)
       .attr("x", width-10)
       .attr("y", function(d,i){ 
@@ -203,55 +192,59 @@ function graph1(csvpath, color, location, w, h) {
       .style("fill", function(d){ return z(d.values[0].party); })
       .text(function(d) { return d.values[0].party; });
 
-      d3.select(".RKlG1")
+      d3.select(".RKlG3")
       .transition()
       .duration(transitionTime)
       .attr("x1", x(new Date(2015,2,1)))
       .attr("x2", x(new Date(2015,2,1)));
 
-      d3.select(".RKG1")
+      d3.select(".RKG3")
       .transition()
       .duration(transitionTime)
       .attr("y", x(new Date(2015,2,1))+5);
 
-      d3.select(".KOVlG1")
+      d3.select(".KOVlG3")
       .transition()
       .duration(transitionTime)
       .attr("x1", x(new Date(2013,9,20)))
       .attr("x2", x(new Date(2013,9,20)));
 
-      d3.select(".KOVG1")
+      d3.select(".KOVG3")
       .transition()
       .duration(transitionTime)
       .attr("y", x(new Date(2013,9,20))+5);
 
-      d3.select(".EPlG1")
+      d3.select(".EPlG3")
       .transition()
       .duration(transitionTime)
       .attr("x1", x(new Date(2014,4,25)))
       .attr("x2", x(new Date(2014,4,25)));
 
-      d3.select(".EPG1")
+      d3.select(".EPG3")
       .transition()
       .duration(transitionTime)
       .attr("y", x(new Date(2014,4,25))+5);
 
-      d3.select(".x.axisA1aGraph1")
+      d3.select(".x.axisA1aGraph3")
       .transition()
       .duration(transitionTime)
       .call(xA1a);
-      d3.select(".x.axisA1bGraph1")
+      d3.select(".x.axisA1bGraph3")
       .transition()
       .duration(transitionTime)
       .call(xA1b);
-      d3.select(".x.axisA2Graph1")
+      d3.select(".x.axisA2Graph3")
       .transition()
       .duration(transitionTime)
       .call(xA2);
-      d3.select(".y.axisGraph1")
+      d3.select(".y.axisGraph3")
       .transition()
       .duration(transitionTime)
       .call(yA);
+      d3.select(".y1.axisGraph3")
+      .transition()
+      .duration(transitionTime)
+      .call(yA1);
 
       arrangeLabels();
     }
@@ -260,11 +253,11 @@ function graph1(csvpath, color, location, w, h) {
       var move = 1;
       while(move > 0) {
         move = 0;
-        d3.selectAll(".partyTextGraph1")
+        d3.selectAll(".partyTextGraph3")
         .each(function() {
          var that = this,
          a = this.getBoundingClientRect();
-         d3.selectAll(".partyTextGraph1")
+         d3.selectAll(".partyTextGraph3")
          .each(function() {
           if(this != that) {
             var b = this.getBoundingClientRect();
@@ -287,24 +280,28 @@ function graph1(csvpath, color, location, w, h) {
     }
 
     svg.append("g")
-    .attr("class", "x axisA1aGraph1")
+    .attr("class", "x axisA1aGraph3")
     .attr("id", "axis")
     .attr("transform", "translate(0," + (height + 5) + ")")
     .call(xA1a);
     svg.append("g")
-    .attr("class", "x axisA1bGraph1")
+    .attr("class", "x axisA1bGraph3")
     .attr("id", "axis")
     .attr("transform", "translate(0," + (height + 5) + ")")
     .call(xA1b);
     svg.append("g")
-    .attr("class", "x axisA2Graph1")
+    .attr("class", "x axisA2Graph3")
     .attr("id", "axis")
     .attr("transform", "translate(0," + (height+25) + ")")
     .call(xA2);
     svg.append("g")
-    .attr("class", "y axisGraph1")
+    .attr("class", "y axisGraph3")
     .attr("id", "axis")
     .call(yA);
+    svg.append("g")
+    .attr("class", "y axisGraph3")
+    .attr("id", "axis")
+    .call(yA1);
 
   });
 };

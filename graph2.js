@@ -12,7 +12,7 @@ function graph2(csvpath, color, location, w, h) {
     colorrange = ["#B30000", "#E34A33", "#FC8D59", "#FDBB84", "#FDD49E", "#FEF0D9"];
   };
 
-  var margin = {top: 10, right: 80, bottom: 120, left: 80},
+  var margin = {top: 40, right: 50, bottom: 120, left: 80},
   width = w,
   height = h,
   radius = 10,
@@ -37,12 +37,9 @@ function graph2(csvpath, color, location, w, h) {
   .ticks(nrTicks)
   .tickSize(5,0),
   xA2 = d3.axisBottom(x)
-  .ticks(d3.time.years, 1)
+  .ticks(d3.timeYears)
   .tickFormat(d3.timeFormat("%Y"))
-  .tickSize(0,0),
-  yA2 = d3.axisLeft(y2)
-  .ticks(3, "s")
-  .tickSize(0, 0, 3);
+  .tickSize(0,0);
 
   var svg = d3.select("."+location)
   .append("svg")
@@ -51,6 +48,13 @@ function graph2(csvpath, color, location, w, h) {
   .attr("height", height + margin.top + margin.bottom)
   .append("g")
   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  var title = svg.append("text")
+  .attr("x", width/2)
+  .attr("y", -20)
+  .attr("class", "graphTitle")
+  .style("text-anchor", "middle")
+  .text("Rahaliste annetuste suurus päevade lõikes");
 
   var base = d3.select("."+location);
   var chart = base.append("canvas")
@@ -65,16 +69,16 @@ function graph2(csvpath, color, location, w, h) {
   var context = chart.node().getContext("2d");
   context.scale(multiplier,multiplier);
 
-  var line = d3.svg.line() 
-  .interpolate("linear")
+  var line = d3.line() 
   .x(function(d) { return x(d.date); })
-  .y(function(d) { return y2(d.total); });
+  .y(function(d) { return y2(d.total); })
+  .curve(d3.curveLinear);
 
   d3.tsv("annetused.txt", function(error, data) {
 
     var date = "date",
-    sum  = "sum",
-    party = "party";
+        sum  = "sum",
+        party = "party";
     data.forEach(function(d) {
       d[date] = new Date(+d.year, +d.month-1, +d.day);
       d[sum] = +d.sum+1;
@@ -103,6 +107,42 @@ function graph2(csvpath, color, location, w, h) {
       reload(partyArray[this.selectedIndex]);
     });
 
+    svg.append("line")
+    .attr("class", "RKlG2")
+    .attr("y1", 0)
+    .attr("y2", height+40)
+    .attr("stroke", "black")
+    svg.append("text")
+    .attr("class", "RKG2")
+    .attr("transform", "rotate(-90)")
+    .attr("dy", ".71em")
+    .style("text-anchor", "end")
+    .text("RK 2015");
+
+    svg.append("line")
+    .attr("class", "KOVlG2")
+    .attr("y1", 0)
+    .attr("y2", height+40)
+    .attr("stroke", "black")
+    svg.append("text")
+    .attr("class", "KOVG2")
+    .attr("transform", "rotate(-90)")
+    .attr("dy", ".71em")
+    .style("text-anchor", "end")
+    .text("KOV 2013");
+
+    svg.append("line")
+    .attr("class", "EPlG2")
+    .attr("y1", 0)
+    .attr("y2", height+40)
+    .attr("stroke", "black")
+    svg.append("text")
+    .attr("class", "EPG2")
+    .attr("transform", "rotate(-90)")
+    .attr("dy", ".71em")
+    .style("text-anchor", "end")
+    .text("EP 2014");
+
     reload("kesk");
     function reload(selectedParty){
       nest = [];
@@ -116,7 +156,7 @@ function graph2(csvpath, color, location, w, h) {
 
       nest = d3.nest()
       .key(function(d){return d.party;})
-      .key(function(d) { return d.date;})//d3.time.month(d.date);})
+      .key(function(d) { return d3.timeDay(d.date);})
       .rollup(function(d) { 
         return {
           date: d[0].date,
@@ -171,6 +211,39 @@ function graph2(csvpath, color, location, w, h) {
       .duration(transitionTime)
       .attr("d", function(d){ return line(d.values); })
       .style("stroke", function(d){ return z(d.values[0].party); });
+
+      d3.select(".RKlG2")
+      .transition()
+      .duration(transitionTime)
+      .attr("x1", x(new Date(2015,2,1)))
+      .attr("x2", x(new Date(2015,2,1)));
+
+      d3.select(".RKG2")
+      .transition()
+      .duration(transitionTime)
+      .attr("y", x(new Date(2015,2,1))+5);
+
+      d3.select(".KOVlG2")
+      .transition()
+      .duration(transitionTime)
+      .attr("x1", x(new Date(2013,9,20)))
+      .attr("x2", x(new Date(2013,9,20)));
+
+      d3.select(".KOVG2")
+      .transition()
+      .duration(transitionTime)
+      .attr("y", x(new Date(2013,9,20))+5);
+
+      d3.select(".EPlG2")
+      .transition()
+      .duration(transitionTime)
+      .attr("x1", x(new Date(2014,4,25)))
+      .attr("x2", x(new Date(2014,4,25)));
+
+      d3.select(".EPG2")
+      .transition()
+      .duration(transitionTime)
+      .attr("y", x(new Date(2014,4,25))+5);
 
       d3.select(".x.axis1aGraph2")
       .transition()
