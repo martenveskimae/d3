@@ -82,7 +82,7 @@ function graph4(csvpath, color, location, w, h) {
       nodesData = [];
       nestData = [];
 
-      data = initialData.filter(function(d) { return d.sum > 0; });
+      data = initialData.filter(function(d) { return d.sum > 0; }).sort(function(a, b){ return a.date - b.date; });
 
       x.domain(d3.extent(data, function(d) { return d.date; }));
 
@@ -121,7 +121,6 @@ function graph4(csvpath, color, location, w, h) {
       nestData = d3.nest()
       .key(function(d){return d.party;})
       .entries(nodesData
-        .sort(function(a, b){ return a.date - b.date; })
         .sort(function(a, b){ return d3.ascending(a.party, b.party); })
         .filter(function(d) { return d.small == 1; }));
 
@@ -150,7 +149,6 @@ function graph4(csvpath, color, location, w, h) {
       nestData2 = d3.nest()
       .key(function(d){return d.party;})
       .entries(nodesData
-        .sort(function(a, b){ return a.date - b.date; })
         .sort(function(a, b){ return d3.ascending(a.party, b.party); })
         .filter(function(d) { return d.small == 0; }));
 
@@ -177,7 +175,7 @@ function graph4(csvpath, color, location, w, h) {
 
       d3.selectAll(".line2Graph4")
       .data(nestData2)
-      .attr("id", function(d){return d.key;});
+      .attr("id", function(d){return d.key + "2" ;});
 
       svg.append("line")
       .attr("class", "RKlG4")
