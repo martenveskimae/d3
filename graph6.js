@@ -1,6 +1,6 @@
 function graph6(csvpath, color, location, w, h) {
   if (color == "blue") {
-    colorrange = ["#045A8D", "#2B8CBE", "#74A9CF", "#A6BDDB", "#D0D1E6", "#F1EEF6"];
+    colorrange = ["#045A8D", "#2B8CBE", "#74A9CF", "#A6BDDB", "#D0D1E6", "#dedeed"];
   }
   else if (color == "pink") {
     colorrange = ["#980043", "#DD1C77", "#DF65B0", "#C994C7", "#D4B9DA", "#F1EEF6"];
@@ -43,7 +43,7 @@ function graph6(csvpath, color, location, w, h) {
   .attr("y", -20)
   .attr("class", "graphTitle")
   .style("text-anchor", "middle")
-  .text("Väljaminekud 2015. aastal");
+  .text("Reklaamikulud 2015. aastal");
 
   d3.tsv(csvpath, type, function(error, data) {
   if (error) throw error;
