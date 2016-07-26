@@ -1,4 +1,4 @@
-function graph5(csvpath, color, location, w, h) {
+function graph6(csvpath, color, location, w, h) {
   if (color == "blue") {
     colorrange = ["#045A8D", "#2B8CBE", "#74A9CF", "#A6BDDB", "#D0D1E6", "#F1EEF6"];
   }
@@ -43,7 +43,7 @@ function graph5(csvpath, color, location, w, h) {
   .attr("y", -20)
   .attr("class", "graphTitle")
   .style("text-anchor", "middle")
-  .text("Sissetulekud 2015. aastal");
+  .text("Väljaminekud 2015. aastal");
 
   d3.tsv(csvpath, type, function(error, data) {
   if (error) throw error;
@@ -68,12 +68,12 @@ function graph5(csvpath, color, location, w, h) {
       .attr("width", x.bandwidth());
 
   svg.append("g")
-    .attr("class", "x axisA1aGraph5")
+    .attr("class", "x axisGraph6")
     .attr("id", "axis")
     .attr("transform", "translate(0," + (height + 5) + ")")
     .call(d3.axisBottom(x));
     svg.append("g")
-    .attr("class", "x axisA2Graph5")
+    .attr("class", "y axisGraph6")
     .attr("id", "axis")
     .call(yA);
 

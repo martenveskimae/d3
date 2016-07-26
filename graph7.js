@@ -1,4 +1,4 @@
-function graph5(csvpath, color, location, w, h) {
+function graph7(csvpath, color, location, w, h) {
   if (color == "blue") {
     colorrange = ["#045A8D", "#2B8CBE", "#74A9CF", "#A6BDDB", "#D0D1E6", "#F1EEF6"];
   }
@@ -18,18 +18,16 @@ function graph5(csvpath, color, location, w, h) {
   transitionTime = 700,
   nrTicks = 25;
 
-  var x = d3.scaleBand()
-    .rangeRound([0, width])
-    .padding(0.1)
-    .align(0.1),
+  var x0 = d3.scale.ordinal()
+          .rangeRoundBands([0, width], .1),
+      x1 = d3.scale.ordinal();
   y = d3.scaleLinear().rangeRound([height,0]),
   z = d3.scaleOrdinal().range(colorrange)
   .domain(["kesk", "ref", "irl", "sde", "vaba", "ekre"]),
+  xA = d3.axisBottom(x0),
   yA = d3.axisLeft(y)
   .tickFormat(EST.numberFormat("$,f"))
   .tickSize(5,0);
-
-  var stack = d3.stack();
 
   var svg = d3.select("."+location)
   .append("svg")
@@ -43,42 +41,50 @@ function graph5(csvpath, color, location, w, h) {
   .attr("y", -20)
   .attr("class", "graphTitle")
   .style("text-anchor", "middle")
-  .text("Sissetulekud 2015. aastal");
+  .text("2015. aasta tulud ja kulud");
 
-  d3.tsv(csvpath, type, function(error, data) {
+  d3.tsv(csvpath, function(error, data) {
   if (error) throw error;
 
-  data.sort(function(a, b) { return b.total - a.total; });
+  var ageNames = d3.keys(data[0]).filter(function(key) { return key !== "party"; });
 
-  x.domain(data.map(function(d) { return d.party; }));
-  y.domain([0, d3.max(data, function(d) { return d.total; })]).nice();
-  z.domain(data.columns.slice(1));
+  data.forEach(function(d) {
+    d.ages = ageNames.map(function(name) { return {name: name, value: +d[name]}; });
+  });
 
-  svg.selectAll(".serie")
-    .data(stack.keys(data.columns.slice(1))(data))
+  data = data.sort(function(a, b){ return b.Tulud - a.Tulud; });
+
+  x0.domain(data.map(function(d) { return d.party; }));
+  x1.domain(ageNames).rangeRoundBands([0, x0.rangeBand()]);
+  y.domain([0, d3.max(data, function(d) { return d3.max(d.ages, function(d) { return d.value; }); })]);
+
+  var state = svg.selectAll(".state")
+      .data(data)
     .enter().append("g")
-      .attr("class", "serie")
-      .attr("fill", function(d) { return z(d.key); })
-    .selectAll("rect")
-    .data(function(d) { return d; })
+      .attr("class", "state")
+      .attr("transform", function(d) { return "translate(" + x0(d.party) + ",0)"; });
+
+  state.selectAll("rect")
+      .data(function(d) { return d.ages; })
     .enter().append("rect")
-      .attr("x", function(d) { return x(d.data.party); })
-      .attr("y", function(d) { return y(d[1]); })
-      .attr("height", function(d) { return y(d[0]) - y(d[1]); })
-      .attr("width", x.bandwidth());
+      .attr("width", x1.rangeBand())
+      .attr("x", function(d) { return x1(d.name); })
+      .attr("y", function(d) { return y(d.value); })
+      .attr("height", function(d) { return height - y(d.value); })
+      .style("fill", function(d) { return z(d.name); });
 
   svg.append("g")
-    .attr("class", "x axisA1aGraph5")
+    .attr("class", "x axisGraph7")
     .attr("id", "axis")
-    .attr("transform", "translate(0," + (height + 5) + ")")
-    .call(d3.axisBottom(x));
+    .attr("transform", "translate(" + x0.rangeBand()/2  + "," + (height + 5) + ")")
+    .call(xA);
     svg.append("g")
-    .attr("class", "x axisA2Graph5")
+    .attr("class", "y axisGraph7")
     .attr("id", "axis")
     .call(yA);
 
   var legend = svg.selectAll(".legend")
-    .data(data.columns.slice(1).reverse())
+    .data(ageNames.slice())
     .enter().append("g")
       .attr("class", "legend")
       .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
@@ -96,11 +102,5 @@ function graph5(csvpath, color, location, w, h) {
       .attr("text-anchor", "end")
       .text(function(d) { return d; });
 });
-
-function type(d, i, columns) {
-  for (i = 1, t = 0; i < columns.length; ++i) t += d[columns[i]] = +d[columns[i]];
-  d.total = t;
-  return d;
-}
 
 };

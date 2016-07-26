@@ -74,7 +74,7 @@ function graph2(csvpath, color, location, w, h) {
   .y(function(d) { return y2(d.total); })
   .curve(d3.curveLinear);
 
-  d3.tsv("annetused.txt", function(error, data) {
+  d3.tsv(csvpath, function(error, data) {
 
     var date = "date",
         sum  = "sum",

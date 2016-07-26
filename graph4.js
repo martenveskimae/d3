@@ -59,7 +59,7 @@ function graph4(csvpath, color, location, w, h) {
   .y(function(d) { return y(d.total); })
   .curve(d3.curveMonotoneX);
 
-  d3.tsv("annetused.txt", function(error, data) {
+  d3.tsv(csvpath, function(error, data) {
 
     var date = "date",
         sum  = "sum",
@@ -82,7 +82,7 @@ function graph4(csvpath, color, location, w, h) {
       nodesData = [];
       nestData = [];
 
-      data = initialData.filter(function(d) { return d.sum > 0; }).sort(function(a, b){ return a.date - b.date; });
+      data = initialData.filter(function(d) { return d.sum > 0; });
 
       x.domain(d3.extent(data, function(d) { return d.date; }));
 
