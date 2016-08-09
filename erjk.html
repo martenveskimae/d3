@@ -9,7 +9,7 @@
       background: #ededed;
       margin: 0;
       font-size: 12px;
-      font-family: 'San Francisco', Helvetica, Arial, sans-serif;
+      font-family: "San Francisco", Helvetica, Arial, sans-serif;
     }
     .graphTitle {
       font-size: 14px;
@@ -35,7 +35,7 @@
     }
     #axis {
       font-size: 13px;
-      font-family: 'San Francisco', Helvetica, Arial, sans-serif;
+      font-family: "San Francisco", Helvetica, Arial, sans-serif;
     }
     #container {
       top: 30px;
@@ -77,6 +77,8 @@
   <script src="graph5.js"></script>
   <script src="graph6.js"></script>
   <script src="graph7.js"></script>
+  <script src="graph8.js"></script>
+  <script src="graph9.js"></script>
 
   <div id="container">
     <span class="graph1"></span>
@@ -105,13 +107,15 @@
     datearray = []; 
     colorrange = [];
 
-    graph1("annetused.txt", "party", "graph1", 500, 200);
-    graph3("annetused.txt", "party", "graph1", 500, 200);
-    graph4("annetused.txt", "party", "graph1", 500, 200);
+    graph1("annetused.txt", "party", "graph1", 1000, 200);
+    graph3("annetused.txt", "party", "graph1", 1000, 200);
+    graph4("annetused.txt", "party", "graph1", 1000, 200);
     graph5("2015_tulud.txt", "blue", "graph1", 500, 200);
+    graph8("2015_tulud.txt", "blue", "graph1", 500, 200);
     graph6("2015_kulud2.txt", "blue", "graph1", 500, 200);
+    graph9("2015_kulud2.txt", "blue", "graph1", 500, 200);
     graph7("2015_tulud-kulud.txt", "blue", "graph1", 500, 200);
-    //graph2("annetused.txt", "party", "graph2", 1000, 180);
+    graph2("annetused.txt", "party", "graph2", 1000, 180);
 
   </script>
 </body>
