@@ -173,13 +173,16 @@
     .style("fill", "none")
     .style("stroke", "black")
     .style("pointer-events", "all")
-    .on("click", function(d) {
+    .on("click", click);
+
+    function click() {
+      d3.selectAll("*").interrupt();
       var coords = d3.mouse(this),
       newData= {x: x.invert(coords[0]),y: y.invert(coords[1])};
 
       data.push(newData);
       update();
-    });
+    };
 
     function update(){
 
