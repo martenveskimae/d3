@@ -81,7 +81,7 @@
     .range([height, 0])
     .domain([-5, 5]),
     t = d3.transition()
-    .duration(1000)
+    .duration(200)
     .ease(d3.easeLinear),
     f = d3.format(".3f");
 
@@ -174,16 +174,14 @@
     .style("fill", "none")
     .style("stroke", "black")
     .style("pointer-events", "all")
-    .on("click", click);
-
-    function click() {
+    .on("click", function() {
       d3.selectAll("*").interrupt();
       var coords = d3.mouse(this),
       newData= {x: x.invert(coords[0]),y: y.invert(coords[1])};
 
       data.push(newData);
       update();
-    };
+    });
 
     function update(){
 
@@ -350,11 +348,6 @@
         var mn = d3.mean(dataSet);
         var varp = dataSet.map(function(d) { return Math.pow(d - mn, 2); });
         return d3.sum(varp) / (dataSet.length-1);
-      };
-
-      function seMean(xPos) {
-        var seMean1 = s / Math.sqrt(n) * Math.sqrt(1 + (Math.pow(xPos - meanX, 2) / variance(invertedxSeries)));
-        return seMean1;
       };
 
       invertedxSeries = xSeries.map(function(d) { return x.invert(d); }),
@@ -609,7 +602,7 @@
     function tableStats(){
 
       d3.select(".slope")
-      .text(function(d) {
+      .text(function() {
         if (pValueSlope > 0.05) { return f(0-slope); }
         else if (pValueSlope > 0.01 && pValueSlope <= 0.05) { return f(0-slope) + "*"; }
         else if (pValueSlope > 0.001 && pValueSlope <= 0.01) { return f(0-slope) + "**"; }
@@ -617,7 +610,7 @@
       });
 
       d3.select(".intercept")
-      .text(function(d) {
+      .text(function() {
         if (pValueIntercept > 0.05) { return f(interceptLoc); }
         else if (pValueIntercept > 0.01 && pValueIntercept <= 0.05) { return f(interceptLoc) + "*"; }
         else if (pValueIntercept > 0.001 && pValueIntercept <= 0.01) { return f(interceptLoc) + "**"; }
@@ -625,13 +618,13 @@
       });
 
       d3.select(".interceptD")
-      .text(function(d){
+      .text(function(){
         if (data.length < 3) { return ""; }
         else { return "(" + f(seIntercept) + ")"; }
       });
 
       d3.select(".slopeD")
-      .text(function(d){
+      .text(function(){
         if (data.length < 3) { return ""; }
         else { return "(" + f(seSlope) + ")"; }
       });
