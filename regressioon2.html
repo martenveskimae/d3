@@ -35,6 +35,7 @@
       background-color: null;
       border: none;
       color: white;
+      width: 120px;
       padding: 12px 25px;
       border-radius: 5px;
       text-align: center;
@@ -46,26 +47,26 @@
       background-color: #666666;
     }
     .chart {
-      float: left;
+      text-align: center;
+      margin-top: 10px;
+      margin-left: 50px;
       position: relative;
-    }
-    .table {
-      margin-top: 250px;
-      margin-left: 100px;
       float: left;
     }
-    .rndData {
-      position: absolute;
-      float: left;
-      margin-top: 500px;
-      margin-left: -14%;
+    .table2 {
+      padding-top: 7cm;
+      text-align: center;
     }
   </style>
 </head>
 <body>
   <div class="chart"><p class="title">Click or tap on the graph</p></div>
-  <div class="table"></div>
-  <button class="rndData" onclick="random()">Randomize</button>
+  <div class="table2">
+    <div class="table"></div>
+    <button class="buttons" onclick="random()">Randomize</button>
+    <button onclick="restart()">Clear</button>
+  </div>
+
   <script type="text/javascript">
 
     var margin = {top: 10, right: 10, bottom: 10, left: 10},
@@ -94,19 +95,13 @@
     .attr("height", height + margin.top + margin.bottom)
     g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    g.append("rect")
-    .attr("width", width)
-    .attr("height", height)
-    .style("fill", "#ffffff")
-    .style("stroke", "black");
+    Axis();
 
     g.append("clipPath")
     .attr("id", "box")
     .append("rect")
     .attr("width", width)
     .attr("height", height);
-
-    Axis();
 
     g.selectAll(".circles")
     .data(data)
@@ -116,6 +111,7 @@
     .attr("r",3)
     .style("stroke","black")
     .style("fill", "none")
+    .attr("clip-path", "url(#box)")
     .attr("cx", function(d) { return x(d.x);})
     .attr("cy", function(d) { return y(d.y);});
 
@@ -144,6 +140,7 @@
     g.append("line")
     .attr("class", "helperH")
     .attr("stroke", "#DC143C")
+    .attr("clip-path", "url(#box)")
     .attr("stroke-width", 1.2)
     .style("stroke-dasharray", (3, 3));
 
@@ -158,6 +155,7 @@
     g.append("line")
     .attr("class", "helperV")
     .attr("stroke", "#DC143C")
+    .attr("clip-path", "url(#box)")
     .attr("stroke-width", 1.2)
     .style("stroke-dasharray", (3, 3));
 
@@ -166,7 +164,13 @@
     .style("fill", "#DC143C")
     .style("text-anchor", "start");
 
-    g.on("click", function(d) {
+    g.append("rect")
+    .attr("width", width)
+    .attr("height", height)
+    .style("fill", "none")
+    .style("stroke", "black")
+    .style("pointer-events", "all")
+    .on("click", function(d) {
       var coords = d3.mouse(this),
       newData= {x: x.invert(coords[0]),y: y.invert(coords[1])};
 
@@ -182,6 +186,7 @@
       leastSquares();
 
       var hLoc = x(1) * slope + intercept + 13,
+      vLoc = x(1.5) * slope + intercept,
       xtextLoc = width - 110,
       ytextLoc = xtextLoc * slope + intercept - 30,
       sign = " + ";
@@ -193,6 +198,10 @@
       if (slope > 0) { sign = " - " };
       if (ytextLoc > height - 30) { ytextLoc = height - 30 };
       if (ytextLoc < 30) { ytextLoc = 30 };
+      if (hLoc > height - 30) { hLoc = height - 30 };
+      if (hLoc < 30) { hLoc = 30 };
+      if (vLoc > height - 30) { vLoc = height - 30 };
+      if (vLoc < 30) { vLoc = 30 };
 
       g.selectAll(".circles")
       .data(data)
@@ -207,6 +216,7 @@
       .append("circle")
       .attr("class", "circles")
       .attr("r",3)
+      .attr("clip-path", "url(#box)")
       .style("stroke","black")
       .style("fill", "none")
       .attr("cx", function(d){ return x(d.x); })
@@ -232,6 +242,7 @@
       .append("line")
       .attr("class", "lines")
       .attr("stroke", "black")
+      .attr("clip-path", "url(#box)")
       .attr("x1", function(d){ return x(d.x) ; })
       .attr("y1", function(d){ return y(d.y) ; })
       .attr("x2", function(d){ return x(d.x) ; })
@@ -288,7 +299,7 @@
       g.select(".helperTextV")
       .transition(t)
       .attr("x", x(2)+13)
-      .attr("y", x(1.5)*slope + intercept)
+      .attr("y", vLoc)
       .text("y =" + sign + Math.abs(f(0-slope)));
 
       g.select(".eq-text")
@@ -377,7 +388,7 @@
       upper.length = 0;
       lower.length = 0;
 
-      for (i=-5; i<=5; i++){
+      for (i=-5; i<=5.1; i+=.2){
         upper.push({ x: i, y: upperConfLimit(i) });
         lower.push({ x: i, y: lowerConfLimit(i) });
       };
@@ -470,6 +481,12 @@
 
         data.push({x: randomX, y: randomY});
       }
+      update();
+    };
+
+    function restart() {
+      data.length = 0;
+      data.push({x: 1, y: 1}, {x: 0, y: 0});
       update();
     };
 
