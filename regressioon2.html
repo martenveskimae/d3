@@ -79,7 +79,9 @@
     y = d3.scaleLinear()
     .range([height, 0])
     .domain([-5, 5]),
-    t = d3.transition().duration(200),
+    t = d3.transition()
+    .duration(1000)
+    .ease(d3.easeLinear),
     f = d3.format(".3f");
 
     var line = d3.line()
@@ -206,7 +208,7 @@
 
       g.selectAll(".circles")
       .data(data)
-      .transition(t)
+      .transition()
       .delay(function(d, i) { return i * 5; })
       .attr("cx", function(d){ return x(d.x); })
       .attr("cy", function(d){ return y(d.y); });
@@ -619,10 +621,16 @@
       });
 
       d3.select(".interceptD")
-      .text("(" + f(seIntercept) + ")");
+      .text(function(d){
+        if (data.length < 3) { return ""; }
+        else { return "(" + f(seIntercept) + ")"; }
+      });
 
       d3.select(".slopeD")
-      .text("(" + f(seSlope) + ")");
+      .text(function(d){
+        if (data.length < 3) { return ""; }
+        else { return "(" + f(seSlope) + ")"; }
+      });
 
       d3.select(".num")
       .text(data.length);
