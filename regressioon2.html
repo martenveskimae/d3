@@ -141,24 +141,27 @@ var svg = d3.select(".chart").append("svg")
 
   svg.append("line")
     .attr("class", "helperH")
-    .attr("stroke", "black")
+    .attr("stroke", "#DC143C")
     .attr("stroke-width", 1.2)
     .style("stroke-dasharray", (3, 3));
 
   svg.append("text")
-    .attr("class", "helperTextH");
+    .attr("class", "helperTextH")
+    .style("fill", "#DC143C");
 
   svg.append("text")
-    .attr("class", "helperTextV");
+    .attr("class", "helperTextV")
+    .style("fill", "#DC143C");
 
   svg.append("line")
     .attr("class", "helperV")
-    .attr("stroke", "black")
+    .attr("stroke", "#DC143C")
     .attr("stroke-width", 1.2)
     .style("stroke-dasharray", (3, 3));
 
   var eqText = svg.append("text")
     .attr("id", "eq-text")
+    .style("fill", "#DC143C")
     .style("text-anchor", "start");
    
   svg.on("click",addCircle);
@@ -362,6 +365,21 @@ function leastSquares(xSeries, ySeries) {
     lower3 = [0];
 
     var reduceSumFunc = function(prev, cur) { return prev + cur; };
+    
+    var xBar = xSeries.reduce(reduceSumFunc) * 1.0 / xSeries.length;
+    var yBar = ySeries.reduce(reduceSumFunc) * 1.0 / ySeries.length;
+
+    var ssXX = xSeries.map(function(d) { return Math.pow(d - xBar, 2); })
+      .reduce(reduceSumFunc);
+    
+    var ssYY = ySeries.map(function(d) { return Math.pow(d - yBar, 2); })
+      .reduce(reduceSumFunc);
+      
+    var ssXY = xSeries.map(function(d, i) { return (d - xBar) * (ySeries[i] - yBar); })
+      .reduce(reduceSumFunc);
+  
+
+    ////////////////////////////////////////////////
 
     function stdDevPopulation(dataSet) {
       var mn = d3.mean(dataSet);
@@ -386,29 +404,71 @@ function leastSquares(xSeries, ySeries) {
       return seMean1;
     };
 
-    var invertedxSeries = xSeries.map(function(d) { return x.invert(d); }),
+        invertedxSeries = xSeries.map(function(d) { return x.invert(d); }),
         invertedySeries = ySeries.map(function(d) { return y.invert(d); }),
-        n = data.length-1;
-    
-    var xBar = xSeries.reduce(reduceSumFunc) * 1.0 / xSeries.length;
-    var yBar = ySeries.reduce(reduceSumFunc) * 1.0 / ySeries.length;
+        n = data.length,
+        meanY = d3.mean(invertedySeries),
+        stddevY = stdDevSample(invertedySeries),
+        meanX = d3.mean(invertedxSeries),
+        stddevX = stdDevSample(invertedxSeries),
+        ///////////////////////////////////////
+        rSquare = Math.pow(ssXY, 2) / (ssXX * ssYY),
+        correlation = Math.sqrt(rSquare),
+        AdjRSquared = 1 - ((n - 1) / (n - 2)) * (1 - rSquare),
+        seReg = Math.sqrt(1 - AdjRSquared) * stddevY,
+        ///////////////////////////////////////
+        slope = ssXY / ssXX,
+        seSlope = seReg / Math.sqrt(n) * (1 / stdDevPopulation(invertedxSeries)),
+        tStatSlope = (0 - slope) / seSlope,
+        pValueSlope = 2 * (1 - tFunction((n-2), Math.abs(tStatSlope))),
+        intercept = yBar - (xBar * slope),
+        seIntercept = seReg / Math.sqrt(n) * Math.sqrt( 1 + Math.pow(meanX, 2) / variance(invertedxSeries)),
+        tStatIntercept = y.invert((width/2)*slope + intercept) / seIntercept,
+        pValueIntercept = 2 * (1 - tFunction((n-2), Math.abs(tStatIntercept))),
 
-    var ssXX = xSeries.map(function(d) { return Math.pow(d - xBar, 2); })
-      .reduce(reduceSumFunc);
-    
-    var ssYY = ySeries.map(function(d) { return Math.pow(d - yBar, 2); })
-      .reduce(reduceSumFunc);
-      
-    var ssXY = xSeries.map(function(d, i) { return (d - xBar) * (ySeries[i] - yBar); })
-      .reduce(reduceSumFunc);
-      
-    var slope = ssXY / ssXX;
-    var intercept = yBar - (xBar * slope);
-    var rSquare = Math.pow(ssXY, 2) / (ssXX * ssYY);
+        //p = 2 ∗ (1 − T (df, |t|))
+        ///////////////////////////////////////
+        confLevel = 0.95,
+        criticalTValue = function(df) {
+          if (n < 6) { return "Too few data"; }
+          else { return tdistr((n - 2), (1 - confLevel)) };
+        },
+        ///////////////////////////////////////
+        forecastX = function(xLoc) { return y.invert(x(xLoc) * slope + intercept); },
+        seMeanAtX = function(xLoc) { return seReg / Math.sqrt(n) * Math.sqrt(1 + Math.pow(xLoc - meanX, 2) / variance(invertedxSeries)); },
+        lowerConfLimit = function(xLoc) { return forecastX(xLoc) - (criticalTValue() * seMeanAtX(xLoc)) },
+        upperConfLimit = function(xLoc) { return forecastX(xLoc) + (criticalTValue() * seMeanAtX(xLoc)) },
+        ///////////////////////////////////////
+        l1 = lowerConfLimit(-5),
+        l2 = lowerConfLimit(0),
+        l3 = lowerConfLimit(5),
+        u1 = upperConfLimit(-5),
+        u2 = upperConfLimit(0),
+        u3 = upperConfLimit(5);
 
-    var meanX = d3.mean(invertedxSeries),
-        meanY = d3.mean(invertedySeries);
+    console.log(data,
+                "n: " + n,
+                "mean of Y: " + meanY,
+                "stddev of Y: " + stddevY,
+                "mean of X: " + meanX,
+                "stddev of X: " + stddevX,
+                "correlation: " + correlation,
+                "r squared: " + rSquare,
+                "adj r squared: " + AdjRSquared,
+                "se of regression: " + seReg,
+                "slope: " + (0-slope),
+                "se of slope: " + seSlope,
+                "t-stat of slope: " + tStatSlope,
+                "p-value of slope: " + pValueSlope,
+                "intercept: " + y.invert((width/2)*slope + intercept),
+                "se of intercept: " + seIntercept,
+                "t-stat of intercept: " + tStatIntercept,
+                "p-value of intercept: " + pValueIntercept);
 
+    upper3 =  [{ y:u1, x:-5 }, { y:u2, x:0 }, { y:u3, x:5 }];
+    lower3 =  [{ y:l1, x:-5 }, { y:l2, x:0 }, { y:l3, x:5 }];
+
+    /*
     var RSS = xSeries.map(function(d,i) { return Math.pow(y.invert(ySeries[i]) - y.invert(d * slope + intercept), 2); });
         //ESS = xSeries.map(function(d,i) { return Math.pow(y.invert(d * slope + intercept) - meanY, 2); });
         //errors = xSeries.map(function(d,i) { return y.invert(ySeries[i]) - y.invert(d * slope + intercept); });
@@ -423,16 +483,7 @@ function leastSquares(xSeries, ySeries) {
       if (n<6) { return "Too few data"; }
       else { return tdistr(n-2, 0.005) };
     };
-
-    var u1 = y.invert(x(-5) * slope + intercept) + (seMean(-5) * tValue()),
-        u2 = y.invert(x(0) * slope + intercept) + (seMean(0) * tValue()),
-        u3 = y.invert(x(5) * slope + intercept) + (seMean(5) * tValue()),
-        l1 = y.invert(x(-5) * slope + intercept) - (seMean(-5) * tValue()),
-        l2 = y.invert(x(0) * slope + intercept) - (seMean(0) * tValue()),
-        l3 = y.invert(x(5) * slope + intercept) - (seMean(5) * tValue());
-
-    upper3 =  [{ y:u1, x:-5 }, { y:u2, x:0 }, { y:u3, x:5 }];
-    lower3 =  [{ y:l1, x:-5 }, { y:l2, x:0 }, { y:l3, x:5 }];
+    */
     
     return [slope, intercept, rSquare];
 };
@@ -564,10 +615,20 @@ svg.append("text")
 function tableStats(intercept, slope, R){
 
 d3.selectAll(".slope")
-  .text(f(slope));
+  .text(function(d) {
+    if (pValueSlope > 0.05) { return f(slope); }
+    else if (pValueSlope > 0.01 && pValueSlope <= 0.05) { return f(slope) + "*"; }
+    else if (pValueSlope > 0.001 && pValueSlope <= 0.01) { return f(slope) + "**"; }
+    else if (pValueSlope <= 0.001) { return f(slope) + "***"; }
+  });
 
 d3.selectAll(".intercept")
-  .text(f(intercept));
+  .text(function(d) {
+    if (pValueIntercept > 0.05) { return f(intercept); }
+    else if (pValueIntercept > 0.01 && pValueIntercept <= 0.05) { return f(intercept) + "*"; }
+    else if (pValueIntercept > 0.001 && pValueIntercept <= 0.01) { return f(intercept) + "**"; }
+    else if (pValueIntercept <= 0.001) { return f(intercept) + "***"; }
+  });
 
 d3.selectAll(".interceptD")
   .text("(" + f(seIntercept) + ")");
