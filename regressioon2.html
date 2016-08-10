@@ -73,6 +73,7 @@
     <select onchange="preset(this.value)">
       <option selected="true" selected disabled="disabled" hidden style="display:none;" value="">Select preset</option>
       <option value="1">sin(x)</option>
+      <option value="5">tan(x)</option>
       <option value="3">exp(x)</option>
       <option value="4">sqrt(x)</option>
       <option value="2">split</option>
@@ -179,8 +180,8 @@
     .style("text-anchor", "start");
 
     g.append("rect")
-    .attr("width", width)
-    .attr("height", height)
+    .attr("width", width+1)
+    .attr("height", height+1)
     .style("fill", "none")
     .style("stroke", "black")
     .style("pointer-events", "all")
@@ -519,6 +520,10 @@
         for (i=0 ;i<5; i+=.1) {
           data.push({x: i, y: Math.sqrt(i) });
         };
+      } else if (value == 5) {
+        for (i=-4 ;i<4.1; i+=.2) {
+          data.push({x: i, y: Math.tan(i) });
+        };
       };
       update();
     };
@@ -609,7 +614,7 @@
       .attr("y", 150)
       .attr("id", "table")
       .attr("text-anchor", "end")
-      .text("r-sqr");
+      .text("R²");
 
       rg.append("text")
       .attr("x", w/2+20)
