@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Kattuvus</title>
+<style>
+    body {
+      background: #ededed;
+      margin: 0;
+      font-size: 12px;
+      font-family: "San Francisco", Helvetica, Arial, sans-serif;
+    }
+    .container {
+      margin-left: 400px;
+    }
+    #tooltip {
+        color: white;
+        opacity: .9;
+        background: #333;
+        padding: 5px;
+        border: 1px solid lightgrey;
+        border-radius: 5px;
+        position: absolute;
+        z-index: 10;
+        visibility: hidden;
+        white-space: nowrap;
+        pointer-events: none;
+      }
+
+.background {
+  fill: #eee;
+}
+
+line {
+  stroke: #fff;
+}
+
+text.active {
+  fill: red;
+}
+
+</style>
+<script src="https://d3js.org/d3.v3.min.js"></script>
+<script src="cubehelix.js"></script>
+
+<p>Order: <select id="order">
+  <option value="name">by Name</option>
+  <option value="count">by Frequency</option>
+  <option value="group">by Cluster</option>
+</select>
+
+  <div class="container"></div>
+  <div id="tooltip"></div>
+
+<script>
+
+var margin = {top: 380, right: 0, bottom: 10, left: 380},
+    width = 750,
+    height = 750;
+
+var m = 200,
+    nr = 65;
+
+var x = d3.scale.ordinal().rangeBands([0, width]),
+    z = d3.scale.linear().domain([0, 4]).clamp(true),
+    c = d3.scale.cubehelix()
+    .domain([0, 1])
+    .range([d3.hsl(96, .6, 1), d3.hsl(276, .6, 0)])
+    .clamp(true),
+    f = d3.format(".0%");
+
+var svg = d3.select(".container").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .style("margin-left", -margin.left + "px")
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+d3.tsv("matrix.txt", function(data) {
+  matrix = new Array,
+  nodes = new Array;
+
+  data.forEach(function(d,i) {
+    nodes.push({ name: d.Õppekava, group: d.Instituut, lvl: d.Õppeaste, coursesNr: +d.Aineid });
+  })
+
+  n = nodes.length;
+
+  nodes.forEach(function(node, i) {
+    node.index = i;
+    node.count = 0;
+    matrix[i] = d3.range(n).map(function(j) { return {x: j, y: i, z: 0}; });
+  });
+
+  d3.tsv("links.txt", function(error, links) {
+
+    links.forEach(function(d) {
+      matrix[d.source-1][d.target-1].z = +d.value / nodes[d.source-1].coursesNr;
+      nodes[d.source-1].count += +d.value;
+    });
+
+  // Precompute the orders.
+  var orders = {
+    name: d3.range(n).sort(function(a, b) { return d3.ascending(nodes[a].name, nodes[b].name); }),
+    count: d3.range(n).sort(function(a, b) { return nodes[b].count - nodes[a].count; }),
+    group: d3.range(n).sort(function(a, b) { return nodes[b].group - nodes[a].group; })
+  };
+
+  // The default sort order.
+  x.domain(orders.group);
+
+  svg.append("rect")
+      .attr("class", "background")
+      .attr("width", width)
+      .attr("height", height);
+
+  var row = svg.selectAll(".row")
+      .data(matrix)
+    .enter().append("g")
+      .attr("class", "row")
+      .attr("transform", function(d, i) { return "translate(0," + x(i) + ")"; })
+      .each(function(d) {
+        var cell = d3.select(this).selectAll(".cell")
+            .data(d.filter(function(d) { return d.z; }))
+            .enter().append("rect")
+            .attr("class", "cell")
+            .attr("x", function(d) { return x(d.x); })
+            .attr("width", x.rangeBand())
+            .attr("height", x.rangeBand())
+            .style("fill", function(d) { return c(d.z); })
+            .on("mouseover", mouseover)
+            .on("mouseout", mouseout);
+      });
+
+  row.append("line")
+      .attr("x2", width);
+
+  row.append("text")
+      .attr("x", -6)
+      .attr("y", x.rangeBand() / 2)
+      .attr("dy", ".32em")
+      .attr("text-anchor", "end")
+      .text(function(d, i) { return nodes[i].name + " " + nodes[i].lvl; });
+
+  var column = svg.selectAll(".column")
+      .data(matrix)
+    .enter().append("g")
+      .attr("class", "column")
+      .attr("transform", function(d, i) { return "translate(" + x(i) + ")rotate(-90)"; });
+
+  column.append("line")
+      .attr("x1", -width);
+
+  column.append("text")
+      .attr("x", 6)
+      .attr("y", x.rangeBand() / 2)
+      .attr("dy", ".32em")
+      .attr("text-anchor", "start")
+      .text(function(d, i) { return nodes[i].name + " " + nodes[i].lvl; });
+      
+
+  function mouseover(p) {
+    d3.selectAll(".row text").classed("active", function(d, i) { return i == p.y; });
+    d3.selectAll(".column text").classed("active", function(d, i) { return i == p.x; });
+    d3.select("#tooltip")
+    .style("visibility", "visible")
+    .html("<table><tr><td>" + nodes[p.y].name + "</td><td>➜</td><td>" + nodes[p.x].name + "</td></tr><td>" +
+          nodes[p.y].lvl + "</td><td></td><td>" + nodes[p.x].lvl + "</td></tr><td>" +
+          nodes[p.y].group + "</td><td></td><td>" + nodes[p.x].group + "</td></tr><td>" +
+          f(p.z) + "</td><td></td><td></td></tr></table>" )
+    .style("top", function () { return (d3.event.pageY - 50)+"px"})
+    .style("left", function () { return (d3.event.pageX - 30)+"px";})
+  }
+
+  function mouseout() {
+    d3.selectAll("text").classed("active", false);
+    d3.select("#tooltip")
+    .style("visibility", "hidden")
+  }
+
+  d3.select("#order").on("change", function() {
+    clearTimeout(timeout);
+    order(this.value);
+  });
+
+  function order(value) {
+    x.domain(orders[value]);
+
+    var t = svg.transition().duration(2000);
+
+    t.selectAll(".row")
+        .delay(function(d, i) { return x(i) * 4; })
+        .attr("transform", function(d, i) { return "translate(0," + x(i) + ")"; })
+      .selectAll(".cell")
+        .delay(function(d) { return x(d.x) * 4; })
+        .attr("x", function(d) { return x(d.x); });
+
+    t.selectAll(".column")
+        .delay(function(d, i) { return x(i) * 4; })
+        .attr("transform", function(d, i) { return "translate(" + x(i) + ")rotate(-90)"; });
+  }
+
+
+  var timeout = setTimeout(function() {
+    order("group");
+    d3.select("#order").property("selectedIndex", 2).node().focus();
+  }, 0);
+
+});
+});
+
+</script>
+
+
