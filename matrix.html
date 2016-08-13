@@ -12,8 +12,7 @@
     margin-left: 400px;
     position: relative;
   }
-  #tooltip {
-    width: 740px;
+  #tooltip2 {
     left: 400px;
 
     position: fixed;
@@ -26,18 +25,45 @@
     border-radius: 5px;
     z-index: 10;
     visibility: hidden;
-    white-space: nowrap;
     pointer-events: none;
+  }
+  #tooltip {
+        color: white;
+        opacity: .95;
+        background: #333;
+        padding: 5px;
+        border: 1px solid lightgrey;
+        border-radius: 5px;
+        position: absolute;
+        z-index: 10;
+        visibility: hidden;
+        pointer-events: none;
   }
   .tipper {
     position: relative;
-    width: 600px;
-    table-layout: fixed;
     margin: auto;
+    table-layout: fixed;
   }
-  .arrow {
-    text-align: center;
-    font-size: 20;
+  .topRow {
+    font-weight: bold;
+  } 
+  .leftColumn {
+    vertical-align: top;
+    padding-left: 50px;
+    text-align: right;
+    font-weight: bold;
+  }
+  .middleColumn {
+    vertical-align: top;
+    width: 220px;
+    text-align: left;
+    word-wrap: break-word;
+  }
+  .rightColumn {
+    vertical-align: top;
+    width: 220px;
+    text-align: left;
+    word-wrap: break-word;
   }
   .background {
     fill: #eee;
@@ -49,33 +75,59 @@
     fill: red;
   }
 </style>
-<script src="https://d3js.org/d3.v3.min.js"></script>
+<script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="cubehelix.js"></script>
 <div id="tooltip"></div>
 <div class="container">
   <p>Järjesta: <select id="order">
     <option value="name">nime järgi</option>
-    <option value="count">kattuvuse järgi</option>
+    <option value="id">koodi järgi</option>
     <option value="group">instituudi järgi</option>
+    <option value="count">kattuvuse järgi</option>
   </select>
-
 </div>
 
 <script>
+/*
+  <select id="abs">
+    <option value="z">protsent</option>
+    <option value="z2">absoluutväärtus</option>
+  </select>
 
-  var margin = {top: 50, right: 0, bottom: 10, left: 380},
+  var e = document.getElementById("abs");
+      g = e.options[e.selectedIndex].value;
+
+      d3.select("#abs").on("change", function() {
+        var domenis = matrix.map(function(d){ return parseFloat(d.z2); }),
+            t = d3.transition().duration(2000);
+
+        c.domain([0, d3.max(links.map(function(d){ return +d.value; }))]);
+
+        t.selectAll(".row")
+        .delay(function(d, i) { return x(i) * 4; })
+        .attr("transform", function(d, i) { return "translate(0," + x(i) + ")"; })
+        .selectAll(".cell")
+        .delay(function(d) { return x(d.x) * 4; })
+        .attr("x", function(d) { return x(d.x); })
+        .style("fill", function(d) { return c(d.z2); });
+
+        t.selectAll(".column")
+        .delay(function(d, i) { return x(i) * 4; })
+        .attr("transform", function(d, i) { return "translate(" + x(i) + ")rotate(-90)"; });
+
+  });
+*/
+  var margin = {top: 50, right: 80, bottom: 10, left: 380},
   width = 750,
   height = 750;
 
-  var m = 200,
-  nr = 65;
-
-  var x = d3.scale.ordinal().rangeBands([0, width]),
-  z = d3.scale.linear().domain([0, 4]).clamp(true),
-  c = d3.scale.cubehelix()
-  .domain([0, 1])
-  .range([d3.hsl(96, .6, 1), d3.hsl(276, .6, 0)])
-  .clamp(true),
+  var x = d3.scaleBand().range([0, width]),
+  z = d3.scaleLinear().domain([0, 4]).clamp(true),
+  c = d3.scaleLinear()
+      .domain([0, 1])
+      .range([d3.hsl(96, .6, 1), d3.hsl(276, .6, 0)])
+      .interpolate(d3.interpolateCubehelix)
+      .clamp(true),
   f = d3.format(".0%");
 
   var svg = d3.select(".container").append("svg")
@@ -98,18 +150,20 @@
     nodes.forEach(function(node, i) {
       node.index = i;
       node.count = 0;
-      matrix[i] = d3.range(n).map(function(j) { return {x: j, y: i, z: 0}; });
+      matrix[i] = d3.range(n).map(function(j) { return {x: j, y: i, z: 0, z2: 0}; });
     });
 
     d3.tsv("links.txt", function(error, links) {
 
       links.forEach(function(d) {
         matrix[d.source-1][d.target-1].z = +d.value / nodes[d.source-1].coursesNr;
+        matrix[d.source-1][d.target-1].z2 = +d.value;
         nodes[d.source-1].count += +d.value / nodes[d.source-1].coursesNr;
       });
 
       var orders = {
         name: d3.range(n).sort(function(a, b) { return d3.ascending(nodes[a].name, nodes[b].name); }),
+        id: d3.range(n).sort(function(a, b) { return nodes[b].id - nodes[a].id; }),
         count: d3.range(n).sort(function(a, b) { return nodes[b].count - nodes[a].count; }),
         group: d3.range(n).sort(function(a, b) { return d3.ascending(nodes[a].group, nodes[b].group); })
       };
@@ -126,25 +180,28 @@
       .enter().append("g")
       .attr("class", "row")
       .attr("transform", function(d, i) { return "translate(0," + x(i) + ")"; })
-      .each(function(d) {
+      .each(row);
+
+
+      function row(d) {
         var cell = d3.select(this).selectAll(".cell")
         .data(d.filter(function(d) { return d.z; }))
         .enter().append("rect")
         .attr("class", "cell")
         .attr("x", function(d) { return x(d.x); })
-        .attr("width", x.rangeBand())
-        .attr("height", x.rangeBand())
+        .attr("width", x.bandwidth())
+        .attr("height", x.bandwidth())
         .style("fill", function(d) { return c(d.z); })
         .on("mouseover", mouseover)
         .on("mouseout", mouseout);
-      });
+      };
 
       row.append("line")
       .attr("x2", width);
 
       row.append("text")
       .attr("x", -6)
-      .attr("y", x.rangeBand() / 2)
+      .attr("y", x.bandwidth() / 2)
       .attr("dy", ".32em")
       .attr("text-anchor", "end")
       .text(function(d, i) { return nodes[i].name + " " + nodes[i].lvl; });
@@ -160,10 +217,29 @@
 
       column.append("text")
       .attr("x", 6)
-      .attr("y", x.rangeBand() / 2)
+      .attr("y", x.bandwidth() / 2)
       .attr("dy", ".32em")
       .attr("text-anchor", "start")
       .text(function(d, i) { return nodes[i].id; });
+
+      var legendSize = svg.selectAll(".legendSize")
+      .data(([0, .2, .4, .6, .8, 1]).reverse())
+      .enter()
+      .append("g")
+      .attr("class", "legend")
+      .attr("transform", function(d, i) { return "translate(" + (width + 20) + "," + i * 17 +")"; });
+
+      legendSize.append("rect")
+      .attr("id", function (d,i) { return "size "+i; })
+      .attr("width", 11)
+      .attr("height", 11)
+      .style("fill", function(d) {return c(d); });
+
+      legendSize.append("text")
+      .text(function (d) { return f(d); })
+      .attr("x", 15)
+      .attr("y", 10)
+      .style("text-anchor", "start");
 
 
       function mouseover(p) {
@@ -171,12 +247,13 @@
         d3.selectAll(".column text").classed("active", function(d, i) { return i == p.x; });
         d3.select("#tooltip")
         .style("visibility", "visible")
-        .html("<table class='tipper'><tr><td>" + nodes[p.y].name + "</td><td></td><td>" + nodes[p.x].name + "</td></tr><td>" +
-          nodes[p.y].lvl + "</td><td class='arrow'>➜</td><td>" + nodes[p.x].lvl + "</td></tr><td>" +
-          nodes[p.y].group + "</td><td></td><td>" + nodes[p.x].group + "</td></tr><td>" +
-          f(p.z) + "</td><td></td><td></td></tr></table>" )
-        //.style("top", function () { return (d3.event.pageY - 95)+"px"})
-        //.style("left", function () { return (d3.event.pageX - 20)+"px";})
+        .html("<table class='tipper'><tr class='topRow'><td></td><td>Mis?</td><td>Millega?</td></tr><tr><td class='leftColumn'>Õppekava:</td><td class='middleColumn'>" +
+          nodes[p.y].name + "</td><td class='rightColumn'>" + nodes[p.x].name + "</td></tr><td class='leftColumn'>Õppeaste:</td><td class='middleColumn'>" +
+          nodes[p.y].lvl + "</td><td class='rightColumn'>" + nodes[p.x].lvl + "</td></tr><td class='leftColumn'>Instituut:</td><td class='middleColumn'>" +
+          nodes[p.y].group + "</td><td class='rightColumn'>" + nodes[p.x].group + "</td></tr><td class='leftColumn'>Kattuvus:</td><td class='middleColumn'>" +
+          f(p.z) + " (ained kokku: " + p.z2 + ")</td><td class='rightColumn'></td></tr></table>" )
+        .style("top", function () { return (d3.event.pageY - 130)+"px"})
+        .style("left", function () { return (d3.event.pageX - 270)+"px";})
       }
 
       function mouseout() {
@@ -193,7 +270,7 @@
       function order(value) {
         x.domain(orders[value]);
 
-        var t = svg.transition().duration(2000);
+        var t = d3.transition().duration(2000);
 
         t.selectAll(".row")
         .delay(function(d, i) { return x(i) * 4; })
@@ -206,7 +283,6 @@
         .delay(function(d, i) { return x(i) * 4; })
         .attr("transform", function(d, i) { return "translate(" + x(i) + ")rotate(-90)"; });
       }
-
 
       var timeout = setTimeout(function() {
         order("group");

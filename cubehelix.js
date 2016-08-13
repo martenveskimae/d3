@@ -1,8 +1,8 @@
 (function() {
   var radians = Math.PI / 180;
 
-  d3.scale.cubehelix = function() {
-    return d3.scale.linear()
+  d3.scaleCubehelix = function() {
+    return d3.scaleLinear()
         .range([d3.hsl(300, .5, 0), d3.hsl(-240, .5, 1)])
         .interpolate(d3.interpolateCubehelix);
   };
