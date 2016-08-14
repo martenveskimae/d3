@@ -71,12 +71,12 @@
   <p>Järjesta: <select id="order">
     <option value="name">nime järgi</option>
     <option value="id">koodi järgi</option>
-    <option value="group">instituudi järgi</option>
+    <option value="group" selected="selected">instituudi järgi</option>
     <option value="count">kattuvuse järgi</option>
   </select>
-  <input type="radio" name="dataset" onclick="switchData(this);" value="links.txt" checked="checked">Kõik ained
-  <input type="radio" name="dataset" onclick="switchData(this);" value="links_koh.txt">Kohustuslikud ained
-  </p>
+  <input id="data" type="radio" name="dataset" value="links.txt" checked="checked">Kõik ained
+  <input id="data" type="radio" name="dataset" value="links_koh.txt">Kohustuslikud ained
+</p>
 </div>
 
 <script>
@@ -106,7 +106,7 @@
 
     data.forEach(function(d,i) {
       nodes.push({ name: d.Õppekava, id: d.Kood, group: d.Instituut, lvl: d.Õppeaste });
-    })
+    });
 
     n = nodes.length;
 
@@ -126,13 +126,7 @@
         nodes[d.source].N += +d.N;
       });
 
-      var orders = {
-        name: d3.range(n).sort(function(a, b) { return d3.ascending(nodes[a].name, nodes[b].name); }),
-        id: d3.range(n).sort(function(a, b) { return nodes[b].id - nodes[a].id; }),
-        count: d3.range(n).sort(function(a, b) { return nodes[b].count - nodes[a].count; }),
-        group: d3.range(n).sort(function(a, b) { return d3.ascending(nodes[a].group, nodes[b].group); })
-      };
-
+      calculateOrders();
       x.domain(orders.group);
 
       svg.append("rect")
@@ -145,10 +139,7 @@
       .enter().append("g")
       .attr("class", "row")
       .attr("transform", function(d, i) { return "translate(0," + x(i) + ")"; })
-      .each(row);
-
-
-      function row(d) {
+      .each( function(d) {
         var cell = d3.select(this).selectAll(".cell")
         .data(d.filter(function(d) { return d.z; }))
         .enter().append("rect")
@@ -159,7 +150,7 @@
         .style("fill", function(d) { return c(d.z); })
         .on("mouseover", mouseover)
         .on("mouseout", mouseout);
-      };
+      });
 
       row.append("line")
       .attr("x2", width);
@@ -187,32 +178,78 @@
       .attr("text-anchor", "start")
       .text(function(d, i) { return nodes[i].id; });
 
-      var legendSize = svg.selectAll(".legendSize")
-      .data(([0, .2, .4, .6, .8, 1]).reverse())
-      .enter()
-      .append("g")
-      .attr("class", "legend")
-      .attr("transform", function(d, i) { return "translate(" + (width + 20) + "," + i * 17 +")"; });
-
-      legendSize.append("rect")
-      .attr("id", function (d,i) { return "size "+i; })
-      .attr("width", 11)
-      .attr("height", 11)
-      .style("fill", function(d) {return c(d); });
-
-      legendSize.append("text")
-      .text(function (d) { return f(d); })
-      .attr("x", 15)
-      .attr("y", 10)
-      .style("text-anchor", "start");
-
-
       d3.select("#order").on("change", function() {
-        clearTimeout(timeout);
         order(this.value);
       });
 
+      d3.selectAll("#data").on("click", function() {
+        switchData(this.value);
+      });
+
+      function switchData(dataset) {
+
+        d3.tsv(dataset, function(error, links) {
+
+        nodes.forEach(function(node) { node.count = 0; });
+
+          links.forEach(function(d) {
+            matrix[d.source][d.target].z = +d.value / +d.N;
+            matrix[d.source][d.target].z2 = +d.value;
+            nodes[d.source].count += +d.value / +d.N;
+            nodes[d.source].N += +d.N;
+          });
+
+          calculateOrders();
+          var e = document.getElementById("order");
+          var orderValue = e.options[e.selectedIndex].value;
+          order(orderValue);
+
+          var row = svg.selectAll(".row")
+          .data(matrix)
+          .each(row);
+
+          function row(d) {
+            d3.select(this).selectAll(".cell")
+            .data(d.filter(function(d) { return d.z; }))
+            .transition()
+            .duration(2000)
+            .attr("x", function(d) { return x(d.x); })
+            .style("fill", function(d) { return c(d.z); });
+
+
+            d3.select(this).selectAll(".cell")
+            .data(d.filter(function(d) { return d.z; }))
+            .enter().append("rect")
+            .attr("class", "cell")
+            .attr("x", function(d) { return x(d.x); })
+            .attr("width", x.bandwidth())
+            .attr("height", x.bandwidth())
+            .style("fill", function(d) { return c(d.z); })
+            .on("mouseover", mouseover)
+            .on("mouseout", mouseout);
+
+            d3.select(this).selectAll(".cell")
+            .data(d.filter(function(d) { return d.z; }))
+            .exit()
+            .remove();
+
+          };
+
+        });
+
+      };
+
+      function calculateOrders(){
+        orders = {
+          name: d3.range(n).sort(function(a, b) { return d3.ascending(nodes[a].name, nodes[b].name); }),
+          id: d3.range(n).sort(function(a, b) { return nodes[b].id - nodes[a].id; }),
+          count: d3.range(n).sort(function(a, b) { return nodes[b].count - nodes[a].count; }),
+          group: d3.range(n).sort(function(a, b) { return d3.ascending(nodes[a].group, nodes[b].group); })
+        };
+      }
+
       function order(value) {
+
         x.domain(orders[value]);
 
         var t = d3.transition().duration(2000);
@@ -229,59 +266,27 @@
         .attr("transform", function(d, i) { return "translate(" + x(i) + ")rotate(-90)"; });
       }
 
-      var timeout = setTimeout(function() {
-        order("group");
-        d3.select("#order").property("selectedIndex", 2).node().focus();
-      }, 0);
-
     });
+});
 
-  });
+var legendSize = svg.selectAll(".legendSize")
+.data(([0, .2, .4, .6, .8, 1]).reverse())
+.enter()
+.append("g")
+.attr("class", "legend")
+.attr("transform", function(d, i) { return "translate(" + (width + 20) + "," + i * 17 +")"; });
 
-function switchData(dataset) {
+legendSize.append("rect")
+.attr("id", function (d,i) { return "size "+i; })
+.attr("width", 11)
+.attr("height", 11)
+.style("fill", function(d) {return c(d); });
 
-  d3.tsv(dataset.value, function(error, links) {
-
-    links.forEach(function(d) {
-      matrix[d.source][d.target].z = +d.value / +d.N;
-      matrix[d.source][d.target].z2 = +d.value;
-      nodes[d.source].count += +d.value / +d.N;
-      nodes[d.source].N += +d.N;
-    });
-
-    var row = svg.selectAll(".row")
-    .data(matrix)
-    .each(row);
-
-    function row(d) {
-      d3.select(this).selectAll(".cell")
-      .data(d.filter(function(d) { return d.z; }))
-      .transition()
-      .duration(2000)
-      .attr("x", function(d) { return x(d.x); })
-      .style("fill", function(d) { return c(d.z); });
-
-
-      d3.select(this).selectAll(".cell")
-      .data(d.filter(function(d) { return d.z; }))
-      .enter().append("rect")
-      .attr("class", "cell")
-      .attr("x", function(d) { return x(d.x); })
-      .attr("width", x.bandwidth())
-      .attr("height", x.bandwidth())
-      .style("fill", function(d) { return c(d.z); })
-      .on("mouseover", mouseover)
-      .on("mouseout", mouseout);
-
-      d3.select(this).selectAll(".cell")
-      .data(d.filter(function(d) { return d.z; }))
-      .exit()
-      .remove();
-
-    };
-
-  });
-};
+legendSize.append("text")
+.text(function (d) { return f(d); })
+.attr("x", 15)
+.attr("y", 10)
+.style("text-anchor", "start");
 
 function mouseover(p) {
   d3.selectAll(".row text").classed("active", function(d, i) { return i == p.y; });
