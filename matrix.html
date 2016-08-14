@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<meta charset="utf-16">
+<meta charset="UTF-8">
 <title>Kattuvus</title>
 <style>
   body {
@@ -206,16 +206,13 @@
 
           var row = svg.selectAll(".row")
           .data(matrix)
-          .each(row);
-
-          function row(d) {
+          .each(function (d) {
             d3.select(this).selectAll(".cell")
             .data(d.filter(function(d) { return d.z; }))
             .transition()
             .duration(2000)
             .attr("x", function(d) { return x(d.x); })
             .style("fill", function(d) { return c(d.z); });
-
 
             d3.select(this).selectAll(".cell")
             .data(d.filter(function(d) { return d.z; }))
@@ -232,11 +229,8 @@
             .data(d.filter(function(d) { return d.z; }))
             .exit()
             .remove();
-
-          };
-
+          });
         });
-
       };
 
       function calculateOrders(){
@@ -249,9 +243,7 @@
       }
 
       function order(value) {
-
         x.domain(orders[value]);
-
         var t = d3.transition().duration(2000);
 
         t.selectAll(".row")
@@ -265,48 +257,47 @@
         .delay(function(d, i) { return x(i) * 4; })
         .attr("transform", function(d, i) { return "translate(" + x(i) + ")rotate(-90)"; });
       }
-
     });
-});
+  });
 
-var legendSize = svg.selectAll(".legendSize")
-.data(([0, .2, .4, .6, .8, 1]).reverse())
-.enter()
-.append("g")
-.attr("class", "legend")
-.attr("transform", function(d, i) { return "translate(" + (width + 20) + "," + i * 17 +")"; });
+  var legendSize = svg.selectAll(".legendSize")
+  .data(([0, .2, .4, .6, .8, 1]).reverse())
+  .enter()
+  .append("g")
+  .attr("class", "legend")
+  .attr("transform", function(d, i) { return "translate(" + (width + 20) + "," + i * 17 +")"; });
 
-legendSize.append("rect")
-.attr("id", function (d,i) { return "size "+i; })
-.attr("width", 11)
-.attr("height", 11)
-.style("fill", function(d) {return c(d); });
+  legendSize.append("rect")
+  .attr("id", function (d,i) { return "size "+i; })
+  .attr("width", 11)
+  .attr("height", 11)
+  .style("fill", function(d) {return c(d); });
 
-legendSize.append("text")
-.text(function (d) { return f(d); })
-.attr("x", 15)
-.attr("y", 10)
-.style("text-anchor", "start");
+  legendSize.append("text")
+  .text(function (d) { return f(d); })
+  .attr("x", 15)
+  .attr("y", 10)
+  .style("text-anchor", "start");
 
-function mouseover(p) {
-  d3.selectAll(".row text").classed("active", function(d, i) { return i == p.y; });
-  d3.selectAll(".column text").classed("active", function(d, i) { return i == p.x; });
-  d3.select("#tooltip")
-  .style("visibility", "visible")
-  .html("<table class='tipper'><tr class='topRow'><td></td><td>Mis?</td><td>Millega?</td></tr><tr><td class='leftColumn'>Õppekava:</td><td class='middleColumn'>" +
-    nodes[p.y].name + "</td><td class='rightColumn'>" + nodes[p.x].name + "</td></tr><td class='leftColumn'>Õppeaste:</td><td class='middleColumn'>" +
-    nodes[p.y].lvl + "</td><td class='rightColumn'>" + nodes[p.x].lvl + "</td></tr><td class='leftColumn'>Instituut:</td><td class='middleColumn'>" +
-    nodes[p.y].group + "</td><td class='rightColumn'>" + nodes[p.x].group + "</td></tr><td class='leftColumn'>Kattuvus:</td><td class='middleColumn'>" +
-    f(p.z) + " (kattuvaid aineid: " + p.z2 + ")</td><td class='rightColumn'></td></tr></table>" )
-  .style("top", function () { return (d3.event.pageY - 130)+"px"})
-  .style("left", function () { return (d3.event.pageX - 270)+"px";})
-}
+  function mouseover(p) {
+    d3.selectAll(".row text").classed("active", function(d, i) { return i == p.y; });
+    d3.selectAll(".column text").classed("active", function(d, i) { return i == p.x; });
+    d3.select("#tooltip")
+    .style("visibility", "visible")
+    .html("<table class='tipper'><tr class='topRow'><td></td><td>Mis?</td><td>Millega?</td></tr><tr><td class='leftColumn'>Õppekava:</td><td class='middleColumn'>" +
+      nodes[p.y].name + "</td><td class='rightColumn'>" + nodes[p.x].name + "</td></tr><td class='leftColumn'>Õppeaste:</td><td class='middleColumn'>" +
+      nodes[p.y].lvl + "</td><td class='rightColumn'>" + nodes[p.x].lvl + "</td></tr><td class='leftColumn'>Instituut:</td><td class='middleColumn'>" +
+      nodes[p.y].group + "</td><td class='rightColumn'>" + nodes[p.x].group + "</td></tr><td class='leftColumn'>Kattuvus:</td><td class='middleColumn'>" +
+      f(p.z) + " (kattuvaid aineid: " + p.z2 + ")</td><td class='rightColumn'></td></tr></table>" )
+    .style("top", function () { return (d3.event.pageY - 130)+"px"})
+    .style("left", function () { return (d3.event.pageX - 270)+"px";})
+  }
 
-function mouseout() {
-  d3.selectAll("text").classed("active", false);
-  d3.select("#tooltip")
-  .style("visibility", "hidden")
-}
+  function mouseout() {
+    d3.selectAll("text").classed("active", false);
+    d3.select("#tooltip")
+    .style("visibility", "hidden")
+  }
 
 </script>
 
