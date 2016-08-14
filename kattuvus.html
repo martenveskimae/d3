@@ -85,7 +85,7 @@
       var svg2 = svg0.append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-      d3.csv('õppekavad_koh.csv', function (error, data) {
+      d3.csv('õppekavad.csv', function (error, data) {
       var taseSeries = d3.nest()
             .key(function(d) { return d.aste; })
             .entries(data);
