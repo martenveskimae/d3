@@ -266,7 +266,7 @@ function graph2(csvpath, color, location, w, h) {
 
       var simulation = d3.forceSimulation(data)
       .force("x", d3.forceX(function(d) { return x(d[date]); }).strength(1))
-      .force("collide", d3.forceCollide(2));
+      .force("collide", d3.forceCollide(3));
 
       for (var i = 0; i < 10; ++i) {
         simulation.tick();
