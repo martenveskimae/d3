@@ -12,7 +12,7 @@ function graph4(csvpath, color, location, w, h) {
     colorrange = ["#B30000", "#E34A33", "#FC8D59", "#FDBB84", "#FDD49E", "#FEF0D9"];
   };
 
-  var margin = {top: 40, right: 50, bottom: 50, left: 80},
+  var margin = {top: 40, right: 120, bottom: 50, left: 80},
   width = w,
   height = h,
   transitionTime = 700,
@@ -52,7 +52,7 @@ function graph4(csvpath, color, location, w, h) {
   .attr("y", -20)
   .attr("class", "graphTitle")
   .style("text-anchor", "middle")
-  .text("Alla ja üle 10,000€ annetused ning nende arv");
+  .text("Alla ja üle 1000€ annetused ning nende arv");
 
   var line = d3.line() 
   .x(function(d) { return x(d.date); })
@@ -70,7 +70,7 @@ function graph4(csvpath, color, location, w, h) {
       d[sum] = +d.sum+1;
       d.name = d.name;
       d[party] = d.party;
-      if(+d.sum<10000){ return d[small] = 1; } else { return d[small] = 0; }
+      if(+d.sum<1000){ return d[small] = 1; } else { return d[small] = 0; }
     });
     initialData = [];
     initialData = data;
@@ -154,7 +154,7 @@ function graph4(csvpath, color, location, w, h) {
 
       nestData2.forEach(function(d, i) {
         var partyLines2 = svg.append("g")
-        .attr("transform", function(d){ return "translate(0," + miniH*(i+1) + ")" ;});
+        .attr("transform", function(d){ return "translate(0," + miniH*(i) + ")" ;});
 
         partyLines2.append("path")
         .attr("class", "line2Graph4")
@@ -234,8 +234,7 @@ function graph4(csvpath, color, location, w, h) {
         return y(lastValue);})
       .style("fill", function(d){ return z(d.values[0].party); })
       .text(function(d) {
-        return d.values[0].party + " " +
-        data.filter(function(e) { return e.small == 0 && e.party == d.values[0].party; }).length;
+        return data.filter(function(e) { return e.small == 0 && e.party == d.values[0].party; }).length + " suurannetust";
       });
     }
 
@@ -256,8 +255,7 @@ function graph4(csvpath, color, location, w, h) {
         return y(lastValue);})
       .style("fill", function(d){ return z(d.values[0].party); })
       .text(function(d) {
-        return d.values[0].party + " " +
-        data.filter(function(e) { return e.small == 1 && e.party == d.values[0].party; }).length;
+        return data.filter(function(e) { return e.small == 1 && e.party == d.values[0].party; }).length + " väikeannetust";
       });
 
       d3.select(".RKlG4")
