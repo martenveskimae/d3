@@ -52,7 +52,7 @@ function graph4(csvpath, color, location, w, h) {
   .attr("y", -20)
   .attr("class", "graphTitle")
   .style("text-anchor", "middle")
-  .text("Alla ja üle 1000€ annetused ning nende arv");
+  .text("Alla ja üle 1000€ annetused ning nende hulk");
 
   var line = d3.line() 
   .x(function(d) { return x(d.date); })
