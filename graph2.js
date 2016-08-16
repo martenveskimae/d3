@@ -266,10 +266,12 @@ function graph2(csvpath, color, location, w, h) {
 
       var simulation = d3.forceSimulation(data)
       .force("x", d3.forceX(function(d) { return x(d[date]); }).strength(1))
-      .force("collide", d3.forceCollide(2))
-      .on("tick", tick);
+      .force("collide", d3.forceCollide(2));
 
-      for (var i = 0; i < 70; ++i) simulation.tick();
+      for (var i = 0; i < 10; ++i) {
+        simulation.tick();
+        if (i == 9) simulation.on("tick", tick);
+      }
 
       function tick(d) {
         clear();
