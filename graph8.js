@@ -75,6 +75,7 @@ function graph8(csvpath, color, location, w, h) {
     .call(d3.axisBottom(x));
   svg.append("g")
     .attr("class", "axis axis--y")
+    .attr("id", "axis")
     .call(d3.axisLeft(y).ticks(10, "%"));
 
   var legend = serie.append("g")
@@ -90,7 +91,7 @@ function graph8(csvpath, color, location, w, h) {
       .attr("x", 9)
       .attr("dy", "0.35em")
       .attr("fill", "#000")
-      .style("font", "10px sans-serif")
+      .attr("id", "axis")
       .text(function(d) { if(d.key!== "Tulu erakonna varalt") return d.key; });
 
 });
