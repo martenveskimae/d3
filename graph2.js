@@ -266,8 +266,25 @@ function graph2(csvpath, color, location, w, h) {
 
       var simulation = d3.forceSimulation(data)
       .force("x", d3.forceX(function(d) { return x(d[date]); }).strength(1))
-      .force("collide", d3.forceCollide(2));
+      .force("collide", d3.forceCollide(2))
+      .on("tick", tick);
 
+      for (var i = 0; i < 70; ++i) simulation.tick();
+
+      function tick(d) {
+        clear();
+        data.forEach(bounded());
+        data.forEach(function(d) {
+          context.beginPath();
+          context.strokeStyle = z(d.party);
+          context.arc(d.x, d.y*1.2, r(d.sum)/6, 0, 2 * Math.PI);
+          context.stroke();
+          context.closePath();
+        });
+        simulation.stop();
+      }
+
+      /*
       simulation.on("tick", function(d) {
         clear();
         data.forEach(bounded());
@@ -275,13 +292,14 @@ function graph2(csvpath, color, location, w, h) {
           context.beginPath();
           //context.fillStyle = z(d.party);
           context.strokeStyle = z(d.party);//"black";
-          cr = r(d.sum)/6;
-          context.arc(d.x, d.y*1.2, cr, 0, 2 * Math.PI);
+          context.arc(d.x, d.y*1.2, r(d.sum)/6, 0, 2 * Math.PI);
           //context.fill();
           context.stroke();
           context.closePath();
         });
       });
+
+      */
       
     }
 
