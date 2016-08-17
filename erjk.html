@@ -64,6 +64,18 @@
       position: relative;
       z-index: 999;
     }
+    #tooltip {
+    color: white;
+    opacity: .95;
+    background: #333;
+    padding: 5px;
+    border: 1px solid lightgrey;
+    border-radius: 5px;
+    position: absolute;
+    z-index: 10;
+    visibility: hidden;
+    pointer-events: none;
+  }
   </style>
 </head>
 
@@ -79,7 +91,8 @@
   <script src="graph7.js"></script>
   <script src="graph8.js"></script>
   <script src="graph9.js"></script>
-
+  
+  <div id="tooltip"></div>
   <div id="container">
     <span class="graph1"></span>
   </div>
@@ -113,10 +126,9 @@
     graph9("2015_kulud2.txt", "blue", "graph1", 500, 200);
     graph7("2015_tulud-kulud.txt", "blue", "graph1", 500, 200);
     graph1("annetused.txt", "party", "graph1", 1000, 200);
-    //graph3("annetused.txt", "party", "graph1", 1000, 200);
+    graph3("annetused.txt", "party", "graph1", 1000, 200);
     graph4("annetused.txt", "party", "graph1", 1000, 200);
     graph2("annetused.txt", "party", "graph2", 1000, 180);
-
   </script>
 </body>
 </html>

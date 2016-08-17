@@ -66,8 +66,21 @@ function graph2(csvpath, color, location, w, h) {
   .style("width", function(){ return width + "px"; })
   .style("height", function(){ return height + "px"; });
 
+  var hiddenChart = base.append("canvas")
+  .attr("class", "canvas")
+  .style("left", margin.left + "px")
+  .style("top", margin.top + 10 + "px")
+  .attr("width", wMulti)
+  .attr("height", hMulti)
+  .style("width", function(){ return width + "px"; })
+  .style("height", function(){ return height + "px"; })
+  .style("display", "none");
+
   var context = chart.node().getContext("2d");
   context.scale(multiplier,multiplier);
+
+  var hiddenContext = hiddenChart.node().getContext("2d");
+  hiddenContext.scale(multiplier,multiplier);
 
   var line = d3.line() 
   .x(function(d) { return x(d.date); })
@@ -264,6 +277,8 @@ function graph2(csvpath, color, location, w, h) {
     function canvas(){
       data.forEach(function(d) { d.x = x(d[date]); d.y = y(d[sum]) - 30 ; });
 
+      colToNode = new Array;
+
       var simulation = d3.forceSimulation(data)
       .force("x", d3.forceX(function(d) { return x(d[date]); }).strength(1))
       .force("collide", d3.forceCollide(3));
@@ -282,6 +297,15 @@ function graph2(csvpath, color, location, w, h) {
           context.arc(d.x, d.y*1.2, r(d.sum)/6, 0, 2 * Math.PI);
           context.stroke();
           context.closePath();
+
+          var color = genColor();
+          hiddenContext.beginPath();
+          hiddenContext.fillStyle = color;
+          hiddenContext.arc(d.x, d.y*1.2, r(d.sum)/6, 0, 2 * Math.PI);
+          hiddenContext.fill();
+          hiddenContext.closePath();
+
+          colToNode.push({clr: color, name: d.name, sum: d.sum });
         });
         simulation.stop();
       }
@@ -304,6 +328,27 @@ function graph2(csvpath, color, location, w, h) {
       */
       
     }
+
+      chart.on("mousemove", function(e){
+        var mouseX = d3.mouse(this)[0] * multiplier;
+        var mouseY = d3.mouse(this)[1] * multiplier;
+
+        var col = hiddenContext.getImageData(mouseX, mouseY, 1, 1).data;
+        var colString = "rgb(" + col[0] + "," + col[1] + ","+ col[2] + ")";
+        var node = colToNode.filter(function(d){ return d.clr == colString});
+
+        if(node.length > 0) {
+          d3.select("#tooltip")
+            .style("visibility", "visible")
+            .html(node[0].name + "</br>€" + node[0].sum)
+            .style("top", function () { return (d3.event.pageY - 50)+"px"})
+            .style("left", function () { return (d3.event.pageX - 50)+"px";}); 
+        } else {
+          d3.select("#tooltip")
+            .style("visibility", "hidden");
+        }
+
+      });
 
     var legendSize = svg.selectAll(".legendSize")
     .data(partyArray, function(d, i) { return d + i; })
@@ -369,6 +414,7 @@ function graph2(csvpath, color, location, w, h) {
 
     function clear(){
       context.clearRect(0, 0, wMulti, hMulti);
+      hiddenContext.clearRect(0, 0, wMulti, hMulti);
     };
 
     function bounded() {
@@ -377,6 +423,21 @@ function graph2(csvpath, color, location, w, h) {
         d.y = Math.max(radius, Math.min(height - radius - 30, d.y));
       };
     }
+
+    var nextCol = 1;
+      function genColor(){
+        var ret = [];
+
+        if(nextCol < 16777215){
+          ret.push(nextCol & 0xff); // R
+          ret.push((nextCol & 0xff00) >> 8); // G 
+          ret.push((nextCol & 0xff0000) >> 16); // B
+
+          nextCol += 1;
+        }
+        var col = "rgb(" + ret.join(',') + ")";
+        return col;
+      }
 
   });
 };
