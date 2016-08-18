@@ -370,7 +370,7 @@ function graph2(csvpath, color, location, w, h) {
         if(node.length > 0) {
           d3.select("#tooltip")
             .style("visibility", "visible")
-            .html(node[0].name + "</br>" + d.date + "</br>" + (node[0].sum - 1) + "€")
+            .html(node[0].name + "</br>" + node[0].date + "</br>" + (node[0].sum - 1) + "€")
             .style("top", function () { return (d3.event.pageY - 50)+"px"})
             .style("left", function () { return (d3.event.pageX - 50)+"px";}); 
         } else {
