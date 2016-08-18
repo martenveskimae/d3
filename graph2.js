@@ -135,12 +135,12 @@ function graph2(csvpath, color, location, w, h) {
     .text(function (d) { return d.key + " - " + d3.sum(d.values, function(d,i){ return d.sum - 1; }) + "€"; });
     
     d3.select(".selectParty")
-    .on("change", function(d) {
+    .on("click", function(d) {
       reload(partyArray[this.selectedIndex],"");
     });
 
     d3.select(".selectName")
-    .on("change", function(d) {
+    .on("click", function(d) {
       reload("", nameNest[this.selectedIndex].key);
     });
 
