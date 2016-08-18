@@ -12,7 +12,7 @@ function graph2(csvpath, color, location, w, h) {
     colorrange = ["#B30000", "#E34A33", "#FC8D59", "#FDBB84", "#FDD49E", "#FEF0D9"];
   };
 
-  var margin = {top: 40, right: 50, bottom: 120, left: 80},
+  var margin = {top: 40, right: 50, bottom: 150, left: 80},
   width = w,
   height = h,
   radius = 10,
@@ -111,8 +111,8 @@ function graph2(csvpath, color, location, w, h) {
     .append("select")
     .attr("class", "selectParty")
     .attr("name", "partyList")
-    .style("top", margin.top + height + 110 + "px")
-    .style("left", margin.left + 5 + "px")
+    .style("top", margin.top + 20  + "px")
+    .style("left", margin.left + width + 20 + "px")
     .selectAll("option")
     .data(partyArray)
     .enter()
@@ -124,9 +124,9 @@ function graph2(csvpath, color, location, w, h) {
     .append("select")
     .attr("class", "selectName")
     .attr("name", "nameList")
-    .style("top", margin.top + height + 110 + "px")
-    .style("left", margin.left + 50 + "px")
-    .style("width", 200 + "px")
+    .style("top", margin.top + 50 + "px")
+    .style("left", margin.left + width + 20 + "px")
+    //.style("width", 200 + "px")
     .selectAll("option")
     .data(nameNest)
     .enter()
