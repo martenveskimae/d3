@@ -103,8 +103,13 @@ function graph2(csvpath, color, location, w, h) {
 
     y.domain([d3.min(data, function(d) { return d.sum; })-30000, d3.max(data, function(d) { return d.sum; })+10000]);
 
-    var dropDown = d3.select("."+location)
+    nameNest = d3.nest()
+      .key(function(d){return d.name;})
+      .entries(data.sort(function(a, b){ return b.sum - a.sum || a.date - b.date }));
+
+    var dropDownParty = d3.select("."+location)
     .append("select")
+    .attr("class", "selectParty")
     .attr("name", "partyList")
     .style("top", margin.top + height + 110 + "px")
     .style("left", margin.left + 5 + "px")
@@ -114,10 +119,29 @@ function graph2(csvpath, color, location, w, h) {
     .append("option")
     .attr("value", function (d,i) { return partyArray[(i)]; })
     .text(function (d,i) { return partyArray[(i)]; });
+
+    var dropDownName = d3.select("."+location)
+    .append("select")
+    .attr("class", "selectName")
+    .attr("name", "nameList")
+    .style("top", margin.top + height + 110 + "px")
+    .style("left", margin.left + 50 + "px")
+    .style("width", 200 + "px")
+    .selectAll("option")
+    .data(nameNest)
+    .enter()
+    .append("option")
+    .attr("value", function (d) { return d.key; })
+    .text(function (d) { return d.key + " - " + d3.sum(d.values, function(d,i){ return d.sum; }) + "€"; });
     
-    d3.select("select")
+    d3.select(".selectParty")
     .on("change", function(d) {
-      reload(partyArray[this.selectedIndex]);
+      reload(partyArray[this.selectedIndex],"");
+    });
+
+    d3.select(".selectName")
+    .on("change", function(d) {
+      reload("", nameNest[this.selectedIndex].key);
     });
 
     svg.append("line")
@@ -156,14 +180,15 @@ function graph2(csvpath, color, location, w, h) {
     .style("text-anchor", "end")
     .text("EP 2014");
 
-    reload("kesk");
-    function reload(selectedParty){
+    reload("kesk","");
+    function reload(selectedParty, selectedName){
       nest = [];
       nodes = [];
       nodesData = [];
       nestData = [];
 
-      data = initialData.filter(function(d) { return d.party === selectedParty && d.sum > 0; });
+      if (selectedParty) data = initialData.filter(function(d) { return d.party === selectedParty && d.sum > 0; });
+      if (selectedName) data = initialData.filter(function(d) { return d.name === selectedName && d.sum > 0; });
 
       x.domain(d3.extent(data, function(d) { return d.date; }));
 
@@ -224,6 +249,11 @@ function graph2(csvpath, color, location, w, h) {
       .duration(transitionTime)
       .attr("d", function(d){ return line(d.values); })
       .style("stroke", function(d){ return z(d.values[0].party); });
+
+      d3.selectAll(".lineGraph2")
+      .data(nestData)
+      .exit()
+      .remove();
 
       d3.select(".RKlG2")
       .transition()
@@ -340,7 +370,7 @@ function graph2(csvpath, color, location, w, h) {
         if(node.length > 0) {
           d3.select("#tooltip")
             .style("visibility", "visible")
-            .html(node[0].name + "</br>€" + node[0].sum)
+            .html(node[0].name + "</br>" + node[0].sum + "€")
             .style("top", function () { return (d3.event.pageY - 50)+"px"})
             .style("left", function () { return (d3.event.pageX - 50)+"px";}); 
         } else {
