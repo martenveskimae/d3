@@ -132,7 +132,7 @@ function graph2(csvpath, color, location, w, h) {
     .enter()
     .append("option")
     .attr("value", function (d) { return d.key; })
-    .text(function (d) { return d.key + " - " + d3.sum(d.values, function(d,i){ return d.sum; }) + "€"; });
+    .text(function (d) { return d.key + " - " + d3.sum(d.values, function(d,i){ return d.sum - 1; }) + "€"; });
     
     d3.select(".selectParty")
     .on("change", function(d) {
@@ -370,7 +370,7 @@ function graph2(csvpath, color, location, w, h) {
         if(node.length > 0) {
           d3.select("#tooltip")
             .style("visibility", "visible")
-            .html(node[0].name + "</br>" + node[0].sum + "€")
+            .html(node[0].name + "</br>" + (node[0].sum - 1) + "€")
             .style("top", function () { return (d3.event.pageY - 50)+"px"})
             .style("left", function () { return (d3.event.pageX - 50)+"px";}); 
         } else {
