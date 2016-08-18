@@ -118,6 +118,8 @@ function graph2(csvpath, color, location, w, h) {
     .attr("value", function (d,i) { return partyArray[(i)]; })
     .text(function (d,i) { return partyArray[(i)]; });
 
+    partyArray.shift();
+
     nameNest.unshift("1")
     var dropDownName = d3.select(".selectName")
     .style("top", margin.top + 50 + "px")
