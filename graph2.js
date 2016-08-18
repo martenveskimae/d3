@@ -107,10 +107,8 @@ function graph2(csvpath, color, location, w, h) {
       .key(function(d){return d.name;})
       .entries(data.sort(function(a, b){ return b.sum - a.sum || a.date - b.date }));
 
-    var dropDownParty = d3.select("."+location)
-    .append("select")
-    .attr("class", "selectParty")
-    .attr("name", "partyList")
+    partyArray.unshift("1");
+    var dropDownParty = d3.select(".selectParty")
     .style("top", margin.top + 20  + "px")
     .style("left", margin.left + width + "px")
     .selectAll("option")
@@ -120,10 +118,8 @@ function graph2(csvpath, color, location, w, h) {
     .attr("value", function (d,i) { return partyArray[(i)]; })
     .text(function (d,i) { return partyArray[(i)]; });
 
-    var dropDownName = d3.select("."+location)
-    .append("select")
-    .attr("class", "selectName")
-    .attr("name", "nameList")
+    nameNest.unshift("1")
+    var dropDownName = d3.select(".selectName")
     .style("top", margin.top + 50 + "px")
     .style("left", margin.left + width + "px")
     //.style("width", 200 + "px")
@@ -135,12 +131,12 @@ function graph2(csvpath, color, location, w, h) {
     .text(function (d) { return d.key + " - " + d3.sum(d.values, function(d,i){ return d.sum - 1; }) + "€"; });
     
     d3.select(".selectParty")
-    .on("click", function(d) {
+    .on("change", function(d) {
       reload(partyArray[this.selectedIndex],"");
     });
 
     d3.select(".selectName")
-    .on("click", function(d) {
+    .on("change", function(d) {
       reload("", nameNest[this.selectedIndex].key);
     });
 

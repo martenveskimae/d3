@@ -84,8 +84,16 @@
   <div id="tooltip"></div>
   <div id="container">
     <span class="graph1"></span>
+    <span class="graph2"></span>
   </div>
-  <div id="container2" class="graph2"></div>
+  <div id="container2" class="graph3">
+      <select class="selectParty" name="partyList">
+        <option value="" disabled="disabled">Erakonnad</option>
+      </select>
+      <select class="selectName" name="nameList">
+        <option value="" disabled="disabled">Isikud</option>
+      </select>
+  </div>
 
   <script>
 
@@ -114,10 +122,10 @@
     graph6("2015_kulud2.txt", "blue", "graph1", 500, 200);
     graph9("2015_kulud2.txt", "blue", "graph1", 500, 200);
     graph7("2015_tulud-kulud.txt", "blue", "graph1", 500, 200);
-    graph1("annetused.txt", "party", "graph1", 1000, 200);
-    //graph3("annetused.txt", "party", "graph1", 1000, 200);
-    graph4("annetused.txt", "party", "graph1", 1000, 200);
-    graph2("annetused.txt", "party", "graph2", 1000, 180);
+    graph1("annetused.txt", "party", "graph2", 1000, 200);
+    //graph3("annetused.txt", "party", "graph2", 1000, 200);
+    graph4("annetused.txt", "party", "graph2", 1000, 200);
+    graph2("annetused.txt", "party", "graph3", 1000, 180);
   </script>
 </body>
 </html>
