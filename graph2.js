@@ -134,7 +134,7 @@ function graph2(csvpath, color, location, w, h) {
     
     d3.select(".selectParty")
     .on("change", function(d) {
-      reload(partyArray[this.selectedIndex],"");
+      reload(partyArray[this.selectedIndex-1],"");
     });
 
     d3.select(".selectName")
