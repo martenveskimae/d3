@@ -57,6 +57,9 @@
   line {
     stroke: #fff;
   }
+  #legendAxis > path {
+    stroke: none;
+  }
   text.active {
     fill: red;
   }
@@ -260,24 +263,37 @@
     });
   });
 
-  var legendSize = svg.selectAll(".legendSize")
-  .data(([0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1]).reverse())
-  .enter()
-  .append("g")
-  .attr("class", "legend")
-  .attr("transform", function(d, i) { return "translate(" + (width + 20) + "," + i * 17 +")"; });
+  svg.append("defs")
+  .append("linearGradient")
+  .attr("id", "gradient")
+  .attr("x1", "0%").attr("y1", "100%")
+  .attr("x2", "0%").attr("y2", "0%")
+  .selectAll("stop") 
+  .data(d3.range(10))                
+  .enter().append("stop") 
+  .attr("offset", function(d,i) { 
+    return (i/10);
+  })   
+  .attr("stop-color", function(d,i) { 
+    return c(i/10); 
+  });
 
-  legendSize.append("rect")
-  .attr("id", function (d,i) { return "size "+i; })
-  .attr("width", 11)
-  .attr("height", 11)
-  .style("fill", function(d) {return c(d); });
+  svg.append("rect")
+  .attr("class", "legendRect")
+  .attr("x", width + 18)
+  .attr("y", 0)
+  .attr("width", 12)
+  .attr("height", 200)
+  .style("fill", "url(#gradient)");
 
-  legendSize.append("text")
-  .text(function (d) { return f(d); })
-  .attr("x", 15)
-  .attr("y", 10)
-  .style("text-anchor", "start");
+  var legendY = d3.scaleLinear()
+   .rangeRound([199,0])
+   .domain([0, 1]);
+
+  svg.append("g")
+  .attr("id", "legendAxis")
+  .attr("transform", function(d) { return "translate(" + (width + 30) + ",0)"; })
+  .call(d3.axisRight(legendY).ticks(10 ,"%").tickSize(0,0));
 
   function mouseover(p) {
     d3.selectAll(".row text").classed("active", function(d, i) { return i == p.y; });
@@ -288,15 +304,14 @@
       nodes[p.y].name + "</td><td class='rightColumn'>" + nodes[p.x].name + "</td></tr><td class='leftColumn'>Õppeaste:</td><td class='middleColumn'>" +
       nodes[p.y].lvl + "</td><td class='rightColumn'>" + nodes[p.x].lvl + "</td></tr><td class='leftColumn'>Instituut:</td><td class='middleColumn'>" +
       nodes[p.y].group + "</td><td class='rightColumn'>" + nodes[p.x].group + "</td></tr><td class='leftColumn'>Kattuvus:</td><td class='middleColumn'>" +
-      f(p.z) + " (kattuvaid aineid: " + p.z2 + ")</td><td class='rightColumn'></td></tr></table>" )
+      f(p.z) + " (kattuvaid aineid: " + p.z2 + ")</td><td class='rightColumn'></td></tr></table>")
     .style("top", function () { return (d3.event.pageY - 130)+"px"})
-    .style("left", function () { return (d3.event.pageX - 270)+"px";})
+    .style("left", function () { return (d3.event.pageX - 270)+"px";});
   }
 
   function mouseout() {
     d3.selectAll("text").classed("active", false);
-    d3.select("#tooltip")
-    .style("visibility", "hidden")
+    d3.select("#tooltip").style("visibility", "hidden");
   }
 
 </script>
