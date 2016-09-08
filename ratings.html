@@ -54,7 +54,7 @@
     .x(function(d) { return x(d.x); })
     .y1(function(d) { return y(d.y1); })
     .y0(function(d) { return y(d.y0); })
-    .curve(d3.curveStepAfter);
+    .curve(d3.curveStep);
 
     var svg = d3.select("body").append("svg")
     .attr("width", width + margin.left + margin.right)
