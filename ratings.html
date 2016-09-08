@@ -36,8 +36,8 @@
     var x = d3.scaleTime().range([0, width]),
     y = d3.scaleLinear().range([height, 0]),
     c = d3.scaleOrdinal()
-    .domain(["ref", "kesk", "irl", "sde"])
-    .range(["#ff9900", "#109618", "#3366cc", "#dc3912"]),
+    .domain(["ref", "kesk", "irl", "sde", "vaba", "ekre"])
+    .range(["#ff9900", "#109618", "#3366cc", "#dc3912", "#888888", "#7a5230"]),
     n = 1000,
     partyShow = [true, false, false, false];
 
@@ -65,21 +65,14 @@
     .attr("class", "tooltip")
     .style("opacity", 0);
 
-    d3.csv("toetus.csv", function(error, data) {
+    d3.tsv("ratings.txt", function(error, data) {
 
       confArea = new Array;
       confLine = new Array;
-      data.forEach(function(d) {
-        d.year = +d.year;
-        d.month = +d.month;
+      data.forEach(function(d,i) {
         d.date = new Date(+d.year, +d.month-1, 1);
-        d.unemp = +d.unemp*d.unemp;
-        d.support = Math.round(+d.support*100);
-        d.skp_yearly = +d.skp_yearly;
-        d.cycle = +d.cycle*d.cycle;
         d.party = d.party;
-        d.gdpgr = +d.gdpgr;
-        d.bruto = +d.bruto;
+        d.support = Math.round(+d.support*100);
       });
 
       x.domain(d3.extent(data, function(d) { return d.date; }));
@@ -130,6 +123,8 @@
       .style("text-anchor", "end")
       .text("NP elections");
 
+      console.log(nestedData)
+
       nestedData.forEach(function(d){
         confArea.length = 0;
         confLine.length = 0;
@@ -157,7 +152,7 @@
         .attr("id", function(d) { return d.party; })
         .attr("d", area(confArea))
         .style("fill", function(d) { return c(d.party); })
-        .style("opacity", function(d){ if(d.party=="irl" || d.party=="sde" || d.party=="kesk") {return "0";} else {return "0.05";}; })
+        .style("opacity", function(d){ if(d.party!="ref") {return "0";} else {return "0.05";}; })
 
         g.append("path")
         .data(confArea.filter(function(g){return g.party==d.key }))
@@ -167,7 +162,7 @@
         .style("stroke", function(d) { return c(d.party); })
         .style("stroke-width", 1)
         .style("stroke-dasharray", (3, 3))
-        .style("opacity", function(d){ if(d.party=="irl" || d.party=="sde" || d.party=="kesk") {return "0";} else {return "1";}; });
+        .style("opacity", function(d){ if(d.party!="ref") {return "0";} else {return "1";}; });
 
         g.append("path")
         .data(confLine.filter(function(g){return g.party==d.key }))
@@ -176,7 +171,7 @@
         .style("fill", "none")
         .style("stroke", function(d) { return c(d.party); })
         .style("stroke-width", 3)
-        .style("opacity", function(d){ if(d.party=="irl" || d.party=="sde" || d.party=="kesk") {return "0";} else {return "1";}; });
+        .style("opacity", function(d){ if(d.party!="ref") {return "0";} else {return "1";}; });
 
 
       });
@@ -192,7 +187,7 @@
       .attr("r", 7)
       .attr("cx", width - 18)
       .attr("id", function(d){ return "legend"+d; })
-      .style("fill", function(d){ if(d=="irl" || d=="sde" || d=="kesk") {return "white";} else {return c(d) ;}; })
+      .style("fill", function(d){ if(d!="ref") {return "white";} else {return c(d) ;}; })
       .style("stroke", "black")
       .on("click", function(d, i){
         if (!partyShow[i]) {
