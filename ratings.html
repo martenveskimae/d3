@@ -44,13 +44,13 @@
     var line = d3.line()
     .x(function(d) { return x(d.x); })
     .y(function(d) { return y(d.y); })
-    .curve(d3.curveMonotoneX);
+    .curve(d3.curveStepAfter);
 
     var area = d3.area()
     .x(function(d) { return x(d.x); })
     .y1(function(d) { return y(d.y1); })
-    .y0(function(d) { return y(d.y0); });
-    //.curve(d3.curveMonotoneX);
+    .y0(function(d) { return y(d.y0); })
+    .curve(d3.curveStepAfter);
 
     var svg = d3.select("body").append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -153,7 +153,7 @@
         .attr("id", function(d) { return d.party; })
         .attr("d", area(confArea))
         .style("fill", function(d) { return c(d.party); })
-        .style("opacity", 0.7);
+        .style("opacity", .2);
 
         g.append("path")
         .data(confLine.filter(function(g){return g.party==d.key }))
@@ -161,7 +161,7 @@
         .attr("d", line(confLine))
         .style("fill", "none")
         .style("stroke", function(d) { return c(d.party); })
-        .style("stroke-width", 2);
+        .style("stroke-width", 3);
 
 
       });
@@ -184,7 +184,7 @@
           d3.selectAll("#" + [d])
           .transition()
           .duration(100)
-          .style("opacity",.7);
+          .style("opacity", .2);
 
           d3.selectAll("#legend" + [d])
           .transition()
