@@ -186,12 +186,22 @@
           .duration(100)
           .style("opacity", .2);
 
+          d3.selectAll("#" + [d] + "Line")
+          .transition()
+          .duration(100)
+          .style("opacity", 1);
+
           d3.selectAll("#legend" + [d])
           .transition()
           .duration(100)
           .style("fill", c);
         } else {
           d3.selectAll("#" + [d])
+          .transition()
+          .duration(100)
+          .style("opacity",0);
+
+          d3.selectAll("#" + [d] + "Line")
           .transition()
           .duration(100)
           .style("opacity",0);
