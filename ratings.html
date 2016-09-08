@@ -108,9 +108,25 @@
       .text("Ratings (%)");
 
       g.append("line")
-      .attr("x1", 460)
+      .attr("x1", x(new Date(2011,2,1)))
       .attr("y1", 0)
-      .attr("x2", 460)
+      .attr("x2", x(new Date(2011,2,1)))
+      .attr("y2", height)
+      .attr("stroke-width", .5)
+      .attr("stroke", "black");
+      g.append("text")
+      .attr("class", "label")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 466)
+      .attr("x", -5)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("NP elections");
+
+      g.append("line")
+      .attr("x1", x(new Date(2015,2,1)))
+      .attr("y1", 0)
+      .attr("x2", x(new Date(2015,2,1)))
       .attr("y2", height)
       .attr("stroke-width", .5)
       .attr("stroke", "black");
