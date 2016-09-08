@@ -2,7 +2,7 @@
 <html>
 <meta charset="utf-8">
 
-<title>Erakondade toetus</title>
+<title>Party ratings</title>
 
 <style>
   body{
@@ -49,8 +49,8 @@
     var area = d3.area()
     .x(function(d) { return x(d.x); })
     .y1(function(d) { return y(d.y1); })
-    .y0(function(d) { return y(d.y0); })
-    .curve(d3.curveMonotoneX);
+    .y0(function(d) { return y(d.y0); });
+    //.curve(d3.curveMonotoneX);
 
     var svg = d3.select("body").append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -64,6 +64,7 @@
     d3.csv("toetus.csv", function(error, data) {
 
       confArea = new Array;
+      confLine = new Array;
       data.forEach(function(d) {
         d.year = +d.year;
         d.month = +d.month;
@@ -126,10 +127,26 @@
       .text("NP elections");
 
       nestedData.forEach(function(d){
+        confArea.length = 0;
+        confLine.length = 0;
         party = d.values.map(function(d){ return d; });
         party.forEach(function(g){
           confArea.push({ x: g.date, y1: g.support + ci95(g.support, n), y0: g.support - ci95(g.support, n), party: d.key });
         });
+
+        y0 = (confArea[0].y1 + confArea[0].y0) / 2;
+        confLine.push({ x: confArea[0].x, y: y0, party: d.key });
+
+        for(i = 0; i < confArea.length-1; i++){
+          if(confArea[i].y1 < confLine[confLine.length-1].y){
+            confLine.push({ x: confArea[i].x, y: confArea[i].y1, party: d.key });
+          }else if(confArea[i].y0 > confLine[confLine.length-1].y) {
+            confLine.push({ x: confArea[i].x, y: confArea[i].y0, party: d.key });
+          };       
+        };
+
+        y1 = (confArea[confArea.length-1].y1 + confArea[confArea.length-1].y0) / 2;
+        confLine.push({ x: confArea[confArea.length-1].x, y: y1, party: d.key });
 
         g.append("path")
         .data(confArea.filter(function(g){return g.party==d.key }))
@@ -138,7 +155,15 @@
         .style("fill", function(d) { return c(d.party); })
         .style("opacity", 0.7);
 
-        confArea.length = 0;
+        g.append("path")
+        .data(confLine.filter(function(g){return g.party==d.key }))
+        .attr("id", function(d) { return d.party + "Line"; })
+        .attr("d", line(confLine))
+        .style("fill", "none")
+        .style("stroke", function(d) { return c(d.party); })
+        .style("stroke-width", 2);
+
+
       });
 
       var legend = g.selectAll(".legend")
