@@ -7,6 +7,7 @@
 <style>
   body{
     font: 11px "San Francisco", Helvetica, Arial, sans-serif;
+    background: #ededed;
   }
   svg{
     margin-top: 40px;
@@ -30,8 +31,8 @@
   <script src="http://d3js.org/d3.v4.min.js"></script>
   <script>
     var margin = {top: 20, right: 60, bottom: 30, left: 40},
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+    width = 1100 - margin.left - margin.right,
+    height = 450 - margin.top - margin.bottom;
 
     var x = d3.scaleTime().range([0, width]),
     y = d3.scaleLinear().range([height, 0]),
@@ -164,30 +165,48 @@
         g.append("path")
         .data(confArea.filter(function(g){return g.party==d.key }))
         .attr("id", function(d) { return d.party; })
+        .attr("class", "area")
         .attr("d", area(confArea))
         .style("fill", function(d) { return c(d.party); })
-        .style("opacity", function(d){ if(d.party!="ref") {return "0";} else {return "0.05";}; })
+        .style("opacity", .05)
+        .style("display", function(d){ if(d.party!="ref") {return "none";} else {return "inline";}; });
 
         g.append("path")
         .data(confArea.filter(function(g){return g.party==d.key }))
-        .attr("id", function(d) { return d.party + "Line"; })
+        .attr("id", function(d) { return d.party; })
         .attr("d", line(confArea))
         .style("fill", "none")
         .style("stroke", function(d) { return c(d.party); })
         .style("stroke-width", 1)
         .style("stroke-dasharray", (3, 3))
-        .style("opacity", function(d){ if(d.party!="ref") {return "0";} else {return "1";}; });
+        .style("opacity", 1)
+        .style("display", function(d){ if(d.party!="ref") {return "none";} else {return "inline";}; });
 
         g.append("path")
         .data(confLine.filter(function(g){return g.party==d.key }))
-        .attr("id", function(d) { return d.party + "Line"; })
+        .attr("id", function(d) { return d.party; })
         .attr("d", lineStep(confLine))
         .style("fill", "none")
         .style("stroke", function(d) { return c(d.party); })
         .style("stroke-width", 3)
-        .style("opacity", function(d){ if(d.party!="ref") {return "0";} else {return "1";}; });
+        .style("opacity", 1)
+        .style("display", function(d){ if(d.party!="ref") {return "none";} else {return "inline";}; });
 
 
+      });
+
+      d3.selectAll(".area")
+      .on("mouseover", function(d){
+      	d3.select(this)
+      	.transition()
+      	.duration(100)
+      	.style("opacity", .1);
+      })
+      .on("mouseout", function(d){
+      	d3.select(this)
+      	.transition()
+      	.duration(100)
+      	.style("opacity", .05);
       });
 
       var legend = g.selectAll(".legend")
@@ -201,19 +220,15 @@
       .attr("r", 7)
       .attr("cx", width + 20)
       .attr("id", function(d){ return "legend"+d; })
-      .style("fill", function(d){ if(d!="ref") {return "white";} else {return c(d) ;}; })
+      .style("opacity", .7)
+      .style("fill", function(d){ if(d!="ref") {return "#ededed";} else {return c(d) ;}; })
       .style("stroke", "black")
       .on("click", function(d, i){
         if (!partyShow[i]) {
           d3.selectAll("#" + [d])
           .transition()
           .duration(100)
-          .style("opacity", .05);
-
-          d3.selectAll("#" + [d] + "Line")
-          .transition()
-          .duration(100)
-          .style("opacity", 1);
+          .style("display", "inline");
 
           d3.selectAll("#legend" + [d])
           .transition()
@@ -223,17 +238,12 @@
           d3.selectAll("#" + [d])
           .transition()
           .duration(100)
-          .style("opacity",0);
-
-          d3.selectAll("#" + [d] + "Line")
-          .transition()
-          .duration(100)
-          .style("opacity",0);
+          .style("display", "none");
 
           d3.selectAll("#legend" + [d])
           .transition()
           .duration(100)
-          .style("fill", "white");
+          .style("fill", "#ededed");
         }
         partyShow[i] =! partyShow[i];
       });
