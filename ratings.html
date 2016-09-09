@@ -40,7 +40,7 @@
     .domain(["ref", "kesk", "irl", "sde", "vaba", "ekre"])
     .range(["#ff9900", "#109618", "#3366cc", "#dc3912", "#888888", "#7a5230"]),
     n = 1000,
-    partyShow = [true, false, false, false];
+    partyShow = [true, true, false, false];
 
     var line = d3.line()
     .x(function(d) { return x(d.x); })
@@ -62,10 +62,6 @@
     .attr("height", height + margin.top + margin.bottom);
     var g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    var tooltip = d3.select("body").append("div")
-    .attr("class", "tooltip")
-    .style("opacity", 0);
-
     d3.tsv("ratings.txt", function(error, data) {
 
       confArea = new Array;
@@ -82,31 +78,6 @@
       var nestedData = d3.nest()
       .key(function(d){return d.party;})
       .entries(data);
-
-      g.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom(x).tickSize(-height,5))
-      .append("text")
-      .attr("class", "label")
-      .attr("x", width-5)
-      .attr("y", -6)
-      .style("text-anchor", "end")
-      .style("fill", "black")
-      .text("Time");
-
-      g.append("g")
-      .attr("class", "y axis")
-      .call(d3.axisLeft(y).tickSize(-width,5))
-      .append("text")
-      .attr("class", "label")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 6)
-      .attr("x", -5)
-      .attr("dy", ".71em")
-      .style("text-anchor", "end")
-      .style("fill", "black")
-      .text("Ratings (%)");
 
       g.append("line")
       .attr("x1", x(new Date(2011,2,1)))
@@ -194,6 +165,31 @@
 
 
       });
+
+      g.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x).tickSize(-height,5))
+      .append("text")
+      .attr("class", "label")
+      .attr("x", width-5)
+      .attr("y", -6)
+      .style("text-anchor", "end")
+      .style("fill", "black")
+      .text("Time");
+
+      g.append("g")
+      .attr("class", "y axis")
+      .call(d3.axisLeft(y).tickSize(-width,5))
+      .append("text")
+      .attr("class", "label")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("x", -5)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .style("fill", "black")
+      .text("Ratings (%)");
 
       d3.selectAll(".area")
       .on("mouseover", function(d){
