@@ -62,6 +62,12 @@
     .attr("height", height + margin.top + margin.bottom);
     var g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+    g.append("clipPath")
+    .attr("id", "box")
+    .append("rect")
+    .attr("width", width)
+    .attr("height", height);
+
     d3.tsv("ratings.txt", function(error, data) {
 
       confArea = new Array;
@@ -122,7 +128,7 @@
         y0 = (confArea[0].y1 + confArea[0].y0) / 2;
         confLine.push({ x: confArea[0].x, y: y0, party: d.key });
 
-        for(i = 0; i < confArea.length-1; i++){
+        for(i = 0; i < confArea.length; i++){
           if(confArea[i].y1 < confLine[confLine.length-1].y){
             confLine.push({ x: confArea[i].x, y: confArea[i].y1, party: d.key });
           }else if(confArea[i].y0 > confLine[confLine.length-1].y) {
@@ -130,8 +136,9 @@
           };       
         };
 
-        y1 = (confArea[confArea.length-1].y1 + confArea[confArea.length-1].y0) / 2;
-        confLine.push({ x: confArea[confArea.length-1].x, y: y1, party: d.key });
+        if(confLine[confLine.length-1].x != confArea[confArea.length-1].x){
+        	confLine.push({ x: confArea[confArea.length-1].x, y: confLine[confLine.length-1].y, party: d.key });
+        }
 
         g.append("path")
         .data(confArea.filter(function(g){return g.party==d.key }))
@@ -140,6 +147,7 @@
         .attr("d", area(confArea))
         .style("fill", function(d) { return c(d.party); })
         .style("opacity", .05)
+        .attr("clip-path", "url(#box)")
         .style("display", function(d){ if(d.party =="ref" || d.party =="kesk") {return "inline";} else {return "none";}; });
 
         g.append("path")
@@ -151,6 +159,7 @@
         .style("stroke-width", 1)
         .style("stroke-dasharray", (3, 3))
         .style("opacity", 1)
+        .attr("clip-path", "url(#box)")
         .style("display", function(d){ if(d.party =="ref" || d.party =="kesk") {return "inline";} else {return "none";}; });
 
         g.append("path")
@@ -161,9 +170,8 @@
         .style("stroke", function(d) { return c(d.party); })
         .style("stroke-width", 3)
         .style("opacity", 1)
+        .attr("clip-path", "url(#box)")
         .style("display", function(d){ if(d.party =="ref" || d.party =="kesk") {return "inline";} else {return "none";}; });
-
-
       });
 
       g.append("g")
