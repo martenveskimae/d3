@@ -169,7 +169,7 @@
         .attr("d", area(confArea))
         .style("fill", function(d) { return c(d.party); })
         .style("opacity", .05)
-        .style("display", function(d){ if(d.party!="ref") {return "none";} else {return "inline";}; });
+        .style("display", function(d){ if(d.party =="ref" || d.party =="kesk") {return "inline";} else {return "none";}; });
 
         g.append("path")
         .data(confArea.filter(function(g){return g.party==d.key }))
@@ -180,7 +180,7 @@
         .style("stroke-width", 1)
         .style("stroke-dasharray", (3, 3))
         .style("opacity", 1)
-        .style("display", function(d){ if(d.party!="ref") {return "none";} else {return "inline";}; });
+        .style("display", function(d){ if(d.party =="ref" || d.party =="kesk") {return "inline";} else {return "none";}; });
 
         g.append("path")
         .data(confLine.filter(function(g){return g.party==d.key }))
@@ -190,7 +190,7 @@
         .style("stroke", function(d) { return c(d.party); })
         .style("stroke-width", 3)
         .style("opacity", 1)
-        .style("display", function(d){ if(d.party!="ref") {return "none";} else {return "inline";}; });
+        .style("display", function(d){ if(d.party =="ref" || d.party =="kesk") {return "inline";} else {return "none";}; });
 
 
       });
@@ -221,7 +221,7 @@
       .attr("cx", width + 20)
       .attr("id", function(d){ return "legend"+d; })
       .style("opacity", .7)
-      .style("fill", function(d){ if(d!="ref") {return "#ededed";} else {return c(d) ;}; })
+      .style("fill", function(d){ if(d == "ref" || d == "kesk") {return c(d);} else {return "#ededed" ;}; })
       .style("stroke", "black")
       .on("click", function(d, i){
         if (!partyShow[i]) {
