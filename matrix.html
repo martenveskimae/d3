@@ -128,7 +128,7 @@
     groups = new Array;
 
     data.forEach(function(d,i) {
-      nodes.push({ name: d.Õppekava, id: d.Kood, group: d.Instituut, lvl: d.Õppeaste });
+      nodes.push({ name: d.Õppekava, id: d.Kood, group: d.Instituut, lvl: d.Õppeaste, price: +d.Maksumus, fill: +d.Täituvus, courses: +d.Aineid_aastas });
     });
 
     var nestedGroups = d3.nest()
@@ -363,7 +363,24 @@
               matrixGroup[a[0].id][b[0].id].countN += matrix[d.source][d.target].z2;
             };
           });
-          console.log(counter);
+
+          var aa = 0,
+              bb = 0,
+              cc = 0,
+              dd = 0,
+              ee = 0;
+
+          for(i=0;i<n;i++){
+            for(j=0;j<n;j++){
+              if(matrix[i][j].z == 0) aa += 1;
+              if(matrix[i][j].z > 0 && matrix[i][j].z < .3) bb += 1;
+              if(matrix[i][j].z >= .3 && matrix[i][j].z < .5) cc += 1;
+              if(matrix[i][j].z >= .5 && matrix[i][j].z < 1) dd += 1;
+              if(matrix[i][j].z > -1) ee += 1;
+            }
+          }
+
+          console.log(ee, aa, bb, cc, dd)
 
           for(i=0;i<matrixGroup.length; i++){
             for(j=0;j<matrixGroup.length;j++){
@@ -504,9 +521,12 @@
       nodes[p.y].name + "</td><td class='rightColumn'>" + nodes[p.x].name + "</td></tr><td class='leftColumn'>Õppeaste:</td><td class='middleColumn'>" +
       nodes[p.y].lvl + "</td><td class='rightColumn'>" + nodes[p.x].lvl + "</td></tr><td class='leftColumn'>Instituut:</td><td class='middleColumn'>" +
       nodes[p.y].group + "</td><td class='rightColumn'>" + nodes[p.x].group + "</td></tr><td class='leftColumn'>Kattuvus:</td><td class='middleColumn'>" +
-      f(p.z) + " (kattuvaid aineid: " + p.z2 + ")</td><td class='rightColumn'></td></tr></table>")
-    .style("top", function () { return (d3.event.pageY - 130)+"px"})
-    .style("left", function () { return (d3.event.pageX - 270)+"px";});
+      f(p.z) + " (kattuvaid aineid: " + p.z2 + ")</td><td class='rightColumn'></td></tr><td class='leftColumn'>Aineid (aastas kohta):</td><td class='middleColumn'>" +
+      nodes[p.y].courses + "</td><td class='rightColumn'>" + nodes[p.x].courses + "</td></tr><td class='leftColumn'>Õppekava täituvus:</td><td class='middleColumn'>" +
+      f(nodes[p.y].fill) + "</td><td class='rightColumn'>" + f(nodes[p.x].fill) + "</td></tr><td class='leftColumn'>Õppekava maksumus:</td><td class='middleColumn'>" +
+      d3.format(".0f")(nodes[p.y].price) + "€</td><td class='rightColumn'>" + d3.format(".0f")(nodes[p.x].price) + "€</td></tr></table>")
+    .style("top", function () { return (d3.event.pageY - 160)+"px"})
+    .style("left", function () { return (d3.event.pageX - 300)+"px";});
   }
 
   function mouseout() {
@@ -522,8 +542,8 @@
     .html("<table class='tipper' width='400px'><tr class='topRow'><td></td><td>Mis?</td><td>Millega?</td></tr><tr><td class='leftColumn'>Instituut:</td><td class='middleColumn'>" +
       groups[p.y].group + "</td><td class='rightColumn'>" + groups[p.x].group + "</td></tr><td class='leftColumn'>Kattuvus:</td><td class='middleColumn'>" +
       f(p.z) + " (kattuvaid aineid: " + p.count + ")</td><td class='rightColumn'></td></tr></table>")
-    .style("top", function () { return (d3.event.pageY - 130)+"px"})
-    .style("left", function () { return (d3.event.pageX - 270)+"px";});
+    .style("top", function () { return (d3.event.pageY - 80)+"px"})
+    .style("left", function () { return (d3.event.pageX - 200)+"px";});
   }
 
   function mouseout2() {
