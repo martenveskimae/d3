@@ -84,7 +84,7 @@
   </select>
   <input id="data" type="radio" name="dataset" value="links.txt" checked="checked">Kõik ained
   <input id="data" type="radio" name="dataset" value="links_koh.txt">Kohustuslikud ained
-  <input id="data" type="radio" name="dataset" value="links_var.txt">Varjatud kattuvused </br>
+  <input id="data" type="radio" name="dataset" value="links_var.txt" disabled="true">Varjatud kattuvused </br>
   Filtreeri:<input id="minimum" type="range" min="0" max="100" value="0" step="5" onchange="showValue(this.value)", style="width:93px; vertical-align:middle;"><span id="range">0</span>%
   <input id="phd" type="checkbox" name="phd">Ph.D.
   <input id="over" type="checkbox" name="over">Instituutide ülesed
@@ -97,7 +97,7 @@
 </div>
 
 <script>
-  var margin = {top: 10, right: 800, bottom: 380, left: 380},
+  var margin = {top: 10, right: 600, bottom: 380, left: 380},
   width = 750,
   width2 = 100,
   height = 750;
@@ -541,7 +541,7 @@
     .style("visibility", "visible")
     .html("<table class='tipper' width='400px'><tr class='topRow'><td></td><td>Mis?</td><td>Millega?</td></tr><tr><td class='leftColumn'>Instituut:</td><td class='middleColumn'>" +
       groups[p.y].group + "</td><td class='rightColumn'>" + groups[p.x].group + "</td></tr><td class='leftColumn'>Kattuvus:</td><td class='middleColumn'>" +
-      f(p.z) + " (kattuvaid aineid: " + p.count + ")</td><td class='rightColumn'></td></tr></table>")
+      f(p.z) + "</td><td class='rightColumn'></td></tr></table>")
     .style("top", function () { return (d3.event.pageY - 80)+"px"})
     .style("left", function () { return (d3.event.pageX - 200)+"px";});
   }
