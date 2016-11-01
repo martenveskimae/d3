@@ -127,11 +127,12 @@
       .data(userInput)
       .enter()
       .append("circle")
+      .attr("class", function(d,i){ return "circle" + i; })
       .attr("id", "userInputPoints")
       .attr("clip-path", "url(#box)")
       .attr("cx", function(d){return x(d.x);})
       .attr("cy", function(d){return y(d.y);})
-      .attr("r", 2)
+      .attr("r", 2.5)
       .style("fill", "none")
       .style("stroke", "#CC6600")
       .style("stroke-width", 1);
@@ -161,13 +162,58 @@
       .style("fill", "black")
       .text("Bruto palk");
 
+      g.append("text")
+      .attr("class", "helper")
+      .style("display", "none")
+      .style("fill", "#CC6600");
+
       g.append("rect")
       .attr("width", width)
       .attr("height", height)
       .style("fill", "none")
       .style("pointer-events", "all")
       .on("click", dataInput)
+      .on("mousemove", helper)
+      .on("mouseout", helperout)
       .call(d3.drag().on("drag", dataInput));
+
+      function helper(){
+        var coords = d3.mouse(this),
+        mouseDate = x.invert(coords[0]),
+        dates = userInput.map(function(d) {return d.x; });
+
+        var bisect = d3.bisector(function(d) { return d; }).left,
+        i = bisect(dates, mouseDate);
+
+        var d0 = dates[i - 1],
+        d1 = dates[i],
+        inputX = mouseDate - d0[0] > d1[0] - mouseDate ? d1 : d0;
+        inputY = y.invert(coords[1]);
+
+        var index = dates.indexOf(inputX);
+        if(coords[0] > width - (width/(userInput.length-1))/2 ){
+          var index = userInput.length - 1;
+          var inputData = {x: userInput[index].x,y: inputY};
+        }
+        if (index !== -1) {
+          g.selectAll("#userInputPoints")
+          .style("fill", "none");
+          g.select(".circle"+index)
+          .style("fill", "#CC6600");
+
+          g.select(".helper")
+          .attr("transform", function(d){ return "translate("+ (x(userInput[index].x) - 10)  +","+ (y(userInput[index].y) - 10) +")"; })
+          .style("display", "inline")
+          .text(d3.format(".0f")(userInput[index].y) + "€")
+        }
+      }
+
+      function helperout(){
+        g.select(".helper")
+        .style("display", "none")
+        g.selectAll("#userInputPoints")
+          .style("fill", "none");
+      }
 
       function dataInput(){
         var coords = d3.mouse(this),
@@ -196,6 +242,16 @@
         }
         if (index !== -1) {
           userInput[index] = inputData;
+
+          g.selectAll("#userInputPoints")
+          .style("fill", "none");
+          g.select(".circle"+index)
+          .style("fill", "#CC6600");
+
+          g.select(".helper")
+          .attr("transform", function(d){ return "translate("+ (x(userInput[index].x) - 10)  +","+ (y(userInput[index].y) - 10) +")"; })
+          .style("display", "inline")
+          .text(d3.format(".0f")(userInput[index].y) + "€")
         }
 
         update();
