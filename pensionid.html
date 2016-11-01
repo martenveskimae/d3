@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+
+<title>Pensioni fondid</title>
+
+<style>
+  body{
+    font: 11px "San Francisco", Helvetica, Arial, sans-serif;
+    background: #ededed;
+  }
+  svg{
+    margin-top: 40px;
+    margin-left:auto;
+    margin-right:auto;
+    display:block;
+    vertical-align: middle;
+  }
+  .title{
+    font-size: 36px;
+    text-align: center;
+    margin-top: 40px;
+  }
+  .tick line{
+    opacity: 0.2;
+  }
+
+</style>
+<body>
+  <p class="title">Pensionid</p>
+  <script src="http://d3js.org/d3.v4.min.js"></script>
+  <script>
+    var margin = {top: 20, right: 120, bottom: 30, left: 40},
+    width = 800 - margin.left - margin.right,
+    height = 200 - margin.top - margin.bottom;
+
+    var x = d3.scaleTime().range([0, width]),
+    y = d3.scaleLinear().range([height, 0]),
+    t = d3.transition().duration(100),
+    maxInput = 2000;
+
+    var line = d3.line()
+    .x(function(d) { return x(d.date); })
+    .y(function(d) { return y(d.bruto); });
+
+    var userLine = d3.line()
+    .x(function(d) { return x(d.x); })
+    .y(function(d) { return y(d.y); })
+    .curve(d3.curveMonotoneX);
+
+    var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom);
+    var g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    d3.tsv("bruto.txt", function(error, data) {
+
+      data.forEach(function(d,i) {
+        d.date = new Date(+d.year, +d.month-1, 1);
+        d.bruto = +d.bruto;
+      });
+
+      userInput = new Array;
+      data.forEach(function(d){
+        var x = d.date;
+        var y = 0;
+        var defaultData= {x: x, y: y};
+        userInput.push(defaultData);
+      });
+
+      x.domain(d3.extent(data, function(d) { return d.date; }));
+      y.domain([0, maxInput]);
+
+      g.append("clipPath")
+      .attr("id", "box")
+      .append("rect")
+      .attr("width", width)
+      .attr("height", height);
+
+      g.append("path")
+      .data(data)
+      .attr("id", "bruto")
+      .attr("d", line(data))
+      .style("fill", "none")
+      .style("stroke", "grey")
+      .style("stroke-width", 1);
+
+      g.append("text")
+      .attr("y", function(){ return y(data[data.length-1].bruto)+5; })
+      .attr("x", width + 5)
+      .style("fill", "grey")
+      .text("Keskmine palk");
+
+      g.append("path")
+      .data(userInput)
+      .attr("id", "userInput")
+      .attr("d", userLine(userInput))
+      .style("fill", "none")
+      .style("stroke", "#CC6600")
+      .style("stroke-width", 2);
+
+      g.append("text")
+      .attr("id", "userInputText")
+      .attr("y", function(){ return y(0)+5; })
+      .attr("x", width + 5)
+      .style("fill", "#CC6600")
+      .text("Sinu palk");
+
+      g.selectAll(".circles")
+      .data(userInput)
+      .enter()
+      .append("circle")
+      .attr("id", "userInputPoints")
+      .attr("cx", function(d){return x(d.x);})
+      .attr("cy", function(d){return y(d.y);})
+      .attr("r", 2)
+      .style("fill", "none")
+      .style("stroke", "#CC6600")
+      .style("stroke-width", 1);
+
+      g.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x).tickSize(-height,5))
+      .append("text")
+      .attr("class", "label")
+      .attr("x", width-5)
+      .attr("y", -6)
+      .style("text-anchor", "end")
+      .style("fill", "black")
+      .text("Aeg");
+
+      g.append("g")
+      .attr("class", "y axis")
+      .call(d3.axisLeft(y).tickSize(-width,5))
+      .append("text")
+      .attr("class", "label")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("x", -5)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .style("fill", "black")
+      .text("Bruto palk");
+
+      g.append("rect")
+      .attr("width", width)
+      .attr("height", height)
+      .style("fill", "none")
+      .style("pointer-events", "all")
+      .on("click", dataInput)
+      .call(d3.drag().on("drag", dataInput));
+
+      function dataInput(){
+        var coords = d3.mouse(this),
+        mouseDate = x.invert(coords[0]),
+        dates = userInput.map(function(d) {return d.x; });
+
+        var bisect = d3.bisector(function(d) { return d; }).left,
+        i = bisect(dates, mouseDate);
+
+        var d0 = dates[i - 1],
+        d1 = dates[i],
+        inputX = mouseDate - d0[0] > d1[0] - mouseDate ? d1 : d0,
+        inputY = y.invert(coords[1]);
+        if(inputY > maxInput){
+          var inputY = maxInput;
+        } else if (inputY < 0){
+          var inputY = 0;
+        }
+
+        var inputData = {x: inputX,y: inputY};
+
+        var index = dates.indexOf(inputX);
+        if(coords[0] > width - (width/(userInput.length-1))/2 ){
+          var index = userInput.length - 1;
+          var inputData = {x: userInput[index].x,y: inputY};
+        }
+        if (index !== -1) {
+          userInput[index] = inputData;
+        }
+
+        update();
+      }
+
+
+      function update(){
+        g.select("#userInput")
+        .data(userInput)
+        .transition()
+        .duration(10)
+        .attr("d", userLine(userInput));
+
+        g.selectAll("#userInputPoints")
+        .data(userInput)
+        .transition()
+        .duration(10)
+        .attr("cx", function(d){return x(d.x);})
+        .attr("cy", function(d){return y(d.y);});
+
+        g.select("#userInputText")
+        .transition()
+        .duration(10)
+        .attr("y", function(d){return y(userInput[userInput.length-1].y);});
+
+      }
+
+    });
+
+  </script>
+</body>
+</html>
