@@ -10,11 +10,13 @@
     background: #ededed;
   }
   svg{
-    margin-top: 40px;
     margin-left:auto;
     margin-right:auto;
     display:block;
     vertical-align: middle;
+  }
+  .container{
+
   }
   .title{
     font-size: 36px;
@@ -27,10 +29,24 @@
 
 </style>
 <body>
-  <p class="title">Pensionifondide kalkulaator</p>
+  <p class="title">Pensionid</p>
+  <div class="container" align="center">
+  Vali palgaskaala:
+  <select onchange="maximumInput(this.value)">
+      <option value="2000">2000€</option>
+      <option value="3000">3000€</option>
+      <option value="4000">4000€</option>
+      <option value="5000">5000€</option>
+      <option value="6000">6000€</option>
+      <option value="7000">7000€</option>
+      <option value="8000">8000€</option>
+      <option value="9000">9000€</option>
+      <option value="10000">10 000€</option>
+  </select>
+  </div>
   <script src="http://d3js.org/d3.v4.min.js"></script>
   <script>
-    var margin = {top: 20, right: 120, bottom: 30, left: 40},
+    var margin = {top: 20, right: 120, bottom: 30, left: 70},
     width = 800 - margin.left - margin.right,
     height = 200 - margin.top - margin.bottom;
 
@@ -86,15 +102,17 @@
       .style("stroke-width", 1);
 
       g.append("text")
+      .attr("id", "brutoText")
       .attr("y", function(){ return y(data[data.length-1].bruto)+5; })
       .attr("x", width + 5)
       .style("fill", "grey")
-      .text("Keskmine palk");
+      .text("Keskmine bruto palk");
 
       g.append("path")
       .data(userInput)
       .attr("id", "userInput")
       .attr("d", userLine(userInput))
+      .attr("clip-path", "url(#box)")
       .style("fill", "none")
       .style("stroke", "#CC6600")
       .style("stroke-width", 2);
@@ -104,13 +122,14 @@
       .attr("y", function(){ return y(0)+5; })
       .attr("x", width + 5)
       .style("fill", "#CC6600")
-      .text("Sinu palk");
+      .text("Sinu bruto palk");
 
       g.selectAll(".circles")
       .data(userInput)
       .enter()
       .append("circle")
       .attr("id", "userInputPoints")
+      .attr("clip-path", "url(#box)")
       .attr("cx", function(d){return x(d.x);})
       .attr("cy", function(d){return y(d.y);})
       .attr("r", 2)
@@ -183,8 +202,13 @@
         update();
       }
 
+      maximumInput = function maximumInput(value){
+        maxInput = value;
+        scaleUpdate();
+      }
 
       function update(){
+
         g.select("#userInput")
         .data(userInput)
         .transition()
@@ -201,6 +225,44 @@
         g.select("#userInputText")
         .transition()
         .duration(10)
+        .attr("y", function(d){return y(userInput[userInput.length-1].y);});
+
+      }
+
+      function scaleUpdate(){
+        y.domain([0, maxInput]);
+        var time = 500;
+        g.select(".y.axis")
+        .transition()
+        .duration(time)
+        .call(d3.axisLeft(y).tickSize(-width,5));
+
+        g.select("#bruto")
+        .transition()
+        .duration(time)
+        .attr("d", line(data));
+
+         g.select("#brutoText")
+        .transition()
+        .duration(time)
+        .attr("y", function(){ return y(data[data.length-1].bruto)+5; });
+
+        g.select("#userInput")
+        .data(userInput)
+        .transition()
+        .duration(time)
+        .attr("d", userLine(userInput));
+
+        g.selectAll("#userInputPoints")
+        .data(userInput)
+        .transition()
+        .duration(time)
+        .attr("cx", function(d){return x(d.x);})
+        .attr("cy", function(d){return y(d.y);});
+
+        g.select("#userInputText")
+        .transition()
+        .duration(time)
         .attr("y", function(d){return y(userInput[userInput.length-1].y);});
 
       }
