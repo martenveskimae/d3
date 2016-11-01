@@ -31,7 +31,7 @@
 <body>
   <p class="title">Pensionid</p>
   <div class="container" align="center">
-  Vali palgaskaala:
+  Vali palgaskaala ülempiir:
   <select onchange="maximumInput(this.value)">
       <option value="2000">2000€</option>
       <option value="3000">3000€</option>
@@ -52,7 +52,6 @@
 
     var x = d3.scaleTime().range([0, width]),
     y = d3.scaleLinear().range([height, 0]),
-    t = d3.transition().duration(100),
     maxInput = 2000;
 
     var line = d3.line()
