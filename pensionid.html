@@ -75,13 +75,27 @@
         d.bruto = +d.bruto;
       });
 
+      var years = [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016],
+      months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+
       userInput = new Array;
+      years.forEach(function(d){
+        months.forEach(function(g){
+          var x = new Date(+d, +g, 1);
+          var y = 0;
+          var defaultData= {x: x, y: y};
+          userInput.push(defaultData);
+        })
+      });
+
+      /*
       data.forEach(function(d){
         var x = d.date;
         var y = 0;
         var defaultData= {x: x, y: y};
         userInput.push(defaultData);
       });
+      */
 
       x.domain(d3.extent(data, function(d) { return d.date; }));
       y.domain([0, maxInput]);
@@ -202,7 +216,7 @@
           .style("fill", "#CC6600");
 
           g.select(".helper")
-          .attr("transform", function(d){ return "translate("+ (x(userInput[index].x) - 10)  +","+ (y(userInput[index].y) - 10) +")"; })
+          .attr("transform", function(d){ return "translate("+ (x(userInput[index].x) - 12)  +","+ (y(userInput[index].y) - 10) +")"; })
           .style("display", "inline")
           .text(d3.format(".0f")(userInput[index].y) + "€")
         }
@@ -249,7 +263,7 @@
           .style("fill", "#CC6600");
 
           g.select(".helper")
-          .attr("transform", function(d){ return "translate("+ (x(userInput[index].x) - 10)  +","+ (y(userInput[index].y) - 10) +")"; })
+          .attr("transform", function(d){ return "translate("+ (x(userInput[index].x) - 12)  +","+ (y(userInput[index].y) - 10) +")"; })
           .style("display", "inline")
           .text(d3.format(".0f")(userInput[index].y) + "€")
         }
