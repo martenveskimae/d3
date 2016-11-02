@@ -450,7 +450,6 @@
         return{
           date: x.date,
           day: x.day,
-          year: x.year,
           nav: x.nav,
           yearMonth: x.yearMonth,
           symbol: x.symbol,
@@ -478,12 +477,12 @@
         var fond = [];
         var fond = d.values.map(function(d){ return d; });
 
-        cumsum.push({sum: fond[0].osakud, x: fond[0].date, year: fond[0].year, y: fond[0].osakud*fond[0].nav, symbol: fond[0].symbol});
+        cumsum.push({sum: fond[0].osakud, x: fond[0].date, y: fond[0].osakud*fond[0].nav, symbol: fond[0].symbol});
 
         for (i=1; i < fond.length; i++) {
           var sum = cumsum[i-1].sum + fond[i].osakud;
           var value = sum * fond[i].nav
-          cumsum.push({sum: sum, x: fond[i].date, year: fond[i].year, y: value, symbol: fond[i].symbol});
+          cumsum.push({sum: sum, x: fond[i].date, y: value, symbol: fond[i].symbol});
         }
 
         maxValues.push(d3.max(cumsum, function(d) {return d.y; } ));
@@ -498,13 +497,13 @@
 
       var cumsumNest = d3.nest()
       .key(function(d){return d.symbol;})
-      .entries(cumsum.filter(function(d){ return d.year <= 2015 }));
+      .entries(cumsum.filter(function(d){ return d.x < new Date(2015,12,1) }));
 
       cumsumNest.forEach(function(d,i){
         g2.select("." + [d][0].key)
         .transition()
         .duration(500)
-        .attr("d", line2(cumsum.filter(function(g){ return g.symbol == d.key })));
+        .attr("d", line2(d.values.filter(function(g){ return g.symbol == d.key })));
 
         g2.selectAll("." + [d][0].key)
         .transition()
