@@ -357,7 +357,7 @@
       d.yearMonth = d3.timeFormat("%Y-%m")(d.date)
       d.nav = +d.nav;
     });
-    data.sort(function(a, b){ return a.year - b.year; });
+    data = data.filter(function(d){ return d.date <= new Date(2016,05,01); });
 
     x2.domain(d3.extent(data, function(d) { return d.date; }));
     y2.domain([0, 5000]);
@@ -408,29 +408,30 @@
     });
 
     fondUpdate = function fondUpdate(){
-      var years = [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015],
+      var years = [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016],
       months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
       userInput2 = new Array;
       years.forEach(function(d){
         months.forEach(function(g){
           var x = new Date(+d, +g, 1);
+          if(x <= new Date(2016,4,1)){
+            var bisect = d3.bisector(function(d) { return d.x; }).right,
+            i = bisect(userInput, x);
 
-          var bisect = d3.bisector(function(d) { return d.x; }).right,
-          i = bisect(userInput, x);
-
-          if(i==0) { 
-            var d0 = userInput[0],
-            d1 = userInput[1],
-            inputX = x - d0.x > d1.x - x ? d1 : d0;
-          } else {
-            var d0 = userInput[i - 1],
-            d1 = userInput[i],
-            inputX = x - d0.x > d1.x - x ? d1 : d0;
+            if(i==0) { 
+              var d0 = userInput[0],
+              d1 = userInput[1],
+              inputX = x - d0.x > d1.x - x ? d1 : d0;
+            } else {
+              var d0 = userInput[i - 1],
+              d1 = userInput[i],
+              inputX = x - d0.x > d1.x - x ? d1 : d0;
+            }
+            var y = inputX.y;
+            var defaultData = {x: x, y: y, yearMonth: d3.timeFormat("%Y-%m")(x)};
+            userInput2.push(defaultData);
           }
-          var y = inputX.y;
-          var defaultData = {x: x, y: y, yearMonth: d3.timeFormat("%Y-%m")(x)};
-          userInput2.push(defaultData);
         })
       });
 
@@ -503,13 +504,9 @@
 
       cumsumNest.forEach(function(d,i){
         g2.select("." + [d][0].key)
-        .transition()
-        .duration(500)
         .attr("d", line2(d.values));
 
         g2.selectAll("." + [d][0].key)
-        .transition()
-        .duration(500)
         .attr("y", y2(d.values[d.values.length-1].y))
         .text(d.key + " - " + d3.format(".0f")(d.values[d.values.length-1].y) + "€")
       })
