@@ -485,7 +485,7 @@
             var value = sum * fond[i].nav
             cumsum.push({sum: sum, x: fond[i].date, y: value, symbol: fond[i].symbol});
           }
-          console.log(cumsum)
+          cumsum = cumsum.sort(function(a,b){ return a.x - b.x; } );
 
 
           g2.select("." + [d][0].key)
