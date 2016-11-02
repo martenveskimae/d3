@@ -372,7 +372,7 @@
       var da = new Date(+d, +g, 1);
       dataDates.push({date: da });
     })
-  });
+   });
    dataDates = dataDates.filter(function(d){ return d.date < new Date(2016,06,01); });
 
    x2.domain(d3.extent(dataDates, function(d) { return d.date; }));
@@ -460,19 +460,18 @@
           return output;
         };
 
-        var data2 = new Array;
-        var data2 = join(df, userInput2, function(x, y){
+        var df = join(df, userInput2, function(x, y){
           return{
             date: x.date,
             day: x.day,
             nav: x.nav,
-            yearMonth: x.yearMonth,
             symbol: x.symbol,
             bruto: y
           }
         });
 
-        data2.forEach(function(d){
+        df.forEach(function(d){
+          
           if(d.date < new Date(2009, 6, 01)){
             d.input = d.bruto * 0.06;
           } else if (d.date >= new Date(2009, 6, 01) && d.date < new Date(2010, 01, 01)){
@@ -523,7 +522,7 @@
             }
           }
 
-          if(d.day == 1) {
+          if(d.day == 2) {
             d.osakud = d.input / d.nav;
           } else {
             d.osakud = 0;
@@ -534,12 +533,11 @@
         cumsum = new Array;
         var nestedData = d3.nest()
         .key(function(d){return d.symbol;})
-        .entries(data2);
+        .entries(df);
 
         nestedData.forEach(function(d,i){
           var tmp = new Array;
           var fond = d.values.map(function(d){ return d; });
-          fond = fond.sort(function(a, b){ return a.date - b.date; });
 
           tmp.push({sum: fond[0].osakud, x: fond[0].date, y: fond[0].osakud*fond[0].nav, symbol: fond[0].symbol});
 
@@ -549,7 +547,6 @@
             tmp.push({sum: sum, x: fond[i].date, y: value, symbol: fond[i].symbol});
             cumsum.push({sum: sum, x: fond[i].date, y: value, symbol: fond[i].symbol});
           }
-          cumsum.push(tmp);
           maxValues.push(d3.max(tmp, function(d) {return d.y; } ));
         })
 
