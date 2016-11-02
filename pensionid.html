@@ -341,7 +341,8 @@
 
    var line2 = d3.line()
    .x(function(d) { return x2(d.x); })
-   .y(function(d) { return y2(d.y); });
+   .y(function(d) { return y2(d.y); })
+   .curve(d3.curveMonotoneX);
 
    var svg2 = d3.select(".container2").append("svg")
    .attr("width", width2 + margin2.left + margin2.right)
@@ -453,11 +454,9 @@
           nav: x.nav,
           yearMonth: x.yearMonth,
           symbol: x.symbol,
-          bruto: y,
           input: y * 0.06
         }
       });
-      data2 = data2.sort(function(a, b){ return a.date - b.date; });
 
       data2.forEach(function(d){
         if(d.day == 1) {
@@ -474,18 +473,21 @@
       .entries(data2);
 
       nestedData.forEach(function(d,i){
-        var fond = [];
+        var tmp = new Array;
         var fond = d.values.map(function(d){ return d; });
+        fond = fond.sort(function(a, b){ return a.date - b.date; });
 
-        cumsum.push({sum: fond[0].osakud, x: fond[0].date, y: fond[0].osakud*fond[0].nav, symbol: fond[0].symbol});
+        tmp.push({sum: fond[0].osakud, x: fond[0].date, y: fond[0].osakud*fond[0].nav, symbol: fond[0].symbol});
 
         for (i=1; i < fond.length; i++) {
-          var sum = cumsum[i-1].sum + fond[i].osakud;
-          var value = sum * fond[i].nav
+          var sum = tmp[i-1].sum + fond[i].osakud;
+          var value = sum * fond[i].nav;
+          tmp.push({sum: sum, x: fond[i].date, y: value, symbol: fond[i].symbol});
           cumsum.push({sum: sum, x: fond[i].date, y: value, symbol: fond[i].symbol});
         }
+        cumsum.push(tmp);
+        maxValues.push(d3.max(tmp, function(d) {return d.y; } ));
 
-        maxValues.push(d3.max(cumsum, function(d) {return d.y; } ));
 
       })
 
@@ -503,7 +505,7 @@
         g2.select("." + [d][0].key)
         .transition()
         .duration(500)
-        .attr("d", line2(d.values.filter(function(g){ return g.symbol == d.key })));
+        .attr("d", line2(d.values));
 
         g2.selectAll("." + [d][0].key)
         .transition()
