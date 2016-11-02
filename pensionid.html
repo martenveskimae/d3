@@ -104,6 +104,16 @@
       x.domain(d3.extent(data, function(d) { return d.date; }));
       y.domain([0, maxInput]);
 
+      g.append("text")
+      .attr("id", "juhis")
+      .attr("x", width/2)
+      .attr("y", height/2 + 12)
+      .style("text-anchor", "middle")
+      .style("font-size", 32)
+      .style("fill", "grey")
+      .style("opacity", .5)
+      .text("Siia joonista oma palga profiil!")
+
       g.append("clipPath")
       .attr("id", "box")
       .append("rect")
@@ -196,6 +206,11 @@
       .call(d3.drag().on("drag", dataInput).on("end", function(d) { fondUpdate() }));
 
       function helper(){
+        d3.select("#juhis")
+        .transition()
+        .duration(2000)
+        .style("opacity", 0);
+
         var coords = d3.mouse(this),
         mouseDate = x.invert(coords[0]),
         dates = userInput.map(function(d) {return d.x; });
@@ -234,6 +249,7 @@
       }
 
       function dataInput(){
+
         var coords = d3.mouse(this),
         mouseDate = x.invert(coords[0]),
         dates = userInput.map(function(d) {return d.x; });
