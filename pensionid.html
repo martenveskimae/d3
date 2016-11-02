@@ -43,6 +43,8 @@
       <option value="9000">9000€</option>
       <option value="10000">10 000€</option>
     </select>
+    Isiklikud sissemaksed aastal 2010 <input id="2010sissemaksed" type="checkbox" checked="checked">
+    Sündinud pärast 1955. aastat <input id="1955sündinud" type="checkbox" checked="checked">
   </div>
   <p align="center"> Siia võib mingi jutu kirjutada</p>
   <div class="container2">
@@ -455,11 +457,45 @@
           nav: x.nav,
           yearMonth: x.yearMonth,
           symbol: x.symbol,
-          input: y * 0.06
+          bruto: y
         }
       });
 
       data2.forEach(function(d){
+        if(d.date < new Date(2009, 6, 01)){
+          d.input = d.bruto * 0.06;
+        } else if (d.date >= new Date(2009, 6, 01) && d.date < new Date(2010, 01, 01)){
+          d.input = 0;
+        } else if (d3.timeFormat("%Y")(d.date) == 2010){
+          if(!document.getElementById("2010sissemaksed").checked){
+            d.input = 0;
+          } else {
+            if (!document.getElementById("1955sündinud").checked){
+              d.input = d.bruto * 0.02;
+            } else {
+              d.input = d.bruto * 0.06;
+            }
+          }
+        } else if (d3.timeFormat("%Y")(d.date) == 2011){
+          if(!document.getElementById("2010sissemaksed").checked){
+            d.input = d.bruto * 0.03;
+          } else {
+            if (!document.getElementById("1955sündinud").checked){
+              d.input = d.bruto * 0.04;
+            } else {
+              d.input = d.bruto * 0.06;
+            }
+          }
+        } else if (d3.timeFormat("%Y")(d.date) == 2012 || (d3.timeFormat("%Y")(d.date) == 2013)){
+          d.input = d.bruto * 0.06;
+        } else if (d3.timeFormat("%Y")(d.date) >= 2014){
+          if(document.getElementById("2010sissemaksed").checked && document.getElementById("1955sündinud").checked){
+            d.input = d.bruto * 0.08;
+          } else {
+            d.input = d.bruto * 0.06;
+          }
+        }
+
         if(d.day == 1) {
           d.osakud = d.input / d.nav;
         } else {
