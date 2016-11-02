@@ -48,10 +48,10 @@
     3% isiklikud sissemaksed 2014-2017 <input id="vabatahtlik" class="checks" type="checkbox" checked="checked">
   </div>
   <div align="center">
-    Konservatiivne<input id="data1" class="datas" type="radio" name="dataset" value="konservatiivne.txt" checked="checked">
-    Tasakaalustatud<input id="data2" class="datas" type="radio" name="dataset" value="tasakaalustatud.txt">
-    Progressiivne<input id="data3" class="datas" type="radio" name="dataset" value="progressiivne.txt">
-    Agressiivne<input id="data4" class="datas" type="radio" name="dataset" value="agressiivne.txt">
+    Konservatiivne <input id="data1" class="datas" type="radio" name="dataset" value="konservatiivne.txt" checked="checked">
+    Tasakaalustatud <input id="data2" class="datas" type="radio" name="dataset" value="tasakaalustatud.txt">
+    Progressiivne <input id="data3" class="datas" type="radio" name="dataset" value="progressiivne.txt">
+    Agressiivne <input id="data4" class="datas" type="radio" name="dataset" value="agressiivne.txt">
   </div>
   <div class="container2">
   </div>
@@ -551,8 +551,6 @@
           }
           cumsum.push(tmp);
           maxValues.push(d3.max(tmp, function(d) {return d.y; } ));
-
-
         })
 
         y2.domain([0, d3.max(maxValues)+1000]);
