@@ -7,7 +7,7 @@
 <style>
   body{
     font: 11px "San Francisco", Helvetica, Arial, sans-serif;
-    background: #ededed;
+    background: #f9f9f9;
   }
   svg{
     margin-left:auto;
@@ -15,8 +15,8 @@
     display:block;
     vertical-align: middle;
   }
-  .container{
-
+  input, select{
+    margin-right: 20px;
   }
   .title{
     font-size: 36px;
@@ -47,12 +47,21 @@
     Isiklikud sissemaksed aastal 2010 <input id="2010sissemaksed" class="checks" type="checkbox" checked="checked">
     3% isiklikud sissemaksed 2014-2017 <input id="vabatahtlik" class="checks" type="checkbox" checked="checked">
   </div>
-  <p align="center"> Siia võib mingi jutu kirjutada</p>
+  <div align="center">
+    <p> Siia võib mingi jutu kirjutada</p>
+    Konservatiivne<input id="data1" class="datas" type="radio" name="dataset" value="konservatiivne.txt" checked="checked">
+    Tasakaalustatud<input id="data2" class="datas" type="radio" name="dataset" value="tasakaalustatud.txt">
+    Progressiivne<input id="data3" class="datas" type="radio" name="dataset" value="progressiivne.txt">
+    Agressiivne<input id="data4" class="datas" type="radio" name="dataset" value="agressiivne.txt">
+  </div>
   <div class="container2">
   </div>
   <script src="http://d3js.org/d3.v4.min.js"></script>
   <script>
     d3.selectAll(".checks").on("change", function() {
+      fondUpdate();
+    })
+    d3.selectAll(".datas").on("click", function() {
       fondUpdate();
     })
     var margin = {top: 20, right: 120, bottom: 30, left: 70},
@@ -355,221 +364,233 @@
    .attr("height", height2 + margin2.top + margin2.bottom);
    var g2 = svg2.append("g").attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
 
-   d3.tsv("fondid.txt", function(error, data) {
+   var years = [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016],
+   months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
-    data.forEach(function(d,i) {
-      d.date = new Date(+d.year, +d.month-1, +d.day);
-      d.year = +d.year;
-      d.yearMonth = d3.timeFormat("%Y-%m")(d.date)
-      d.nav = +d.nav;
-    });
-    data = data.filter(function(d){ return d.date <= new Date(2016,05,01); });
+   dataDates = new Array
+   years.forEach(function(d){
+    months.forEach(function(g){
+      var da = new Date(+d, +g, 1);
+      dataDates.push({date: da });
+    })
+  });
+   dataDates = dataDates.filter(function(d){ return d.date < new Date(2016,06,01); });
 
-    x2.domain(d3.extent(data, function(d) { return d.date; }));
-    y2.domain([0, 5000]);
+   x2.domain(d3.extent(dataDates, function(d) { return d.date; }));
+   y2.domain([0, 5000]);
 
-    g2.append("g")
-    .attr("class", "x axis2")
-    .attr("transform", "translate(0," + height2 + ")")
-    .call(d3.axisBottom(x2).tickSize(-height2,5))
-    .append("text")
-    .attr("class", "label")
-    .attr("x", width2-5)
-    .attr("y", -6)
-    .style("text-anchor", "end")
-    .style("fill", "black")
-    .text("Aeg");
+   g2.append("g")
+   .attr("class", "x axis2")
+   .attr("transform", "translate(0," + height2 + ")")
+   .call(d3.axisBottom(x2).tickSize(-height2,5))
+   .append("text")
+   .attr("class", "label")
+   .attr("x", width2-5)
+   .attr("y", -6)
+   .style("text-anchor", "end")
+   .style("fill", "black")
+   .text("Aeg");
 
-    g2.append("g")
-    .attr("class", "y axis2")
-    .call(d3.axisLeft(y2).tickSize(-width2,5))
-    .append("text")
-    .attr("class", "label")
-    .attr("transform", "rotate(-90)")
-    .attr("y", 6)
-    .attr("x", -5)
-    .attr("dy", ".71em")
-    .style("text-anchor", "end")
-    .style("fill", "black")
-    .text("Osakute kumulatiivne puhasväärtus");
+   g2.append("g")
+   .attr("class", "y axis2")
+   .call(d3.axisLeft(y2).tickSize(-width2,5))
+   .append("text")
+   .attr("class", "label")
+   .attr("transform", "rotate(-90)")
+   .attr("y", 6)
+   .attr("x", -5)
+   .attr("dy", ".71em")
+   .style("text-anchor", "end")
+   .style("fill", "black")
+   .text("Osakute kumulatiivne puhasväärtus");
 
-    var nested = d3.nest()
-    .key(function(d){return d.symbol;})
-    .entries(data);
+   function fondUpdate(){
 
-    nested.forEach(function(d,i){
-      g2.append("path")
-      .data(nested)
-      .attr("class", d.values[0].symbol)
-      .style("fill", "none")
-      .style("stroke", c2(i))
-      .style("stroke-width", 1);
+    if(document.getElementById("data1").checked){ dataset = document.getElementById("data1").value; }
+    if(document.getElementById("data2").checked){ dataset = document.getElementById("data2").value; }
+    if(document.getElementById("data3").checked){ dataset = document.getElementById("data3").value; }
+    if(document.getElementById("data4").checked){ dataset = document.getElementById("data4").value; }
 
-      g2.append("text")
-      .data(nested)
-      .attr("class", d.values[0].symbol)
-      .attr("x", width2 + 5)
-      .style("fill", c2(i));
+    dataSelection(dataset);
+    function dataSelection(dataset){
+      d3.tsv(dataset, function(error, df) {
+        df.forEach(function(d,i) {
+          d.date = new Date(+d.year, +d.month-1, +d.day);
+          d.year = +d.year;
+          d.yearMonth = d3.timeFormat("%Y-%m")(d.date)
+          d.nav = +d.nav;
+        });
+        df = df.filter(function(d){ return d.date <= new Date(2016,05,01); });
 
-    });
+        var years = [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016],
+        months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
-    fondUpdate = function fondUpdate(){
-      var years = [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016],
-      months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+        userInput2 = new Array;
+        years.forEach(function(d){
+          months.forEach(function(g){
+            var x = new Date(+d, +g, 1);
+            if(x <= new Date(2016,4,1)){
+              var bisect = d3.bisector(function(d) { return d.x; }).right,
+              i = bisect(userInput, x);
 
-      userInput2 = new Array;
-      years.forEach(function(d){
-        months.forEach(function(g){
-          var x = new Date(+d, +g, 1);
-          if(x <= new Date(2016,4,1)){
-            var bisect = d3.bisector(function(d) { return d.x; }).right,
-            i = bisect(userInput, x);
-
-            if(i==0) { 
-              var d0 = userInput[0],
-              d1 = userInput[1],
-              inputX = x - d0.x > d1.x - x ? d1 : d0;
-            } else {
-              var d0 = userInput[i - 1],
-              d1 = userInput[i],
-              inputX = x - d0.x > d1.x - x ? d1 : d0;
+              if(i==0) { 
+                var d0 = userInput[0],
+                d1 = userInput[1],
+                inputX = x - d0.x > d1.x - x ? d1 : d0;
+              } else {
+                var d0 = userInput[i - 1],
+                d1 = userInput[i],
+                inputX = x - d0.x > d1.x - x ? d1 : d0;
+              }
+              var y = inputX.y;
+              var defaultData = {x: x, y: y, yearMonth: d3.timeFormat("%Y-%m")(x)};
+              userInput2.push(defaultData);
             }
-            var y = inputX.y;
-            var defaultData = {x: x, y: y, yearMonth: d3.timeFormat("%Y-%m")(x)};
-            userInput2.push(defaultData);
+          })
+        });
+
+        function join(mis, millega, select) {
+          output = [];
+          for (i = 0; i < mis.length; i++) {
+            var x = mis[i];
+            var y = millega.filter(function(d, i){ return d.yearMonth ==  x.yearMonth; });
+
+            if(y.length == 0) { continue; };
+            output.push(select(x, y[0].y)); 
           }
-        })
-      });
+          return output;
+        };
 
-      function join(mis, millega, select) {
-        output = [];
-        for (i = 0; i < mis.length; i++) {
-          var x = mis[i];
-          var y = millega.filter(function(d, i){ return d.yearMonth ==  x.yearMonth; });
+        var data2 = new Array;
+        var data2 = join(df, userInput2, function(x, y){
+          return{
+            date: x.date,
+            day: x.day,
+            nav: x.nav,
+            yearMonth: x.yearMonth,
+            symbol: x.symbol,
+            bruto: y
+          }
+        });
 
-          if(y.length == 0) { continue; };
-          output.push(select(x, y[0].y)); 
-        }
-        return output;
-      };
-
-      var data2 = new Array;
-      var data2 = join(data, userInput2, function(x, y){
-        return{
-          date: x.date,
-          day: x.day,
-          nav: x.nav,
-          yearMonth: x.yearMonth,
-          symbol: x.symbol,
-          bruto: y
-        }
-      });
-
-      data2.forEach(function(d){
-        if(d.date < new Date(2009, 6, 01)){
-          d.input = d.bruto * 0.06;
-        } else if (d.date >= new Date(2009, 6, 01) && d.date < new Date(2010, 01, 01)){
-          d.input = 0;
-        } else if (d3.timeFormat("%Y")(d.date) == 2010){
-          if(!document.getElementById("2010sissemaksed").checked){
+        data2.forEach(function(d){
+          if(d.date < new Date(2009, 6, 01)){
+            d.input = d.bruto * 0.06;
+          } else if (d.date >= new Date(2009, 6, 01) && d.date < new Date(2010, 01, 01)){
             d.input = 0;
-          } else {
-            if (!document.getElementById("1955sündinud").checked){
-              d.input = d.bruto * 0.02;
-            } else {
-              d.input = d.bruto * 0.06;
-            }
-          }
-        } else if (d3.timeFormat("%Y")(d.date) == 2011){
-          if(!document.getElementById("2010sissemaksed").checked){
-            d.input = d.bruto * 0.03;
-          } else {
-            if (!document.getElementById("1955sündinud").checked){
-              d.input = d.bruto * 0.04;
-            } else {
-              d.input = d.bruto * 0.06;
-            }
-          }
-        } else if (d3.timeFormat("%Y")(d.date) == 2012 || (d3.timeFormat("%Y")(d.date) == 2013)){
-          d.input = d.bruto * 0.06;
-        } else if (d3.timeFormat("%Y")(d.date) >= 2014){
-          if(!document.getElementById("1955sündinud").checked){
-            if(!document.getElementById("vabatahtlik").checked){
-              d.input = d.bruto * 0.06;
-            } else {
-              d.input = d.bruto * 0.09;
-            }
-          } else {
+          } else if (d3.timeFormat("%Y")(d.date) == 2010){
             if(!document.getElementById("2010sissemaksed").checked){
+              d.input = 0;
+            } else {
+              if (!document.getElementById("1955sündinud").checked){
+                d.input = d.bruto * 0.02;
+              } else {
+                d.input = d.bruto * 0.06;
+              }
+            }
+          } else if (d3.timeFormat("%Y")(d.date) == 2011){
+            if(!document.getElementById("2010sissemaksed").checked){
+              d.input = d.bruto * 0.03;
+            } else {
+              if (!document.getElementById("1955sündinud").checked){
+                d.input = d.bruto * 0.04;
+              } else {
+                d.input = d.bruto * 0.06;
+              }
+            }
+          } else if (d3.timeFormat("%Y")(d.date) == 2012 || (d3.timeFormat("%Y")(d.date) == 2013)){
+            d.input = d.bruto * 0.06;
+          } else if (d3.timeFormat("%Y")(d.date) >= 2014){
+            if(!document.getElementById("1955sündinud").checked){
               if(!document.getElementById("vabatahtlik").checked){
                 d.input = d.bruto * 0.06;
               } else {
                 d.input = d.bruto * 0.09;
               }
             } else {
-              if(!document.getElementById("vabatahtlik").checked){
-                d.input = d.bruto * 0.08;
+              if(!document.getElementById("2010sissemaksed").checked){
+                if(!document.getElementById("vabatahtlik").checked){
+                  d.input = d.bruto * 0.06;
+                } else {
+                  d.input = d.bruto * 0.09;
+                }
               } else {
-                d.input = d.bruto * 0.09;
+                if(!document.getElementById("vabatahtlik").checked){
+                  d.input = d.bruto * 0.08;
+                } else {
+                  d.input = d.bruto * 0.09;
+                }
               }
             }
           }
-        }
 
-        if(d.day == 1) {
-          d.osakud = d.input / d.nav;
-        } else {
-          d.osakud = 0;
-        }
-      })
+          if(d.day == 1) {
+            d.osakud = d.input / d.nav;
+          } else {
+            d.osakud = 0;
+          }
+        })
 
-      maxValues = new Array;
-      cumsum = new Array;
-      var nestedData = d3.nest()
-      .key(function(d){return d.symbol;})
-      .entries(data2);
+        maxValues = new Array;
+        cumsum = new Array;
+        var nestedData = d3.nest()
+        .key(function(d){return d.symbol;})
+        .entries(data2);
 
-      nestedData.forEach(function(d,i){
-        var tmp = new Array;
-        var fond = d.values.map(function(d){ return d; });
-        fond = fond.sort(function(a, b){ return a.date - b.date; });
+        nestedData.forEach(function(d,i){
+          var tmp = new Array;
+          var fond = d.values.map(function(d){ return d; });
+          fond = fond.sort(function(a, b){ return a.date - b.date; });
 
-        tmp.push({sum: fond[0].osakud, x: fond[0].date, y: fond[0].osakud*fond[0].nav, symbol: fond[0].symbol});
+          tmp.push({sum: fond[0].osakud, x: fond[0].date, y: fond[0].osakud*fond[0].nav, symbol: fond[0].symbol});
 
-        for (i=1; i < fond.length; i++) {
-          var sum = tmp[i-1].sum + fond[i].osakud;
-          var value = sum * fond[i].nav;
-          tmp.push({sum: sum, x: fond[i].date, y: value, symbol: fond[i].symbol});
-          cumsum.push({sum: sum, x: fond[i].date, y: value, symbol: fond[i].symbol});
-        }
-        cumsum.push(tmp);
-        maxValues.push(d3.max(tmp, function(d) {return d.y; } ));
+          for (i=1; i < fond.length; i++) {
+            var sum = tmp[i-1].sum + fond[i].osakud;
+            var value = sum * fond[i].nav;
+            tmp.push({sum: sum, x: fond[i].date, y: value, symbol: fond[i].symbol});
+            cumsum.push({sum: sum, x: fond[i].date, y: value, symbol: fond[i].symbol});
+          }
+          cumsum.push(tmp);
+          maxValues.push(d3.max(tmp, function(d) {return d.y; } ));
 
 
-      })
+        })
 
-      y2.domain([0, d3.max(maxValues)+1000]);
-      g2.select(".y.axis2")
-      .transition()
-      .duration(500)
-      .call(d3.axisLeft(y2).tickSize(-width2,5));
+        y2.domain([0, d3.max(maxValues)+1000]);
+        g2.select(".y.axis2")
+        .transition()
+        .duration(500)
+        .call(d3.axisLeft(y2).tickSize(-width2,5));
 
-      var cumsumNest = d3.nest()
-      .key(function(d){return d.symbol;})
-      .entries(cumsum.filter(function(d){ return d.x < new Date(2015,12,1) }));
+        var cumsumNest = d3.nest()
+        .key(function(d){return d.symbol;})
+        .entries(cumsum.filter(function(d){ return d.x < new Date(2015,12,1) }));
 
-      cumsumNest.forEach(function(d,i){
-        g2.select("." + [d][0].key)
-        .attr("d", line2(d.values));
+        g2.selectAll("#jooned")
+        .remove();
 
-        g2.selectAll("." + [d][0].key)
-        .attr("y", y2(d.values[d.values.length-1].y))
-        .text(d.key + " - " + d3.format(".0f")(d.values[d.values.length-1].y) + "€")
-      })
+        cumsumNest.forEach(function(d, i){
+          g2.append("path")
+          .data(cumsumNest.filter(function(g){return g.key == d.key; }))
+          .attr("id", "jooned")
+          .style("fill", "none")
+          .style("stroke", c2(i))
+          .style("stroke-width", 1)
+          .attr("d", line2(d.values));
 
-    }
+          g2.append("text")
+          .data(cumsumNest.filter(function(g){return g.key == d.key; }))
+          .attr("id", "jooned")
+          .attr("class", "labels")
+          .style("fill", c2(i))
+          .attr("x", width2 + 5)
+          .attr("y", y2(d.values[d.values.length-1].y))
+          .text(d.key + " - " + d3.format(".0f")(d.values[d.values.length-1].y) + "€")
+        })
+      });
+  }
+}
 
-  });
 </script>
 </body>
 </html>
