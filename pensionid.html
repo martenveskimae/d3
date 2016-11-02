@@ -44,10 +44,13 @@
       <option value="10000">10 000€</option>
   </select>
   </div>
+  <p align="center"> Siia võib mingi jutu kirjutada</p>
+  <div class="container2">
+  </div>
   <script src="http://d3js.org/d3.v4.min.js"></script>
   <script>
     var margin = {top: 20, right: 120, bottom: 30, left: 70},
-    width = 800 - margin.left - margin.right,
+    width = 1000 - margin.left - margin.right,
     height = 200 - margin.top - margin.bottom;
 
     var x = d3.scaleTime().range([0, width]),
@@ -63,7 +66,7 @@
     .y(function(d) { return y(d.y); })
     .curve(d3.curveMonotoneX);
 
-    var svg = d3.select("body").append("svg")
+    var svg = d3.select(".container").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom);
     var g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -74,28 +77,15 @@
         d.date = new Date(+d.year, +d.month-1, 1);
         d.bruto = +d.bruto;
       });
-
-      var years = [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016],
-      months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-
+      
       userInput = new Array;
-      years.forEach(function(d){
-        months.forEach(function(g){
-          var x = new Date(+d, +g, 1);
-          var y = 0;
-          var defaultData= {x: x, y: y};
-          userInput.push(defaultData);
-        })
-      });
-
-      /*
       data.forEach(function(d){
         var x = d.date;
         var y = 0;
         var defaultData= {x: x, y: y};
         userInput.push(defaultData);
       });
-      */
+      
 
       x.domain(d3.extent(data, function(d) { return d.date; }));
       y.domain([0, maxInput]);
@@ -189,14 +179,14 @@
       .on("click", dataInput)
       .on("mousemove", helper)
       .on("mouseout", helperout)
-      .call(d3.drag().on("drag", dataInput));
+      .call(d3.drag().on("drag", dataInput).on("end", function(d) { fondUpdate() }));
 
       function helper(){
         var coords = d3.mouse(this),
         mouseDate = x.invert(coords[0]),
         dates = userInput.map(function(d) {return d.x; });
 
-        var bisect = d3.bisector(function(d) { return d; }).left,
+        var bisect = d3.bisector(function(d) { return d; }).right,
         i = bisect(dates, mouseDate);
 
         var d0 = dates[i - 1],
@@ -207,7 +197,7 @@
         var index = dates.indexOf(inputX);
         if(coords[0] > width - (width/(userInput.length-1))/2 ){
           var index = userInput.length - 1;
-          var inputData = {x: userInput[index].x,y: inputY};
+          var inputData = {x: userInput[index].x, y: inputY, yearMonth: userInput[index].yearMonth};
         }
         if (index !== -1) {
           g.selectAll("#userInputPoints")
@@ -234,7 +224,7 @@
         mouseDate = x.invert(coords[0]),
         dates = userInput.map(function(d) {return d.x; });
 
-        var bisect = d3.bisector(function(d) { return d; }).left,
+        var bisect = d3.bisector(function(d) { return d; }).right,
         i = bisect(dates, mouseDate);
 
         var d0 = dates[i - 1],
@@ -247,12 +237,12 @@
           var inputY = 0;
         }
 
-        var inputData = {x: inputX,y: inputY};
+        var inputData = {x: inputX, y: inputY, yearMonth: d3.timeFormat("%Y-%m")(inputX)};
 
         var index = dates.indexOf(inputX);
         if(coords[0] > width - (width/(userInput.length-1))/2 ){
           var index = userInput.length - 1;
-          var inputData = {x: userInput[index].x,y: inputY};
+          var inputData = {x: userInput[index].x, y: inputY, yearMonth: d3.timeFormat("%Y-%m")(userInput[index].x)};
         }
         if (index !== -1) {
           userInput[index] = inputData;
@@ -338,6 +328,181 @@
 
     });
 
+  </script>
+
+  <script>
+   var margin2 = {top: 20, right: 120, bottom: 30, left: 70},
+    width2 = 1000 - margin2.left - margin2.right,
+    height2 = 500 - margin2.top - margin2.bottom;
+
+    var x2 = d3.scaleTime().range([0, width2]),
+    y2 = d3.scaleLinear().range([height2, 0]),
+    c2 = d3.scaleOrdinal(d3.schemeCategory20c);
+
+    var line2 = d3.line()
+    .x(function(d) { return x2(d.x); })
+    .y(function(d) { return y2(d.y); });
+
+    var line22 = d3.line()
+    .x(function(d) { return x2(d.x); })
+    .y(function(d) { return y2(d.y); });
+
+    var svg2 = d3.select(".container2").append("svg")
+    .attr("width", width2 + margin2.left + margin2.right)
+    .attr("height", height2 + margin2.top + margin2.bottom);
+    var g2 = svg2.append("g").attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+
+    d3.tsv("fondid.txt", function(error, data) {
+
+      data.forEach(function(d,i) {
+        d.date = new Date(+d.year, +d.month-1, +d.day);
+        d.year = +d.year;
+        d.yearMonth = d3.timeFormat("%Y-%m")(d.date)
+        d.nav = +d.nav;
+      });
+      data.sort(function(a, b){ return a.year - b.year; });
+
+      x2.domain(d3.extent(data, function(d) { return d.date; }));
+      y2.domain([0, 10000]);
+
+      g2.append("g")
+      .attr("class", "x axis2")
+      .attr("transform", "translate(0," + height2 + ")")
+      .call(d3.axisBottom(x2).tickSize(-height2,5))
+      .append("text")
+      .attr("class", "label")
+      .attr("x", width2-5)
+      .attr("y", -6)
+      .style("text-anchor", "end")
+      .style("fill", "black")
+      .text("Aeg");
+
+      g2.append("g")
+      .attr("class", "y axis2")
+      .call(d3.axisLeft(y2).tickSize(-width2,5))
+      .append("text")
+      .attr("class", "label")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("x", -5)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .style("fill", "black")
+      .text("Osakute kumulatiivne puhasväärtus");
+
+      var nested = d3.nest()
+      .key(function(d){return d.symbol;})
+      .entries(data);
+
+      nested.forEach(function(d,i){
+        g2.append("path")
+        .data(nested)
+        .attr("class", d.values[0].symbol)
+        .style("fill", "none")
+        .style("stroke", c2(i))
+        .style("stroke-width", 1);
+
+        g2.append("text")
+        .data(nested)
+        .attr("class", d.values[0].symbol)
+        .attr("x", width2 + 5)
+        .style("fill", c2(i));
+
+      });
+
+      fondUpdate = function fondUpdate(){
+
+        var years = [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015],
+        months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+
+        userInput2 = new Array;
+        years.forEach(function(d){
+          months.forEach(function(g){
+            var x = new Date(+d, +g, 1);
+
+            var bisect = d3.bisector(function(d) { return d.x; }).right,
+            i = bisect(userInput, x);
+
+            if(i==0) { 
+              var d0 = userInput[0],
+              d1 = userInput[1],
+              inputX = x - d0.x > d1.x - x ? d1 : d0;
+            } else {
+              var d0 = userInput[i - 1],
+              d1 = userInput[i],
+              inputX = x - d0.x > d1.x - x ? d1 : d0;
+            }
+
+            var y = inputX.y;
+            var defaultData = {x: x, y: y, yearMonth: d3.timeFormat("%Y-%m")(x)};
+            userInput2.push(defaultData);
+          })
+        });
+
+        function join(mis, millega, select) {
+          output = [];
+          for (i = 5000; i < 60000; i++) {
+            var x = mis[i];
+            var y = millega.filter(function(d, i){ return d.yearMonth ==  x.yearMonth; });
+            output.push(select(x, y[0].y)); 
+          }
+          return output;
+        };
+
+        var data2 = [];
+        var data2 = join(data, userInput2, function(x, y){
+          return{
+            date: x.date,
+            day: x.day,
+            nav: x.nav,
+            yearMonth: x.yearMonth,
+            symbol: x.symbol,
+            bruto: y,
+            input: y * 0.06
+          }
+        });
+
+        data2.forEach(function(d){
+          if(d.day == 1) {
+            d.osakud = d.input / d.nav;
+          } else {
+            d.osakud = 0;
+          }
+        })
+
+        var nestedData = d3.nest()
+        .key(function(d){return d.symbol;})
+        .entries(data2);
+
+        nestedData.forEach(function(d,i){
+          var fond = [];
+          var fond = d.values.map(function(d){ return d; });
+
+          var cumsum = [];
+          var cumsum = [{sum: fond[0].osakud, x: fond[0].date, y: fond[0].osakud*fond[0].nav, symbol: fond[0].symbol}];
+          for (i=1; i < fond.length; i++) {
+            var sum = cumsum[i-1].sum + fond[i].osakud;
+            var value = sum * fond[i].nav
+            cumsum.push({sum: sum, x: fond[i].date, y: value, symbol: fond[i].symbol});
+          }
+          console.log(cumsum)
+
+
+          g2.select("." + [d][0].key)
+          .attr("d", line22(cumsum.filter(function(g){ return g.symbol == d.key })));
+
+          g2.selectAll("." + [d][0].key)
+          .transition()
+          .duration(500)
+          .attr("y", y2(cumsum[cumsum.length-1].y))
+          .text(d.values[0].symbol + " - " + d3.format(".0f")(cumsum[cumsum.length-1].y) + "€")
+
+
+        })
+        
+      }
+
+    });
   </script>
 </body>
 </html>
