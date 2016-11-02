@@ -18,6 +18,10 @@
   input, select{
     margin-right: 20px;
   }
+  .datas{
+    margin-right: auto;
+    margin-left: 20px;
+  }
   .title{
     font-size: 36px;
     text-align: center;
@@ -31,7 +35,7 @@
 <body>
   <p class="title">Pensionid</p>
   <div class="container" align="center">
-    Vali palgaskaala ülempiir:
+    Palgaskaala ülempiir:
     <select onchange="maximumInput(this.value)">
       <option value="2000">2000€</option>
       <option value="3000">3000€</option>
@@ -45,13 +49,14 @@
     </select>
     Sündinud pärast 1955. aastat <input id="1955sündinud" class="checks" type="checkbox" checked="checked">
     Isiklikud sissemaksed aastal 2010 <input id="2010sissemaksed" class="checks" type="checkbox" checked="checked">
-    3% isiklikud sissemaksed 2014-2017 <input id="vabatahtlik" class="checks" type="checkbox" checked="checked">
+    Suuremad isiklikud sissemaksed aastatel 2014-2017 <input id="vabatahtlik" class="checks" type="checkbox" checked="checked">
   </div>
   <div align="center">
-    Konservatiivne <input id="data1" class="datas" type="radio" name="dataset" value="konservatiivne.txt" checked="checked">
-    Tasakaalustatud <input id="data2" class="datas" type="radio" name="dataset" value="tasakaalustatud.txt">
-    Progressiivne <input id="data3" class="datas" type="radio" name="dataset" value="progressiivne.txt">
-    Agressiivne <input id="data4" class="datas" type="radio" name="dataset" value="agressiivne.txt">
+  Pensionifondi liik:
+    <input id="data1" class="datas" type="radio" name="dataset" value="konservatiivne.txt" checked="checked"> konservatiivne
+    <input id="data2" class="datas" type="radio" name="dataset" value="tasakaalustatud.txt"> tasakaalustatud
+    <input id="data3" class="datas" type="radio" name="dataset" value="progressiivne.txt"> progressiivne
+    <input id="data4" class="datas" type="radio" name="dataset" value="agressiivne.txt"> agressiivne
   </div>
   <div class="container2">
   </div>
@@ -206,7 +211,7 @@
       .call(d3.drag().on("drag", dataInput).on("end", function(d) { fondUpdate() }));
 
       function helper(){
-        d3.select("#juhis")
+        d3.selectAll("#juhis")
         .transition()
         .duration(2000)
         .style("opacity", 0);
@@ -393,6 +398,16 @@
 
    x2.domain(d3.extent(dataDates, function(d) { return d.date; }));
    y2.domain([0, 5000]);
+
+   g2.append("text")
+   .attr("id", "juhis")
+   .attr("x", width2/2)
+   .attr("y", height2/2 + 12)
+   .style("text-anchor", "middle")
+   .style("font-size", 32)
+   .style("fill", "grey")
+   .style("opacity", .5)
+   .text("Siia joonistub soetatud osakute väärtus eurodes")
 
    g2.append("g")
    .attr("class", "x axis2")
