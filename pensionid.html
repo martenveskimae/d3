@@ -450,6 +450,7 @@
         return{
           date: x.date,
           day: x.day,
+          year: x.year,
           nav: x.nav,
           yearMonth: x.yearMonth,
           symbol: x.symbol,
@@ -477,12 +478,12 @@
         var fond = [];
         var fond = d.values.map(function(d){ return d; });
 
-        cumsum.push({sum: fond[0].osakud, x: fond[0].date, y: fond[0].osakud*fond[0].nav, symbol: fond[0].symbol});
+        cumsum.push({sum: fond[0].osakud, x: fond[0].date, year: fond[0].year, y: fond[0].osakud*fond[0].nav, symbol: fond[0].symbol});
 
         for (i=1; i < fond.length; i++) {
           var sum = cumsum[i-1].sum + fond[i].osakud;
           var value = sum * fond[i].nav
-          cumsum.push({sum: sum, x: fond[i].date, y: value, symbol: fond[i].symbol});
+          cumsum.push({sum: sum, x: fond[i].date, year: fond[i].year, y: value, symbol: fond[i].symbol});
         }
 
         maxValues.push(d3.max(cumsum, function(d) {return d.y; } ));
@@ -497,7 +498,7 @@
 
       var cumsumNest = d3.nest()
       .key(function(d){return d.symbol;})
-      .entries(cumsum);
+      .entries(cumsum.filter(function(d){ return d.year <= 2015 }));
 
       cumsumNest.forEach(function(d,i){
         g2.select("." + [d][0].key)
