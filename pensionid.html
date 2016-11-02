@@ -31,8 +31,8 @@
 <body>
   <p class="title">Pensionid</p>
   <div class="container" align="center">
-  Vali palgaskaala ülempiir:
-  <select onchange="maximumInput(this.value)">
+    Vali palgaskaala ülempiir:
+    <select onchange="maximumInput(this.value)">
       <option value="2000">2000€</option>
       <option value="3000">3000€</option>
       <option value="4000">4000€</option>
@@ -42,7 +42,7 @@
       <option value="8000">8000€</option>
       <option value="9000">9000€</option>
       <option value="10000">10 000€</option>
-  </select>
+    </select>
   </div>
   <p align="center"> Siia võib mingi jutu kirjutada</p>
   <div class="container2">
@@ -117,14 +117,14 @@
       .attr("d", userLine(userInput))
       .attr("clip-path", "url(#box)")
       .style("fill", "none")
-      .style("stroke", "#CC6600")
+      .style("stroke", "#fc9920")
       .style("stroke-width", 2);
 
       g.append("text")
       .attr("id", "userInputText")
       .attr("y", function(){ return y(0)+5; })
       .attr("x", width + 5)
-      .style("fill", "#CC6600")
+      .style("fill", "#fc9920")
       .text("Sinu bruto palk");
 
       g.selectAll(".circles")
@@ -138,7 +138,7 @@
       .attr("cy", function(d){return y(d.y);})
       .attr("r", 2.5)
       .style("fill", "none")
-      .style("stroke", "#CC6600")
+      .style("stroke", "#fc9920")
       .style("stroke-width", 1);
 
       g.append("g")
@@ -169,7 +169,7 @@
       g.append("text")
       .attr("class", "helper")
       .style("display", "none")
-      .style("fill", "#CC6600");
+      .style("fill", "#fc9920");
 
       g.append("rect")
       .attr("width", width)
@@ -203,7 +203,7 @@
           g.selectAll("#userInputPoints")
           .style("fill", "none");
           g.select(".circle"+index)
-          .style("fill", "#CC6600");
+          .style("fill", "#fc9920");
 
           g.select(".helper")
           .attr("transform", function(d){ return "translate("+ (x(userInput[index].x) - 12)  +","+ (y(userInput[index].y) - 10) +")"; })
@@ -216,7 +216,7 @@
         g.select(".helper")
         .style("display", "none")
         g.selectAll("#userInputPoints")
-          .style("fill", "none");
+        .style("fill", "none");
       }
 
       function dataInput(){
@@ -250,7 +250,7 @@
           g.selectAll("#userInputPoints")
           .style("fill", "none");
           g.select(".circle"+index)
-          .style("fill", "#CC6600");
+          .style("fill", "#fc9920");
 
           g.select(".helper")
           .attr("transform", function(d){ return "translate("+ (x(userInput[index].x) - 12)  +","+ (y(userInput[index].y) - 10) +")"; })
@@ -301,7 +301,7 @@
         .duration(time)
         .attr("d", line(data));
 
-         g.select("#brutoText")
+        g.select("#brutoText")
         .transition()
         .duration(time)
         .attr("y", function(){ return y(data[data.length-1].bruto)+5; });
@@ -332,194 +332,189 @@
 
   <script>
    var margin2 = {top: 20, right: 120, bottom: 30, left: 70},
-    width2 = 1000 - margin2.left - margin2.right,
-    height2 = 500 - margin2.top - margin2.bottom;
+   width2 = 1000 - margin2.left - margin2.right,
+   height2 = 500 - margin2.top - margin2.bottom;
 
-    var x2 = d3.scaleTime().range([0, width2]),
-    y2 = d3.scaleLinear().range([height2, 0]),
-    c2 = d3.scaleOrdinal(d3.schemeCategory20c);
+   var x2 = d3.scaleTime().range([0, width2]),
+   y2 = d3.scaleLinear().range([height2, 0]),
+   c2 = d3.scaleOrdinal(d3.schemeCategory20c);
 
-    var line2 = d3.line()
-    .x(function(d) { return x2(d.x); })
-    .y(function(d) { return y2(d.y); });
+   var line2 = d3.line()
+   .x(function(d) { return x2(d.x); })
+   .y(function(d) { return y2(d.y); });
 
-    var line22 = d3.line()
-    .x(function(d) { return x2(d.x); })
-    .y(function(d) { return y2(d.y); });
+   var svg2 = d3.select(".container2").append("svg")
+   .attr("width", width2 + margin2.left + margin2.right)
+   .attr("height", height2 + margin2.top + margin2.bottom);
+   var g2 = svg2.append("g").attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
 
-    var svg2 = d3.select(".container2").append("svg")
-    .attr("width", width2 + margin2.left + margin2.right)
-    .attr("height", height2 + margin2.top + margin2.bottom);
-    var g2 = svg2.append("g").attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+   d3.tsv("fondid.txt", function(error, data) {
 
-    d3.tsv("fondid.txt", function(error, data) {
+    data.forEach(function(d,i) {
+      d.date = new Date(+d.year, +d.month-1, +d.day);
+      d.year = +d.year;
+      d.yearMonth = d3.timeFormat("%Y-%m")(d.date)
+      d.nav = +d.nav;
+    });
+    data.sort(function(a, b){ return a.year - b.year; });
 
-      data.forEach(function(d,i) {
-        d.date = new Date(+d.year, +d.month-1, +d.day);
-        d.year = +d.year;
-        d.yearMonth = d3.timeFormat("%Y-%m")(d.date)
-        d.nav = +d.nav;
-      });
-      data.sort(function(a, b){ return a.year - b.year; });
+    x2.domain(d3.extent(data, function(d) { return d.date; }));
+    y2.domain([0, 5000]);
 
-      x2.domain(d3.extent(data, function(d) { return d.date; }));
-      y2.domain([0, 10000]);
+    g2.append("g")
+    .attr("class", "x axis2")
+    .attr("transform", "translate(0," + height2 + ")")
+    .call(d3.axisBottom(x2).tickSize(-height2,5))
+    .append("text")
+    .attr("class", "label")
+    .attr("x", width2-5)
+    .attr("y", -6)
+    .style("text-anchor", "end")
+    .style("fill", "black")
+    .text("Aeg");
 
-      g2.append("g")
-      .attr("class", "x axis2")
-      .attr("transform", "translate(0," + height2 + ")")
-      .call(d3.axisBottom(x2).tickSize(-height2,5))
-      .append("text")
-      .attr("class", "label")
-      .attr("x", width2-5)
-      .attr("y", -6)
-      .style("text-anchor", "end")
-      .style("fill", "black")
-      .text("Aeg");
+    g2.append("g")
+    .attr("class", "y axis2")
+    .call(d3.axisLeft(y2).tickSize(-width2,5))
+    .append("text")
+    .attr("class", "label")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 6)
+    .attr("x", -5)
+    .attr("dy", ".71em")
+    .style("text-anchor", "end")
+    .style("fill", "black")
+    .text("Osakute kumulatiivne puhasväärtus");
 
-      g2.append("g")
-      .attr("class", "y axis2")
-      .call(d3.axisLeft(y2).tickSize(-width2,5))
-      .append("text")
-      .attr("class", "label")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 6)
-      .attr("x", -5)
-      .attr("dy", ".71em")
-      .style("text-anchor", "end")
-      .style("fill", "black")
-      .text("Osakute kumulatiivne puhasväärtus");
+    var nested = d3.nest()
+    .key(function(d){return d.symbol;})
+    .entries(data);
 
-      var nested = d3.nest()
-      .key(function(d){return d.symbol;})
-      .entries(data);
+    nested.forEach(function(d,i){
+      g2.append("path")
+      .data(nested)
+      .attr("class", d.values[0].symbol)
+      .style("fill", "none")
+      .style("stroke", c2(i))
+      .style("stroke-width", 1);
 
-      nested.forEach(function(d,i){
-        g2.append("path")
-        .data(nested)
-        .attr("class", d.values[0].symbol)
-        .style("fill", "none")
-        .style("stroke", c2(i))
-        .style("stroke-width", 1);
-
-        g2.append("text")
-        .data(nested)
-        .attr("class", d.values[0].symbol)
-        .attr("x", width2 + 5)
-        .style("fill", c2(i));
-
-      });
-
-      fondUpdate = function fondUpdate(){
-        maxValues = new Array;
-        cumsum = new Array;
-
-        var years = [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015],
-        months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-
-        userInput2 = new Array;
-        years.forEach(function(d){
-          months.forEach(function(g){
-            var x = new Date(+d, +g, 1);
-
-            var bisect = d3.bisector(function(d) { return d.x; }).right,
-            i = bisect(userInput, x);
-
-            if(i==0) { 
-              var d0 = userInput[0],
-              d1 = userInput[1],
-              inputX = x - d0.x > d1.x - x ? d1 : d0;
-            } else {
-              var d0 = userInput[i - 1],
-              d1 = userInput[i],
-              inputX = x - d0.x > d1.x - x ? d1 : d0;
-            }
-            var y = inputX.y;
-            var defaultData = {x: x, y: y, yearMonth: d3.timeFormat("%Y-%m")(x)};
-            userInput2.push(defaultData);
-          })
-        });
-
-        function join(mis, millega, select) {
-          output = [];
-          for (i = 0; i < mis.length; i++) {
-            var x = mis[i];
-            var y = millega.filter(function(d, i){ return d.yearMonth ==  x.yearMonth; });
-
-            if(y.length == 0) { continue; };
-            output.push(select(x, y[0].y)); 
-          }
-          return output;
-        };
-
-        var data2 = [];
-        var data2 = join(data, userInput2, function(x, y){
-          return{
-            date: x.date,
-            day: x.day,
-            nav: x.nav,
-            yearMonth: x.yearMonth,
-            symbol: x.symbol,
-            bruto: y,
-            input: y * 0.06
-          }
-        });
-
-        data2.forEach(function(d){
-          if(d.day == 1) {
-            d.osakud = d.input / d.nav;
-          } else {
-            d.osakud = 0;
-          }
-        })
-
-        var nestedData = d3.nest()
-        .key(function(d){return d.symbol;})
-        .entries(data2);
-
-        nestedData.forEach(function(d,i){
-          var fond = [];
-          var fond = d.values.map(function(d){ return d; });
-          var fond = fond.sort(function(a, b){ return b.x - a.x; });
-
-          cumsum.push({sum: fond[0].osakud, x: fond[0].date, y: fond[0].osakud*fond[0].nav, symbol: fond[0].symbol});
-
-          for (i=1; i < fond.length; i++) {
-            var sum = cumsum[i-1].sum + fond[i].osakud;
-            var value = sum * fond[i].nav
-            cumsum.push({sum: sum, x: fond[i].date, y: value, symbol: fond[i].symbol});
-          }
-
-          maxValues.push(cumsum[cumsum.length-1].y);
-
-        })
-
-        y2.domain([0, d3.max(maxValues)+1000]);
-        g2.select(".y.axis2")
-        .transition()
-        .duration(500)
-        .call(d3.axisLeft(y2).tickSize(-width2,5));
-
-        var cumsumNest = d3.nest()
-        .key(function(d){return d.symbol;})
-        .entries(cumsum);
-
-        cumsumNest.forEach(function(d,i){
-          g2.select("." + [d][0].key)
-          .transition()
-          .duration(500)
-          .attr("d", line22(cumsum.filter(function(g){ return g.symbol == d.key })));
-
-          g2.selectAll("." + [d][0].key)
-          .transition()
-          .duration(500)
-          .attr("y", y2(d.values[d.values.length-1].y))
-          .text(d.key + " - " + d3.format(".0f")(d.values[d.values.length-1].y) + "€")
-        })
-        
-      }
+      g2.append("text")
+      .data(nested)
+      .attr("class", d.values[0].symbol)
+      .attr("x", width2 + 5)
+      .style("fill", c2(i));
 
     });
-  </script>
+
+    fondUpdate = function fondUpdate(){
+      var years = [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015],
+      months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+
+      userInput2 = new Array;
+      years.forEach(function(d){
+        months.forEach(function(g){
+          var x = new Date(+d, +g, 1);
+
+          var bisect = d3.bisector(function(d) { return d.x; }).right,
+          i = bisect(userInput, x);
+
+          if(i==0) { 
+            var d0 = userInput[0],
+            d1 = userInput[1],
+            inputX = x - d0.x > d1.x - x ? d1 : d0;
+          } else {
+            var d0 = userInput[i - 1],
+            d1 = userInput[i],
+            inputX = x - d0.x > d1.x - x ? d1 : d0;
+          }
+          var y = inputX.y;
+          var defaultData = {x: x, y: y, yearMonth: d3.timeFormat("%Y-%m")(x)};
+          userInput2.push(defaultData);
+        })
+      });
+
+      function join(mis, millega, select) {
+        output = [];
+        for (i = 0; i < mis.length; i++) {
+          var x = mis[i];
+          var y = millega.filter(function(d, i){ return d.yearMonth ==  x.yearMonth; });
+
+          if(y.length == 0) { continue; };
+          output.push(select(x, y[0].y)); 
+        }
+        return output;
+      };
+
+      var data2 = new Array;
+      var data2 = join(data, userInput2, function(x, y){
+        return{
+          date: x.date,
+          day: x.day,
+          nav: x.nav,
+          yearMonth: x.yearMonth,
+          symbol: x.symbol,
+          bruto: y,
+          input: y * 0.06
+        }
+      });
+      data2 = data2.sort(function(a, b){ return a.date - b.date; });
+
+      data2.forEach(function(d){
+        if(d.day == 1) {
+          d.osakud = d.input / d.nav;
+        } else {
+          d.osakud = 0;
+        }
+      })
+
+      maxValues = new Array;
+      cumsum = new Array;
+      var nestedData = d3.nest()
+      .key(function(d){return d.symbol;})
+      .entries(data2);
+
+      nestedData.forEach(function(d,i){
+        var fond = [];
+        var fond = d.values.map(function(d){ return d; });
+
+        cumsum.push({sum: fond[0].osakud, x: fond[0].date, y: fond[0].osakud*fond[0].nav, symbol: fond[0].symbol});
+
+        for (i=1; i < fond.length; i++) {
+          var sum = cumsum[i-1].sum + fond[i].osakud;
+          var value = sum * fond[i].nav
+          cumsum.push({sum: sum, x: fond[i].date, y: value, symbol: fond[i].symbol});
+        }
+
+        maxValues.push(cumsum[cumsum.length-1].y);
+
+      })
+
+      y2.domain([0, d3.max(maxValues)+1000]);
+      g2.select(".y.axis2")
+      .transition()
+      .duration(500)
+      .call(d3.axisLeft(y2).tickSize(-width2,5));
+
+      var cumsumNest = d3.nest()
+      .key(function(d){return d.symbol;})
+      .entries(cumsum);
+
+      cumsumNest.forEach(function(d,i){
+        g2.select("." + [d][0].key)
+        .transition()
+        .duration(500)
+        .attr("d", line2(cumsum.filter(function(g){ return g.symbol == d.key })));
+
+        g2.selectAll("." + [d][0].key)
+        .transition()
+        .duration(500)
+        .attr("y", y2(d.values[d.values.length-1].y))
+        .text(d.key + " - " + d3.format(".0f")(d.values[d.values.length-1].y) + "€")
+      })
+
+    }
+
+  });
+</script>
 </body>
 </html>
