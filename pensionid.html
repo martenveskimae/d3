@@ -19,7 +19,7 @@
     margin-right: 20px;
   }
   #juhis{
-    font-size: 32px;
+    font-size: 26px;
   }
   .datas{
     margin-right: auto;
@@ -68,9 +68,11 @@
     d3.selectAll(".checks").on("change", function() {
       fondUpdate();
     })
+
     d3.selectAll(".datas").on("click", function() {
       fondUpdate();
     })
+
     EST = d3.formatLocale({
       "decimal": ".",
       "thousands": ",",
@@ -85,6 +87,7 @@
       "months": ["Jaanuar", "Veebruar", "Märts", "Aprill", "Mai", "Juuni", "Juuli", "August", "September", "Oktoober", "November", "Detsember"],
       "shortMonths": ["Jaan", "Veebr", "Märts", "Apr", "Mai", "Juuni", "Juuli", "Aug", "Sep", "Okt", "Nov", "Dets"]
     });
+
     var margin = {top: 20, right: 120, bottom: 30, left: 70},
     width = 1000 - margin.left - margin.right,
     height = 200 - margin.top - margin.bottom;
@@ -122,7 +125,6 @@
         userInput.push(defaultData);
       });
       
-
       x.domain(d3.extent(data, function(d) { return d.date; }));
       y.domain([0, maxInput]);
 
@@ -475,8 +477,16 @@
           d.year = +d.year;
           d.yearMonth = d3.timeFormat("%Y-%m")(d.date)
           d.nav = +d.nav;
+          d.kinni = +d.kinni;
+          d.enne55_jatkab = +d.enne55_jatkab;
+          d.katkestab_3ei = +d.katkestab_3ei;
+          d.katkestab_3jah = +d.katkestab_3jah;
+          d.parast55_jatkab_3ei = +d.parast55_jatkab_3ei;
+          d.parast55_jatkab_3jah = +d.parast55_jatkab_3jah;
         });
         df = df.filter(function(d){ return d.date <= new Date(2016,05,01); });
+
+        console.log(df);
 
         var years = [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016],
         months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
@@ -526,63 +536,31 @@
             day: x.day,
             nav: x.nav,
             symbol: x.symbol,
+            kinni: x.kinni,
+            enne55_jatkab: x.enne55_jatkab,
+            katkestab_3ei: x.katkestab_3ei,
+            katkestab_3jah: x.katkestab_3jah,
+            parast55_jatkab_3ei: x.parast55_jatkab_3ei,
+            parast55_jatkab_3jah: x.parast55_jatkab_3jah,
             bruto: y
           }
         });
 
         df.forEach(function(d){
-          
-          if(d.date < new Date(2009, 6, 01)){
-            d.input = d.bruto * 0.06;
-          } else if (d.date >= new Date(2009, 6, 01) && d.date < new Date(2010, 01, 01)){
-            d.input = 0;
-          } else if (d3.timeFormat("%Y")(d.date) == 2010){
-            if(!document.getElementById("2010sissemaksed").checked){
-              d.input = 0;
-            } else {
-              if (!document.getElementById("1955sündinud").checked){
-                d.input = d.bruto * 0.02;
-              } else {
-                d.input = d.bruto * 0.06;
-              }
-            }
-          } else if (d3.timeFormat("%Y")(d.date) == 2011){
-            if(!document.getElementById("2010sissemaksed").checked){
-              d.input = d.bruto * 0.03;
-            } else {
-              if (!document.getElementById("1955sündinud").checked){
-                d.input = d.bruto * 0.04;
-              } else {
-                d.input = d.bruto * 0.06;
-              }
-            }
-          } else if (d3.timeFormat("%Y")(d.date) == 2012 || (d3.timeFormat("%Y")(d.date) == 2013)){
-            d.input = d.bruto * 0.06;
-          } else if (d3.timeFormat("%Y")(d.date) >= 2014){
-            if(!document.getElementById("1955sündinud").checked){
-              if(!document.getElementById("vabatahtlik").checked){
-                d.input = d.bruto * 0.06;
-              } else {
-                d.input = d.bruto * 0.09;
-              }
-            } else {
-              if(!document.getElementById("2010sissemaksed").checked){
-                if(!document.getElementById("vabatahtlik").checked){
-                  d.input = d.bruto * 0.06;
-                } else {
-                  d.input = d.bruto * 0.09;
-                }
-              } else {
-                if(!document.getElementById("vabatahtlik").checked){
-                  d.input = d.bruto * 0.08;
-                } else {
-                  d.input = d.bruto * 0.09;
-                }
-              }
-            }
-          }
 
-          if(d.day == 2) {
+          if(!document.getElementById("1955sündinud").checked && document.getElementById("2010sissemaksed").checked){
+            d.input = d.bruto * d.enne55_jatkab * (1-(d.kinni / 100));
+          } else if (!document.getElementById("2010sissemaksed").checked && !document.getElementById("vabatahtlik").checked){
+            d.input = d.bruto * d.katkestab_3ei * (1-(d.kinni / 100));
+          } else if (!document.getElementById("2010sissemaksed").checked && document.getElementById("vabatahtlik").checked){
+            d.input = d.bruto * d.katkestab_3jah * (1-(d.kinni / 100));
+          } else if (document.getElementById("1955sündinud").checked && document.getElementById("2010sissemaksed").checked && !document.getElementById("vabatahtlik").checked){
+            d.input = d.bruto * d.parast55_jatkab_3ei * (1-(d.kinni / 100));
+          } else if (document.getElementById("1955sündinud").checked && document.getElementById("2010sissemaksed").checked && document.getElementById("vabatahtlik").checked){
+            d.input = d.bruto * d.parast55_jatkab_3jah * (1-(d.kinni / 100));
+          } 
+
+          if(d.day == 1) {
             d.osakud = d.input / d.nav;
           } else {
             d.osakud = 0;
@@ -629,6 +607,44 @@
         .remove();
 
         cumsumNest.forEach(function(d, i){
+          var fondLines = g2.append("g")
+
+          fondLines.append("path")
+          .attr("class", "fondLine")
+          .style("fill", "none")
+          .attr("clip-path", "url(#box2)")
+          .style("stroke", c2(i));
+
+          fondLines.append("text")
+          .attr("class", "fondText")
+          .attr("dy", ".35em")
+          .style("fill", c2(i));
+
+        });
+
+        d3.selectAll(".fondLine")
+        .data(cumsumNest)
+        .attr("id", function(d){return d.key;});
+
+        d3.selectAll(".fondLine")
+        .data(cumsumNest)
+        .transition()
+        .duration(500)
+        .attr("d", function(d){ return line2(d.values); });
+
+        d3.selectAll(".fondText")
+        .data(cumsumNest)
+        .transition()
+        .duration(500)
+        .attr("x", width2 + 5)
+        .attr("y", function(d,i){ 
+          var lastValue = cumsumNest[i].values[(cumsumNest[i].values.length-1)].y;
+          return y2(lastValue);})
+        .text(function(d){ return d.key + " - " + d3.format(",.0f")(d.values[d.values.length-1].y) + "€" });
+
+        /*
+        cumsumNest.forEach(function(d, i){
+
           g2.append("path")
           .data(cumsumNest.filter(function(g){return g.key == d.key; }))
           .attr("id", "jooned")
@@ -647,6 +663,7 @@
           .attr("y", y2(d.values[d.values.length-1].y))
           .text(d.key + " - " + d3.format(",.0f")(d.values[d.values.length-1].y) + "€")
         })
+        */
       });
   }
 }
