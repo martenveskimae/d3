@@ -540,7 +540,7 @@
           : d3.timeYear(date) < date ? formatMonth
           : formatYear)(date);
         }
-        
+
       d3.tsv(dataset, function(error, df) {
         df.forEach(function(d,i) {
           d.date = new Date(+d.year, +d.month-1, +d.day);
