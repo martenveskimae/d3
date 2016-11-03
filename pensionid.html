@@ -616,6 +616,8 @@
           fondLines.append("text")
           .attr("class", "fondText")
           .attr("dy", ".35em")
+          .attr("x", width2 + 5)
+          .attr("y", height2 / 2)
           .style("fill", c2(i));
 
         });
@@ -640,38 +642,11 @@
           return y2(lastValue);})
         .text(function(d){ return d.key + " - " + d3.format(",.0f")(d.values[d.values.length-1].y) + "€" });
 
-        d3.selectAll(".fondLine")
+        d3.selectAll(".jooned")
         .data(cumsumNest)
         .exit()
         .remove();
 
-        d3.selectAll(".fondText")
-        .data(cumsumNest)
-        .exit()
-        .remove();
-
-        /*
-        cumsumNest.forEach(function(d, i){
-
-          g2.append("path")
-          .data(cumsumNest.filter(function(g){return g.key == d.key; }))
-          .attr("id", "jooned")
-          .attr("clip-path", "url(#box2)")
-          .style("fill", "none")
-          .style("stroke", c2(i))
-          .style("stroke-width", 1)
-          .attr("d", line2(d.values));
-
-          g2.append("text")
-          .data(cumsumNest.filter(function(g){return g.key == d.key; }))
-          .attr("id", "jooned")
-          .attr("class", "labels")
-          .style("fill", c2(i))
-          .attr("x", width2 + 5)
-          .attr("y", y2(d.values[d.values.length-1].y))
-          .text(d.key + " - " + d3.format(",.0f")(d.values[d.values.length-1].y) + "€")
-        })
-        */
       });
   }
 }
