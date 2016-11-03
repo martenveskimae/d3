@@ -524,9 +524,6 @@
     dataSelection(dataset);
     function dataSelection(dataset){
 
-      d3.select(".helper2")
-      .style("opacity", 1);
-
       d3.tsv(dataset, function(error, df) {
         df.forEach(function(d,i) {
           d.date = new Date(+d.year, +d.month-1, +d.day);
