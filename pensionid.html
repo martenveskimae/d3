@@ -5,15 +5,15 @@
 <title>Pensionifondide kalkulaator</title>
 
 <style>
+  html {
+    min-width: 1000px;
+  }
   body{
     font: 11px "San Francisco", Helvetica, Arial, sans-serif;
     background: #fffcfc;
-  }
-  svg{
-    margin-left:auto;
-    margin-right:auto;
-    display:block;
-    vertical-align: middle;
+    margin: 8em auto 4em auto;
+    position: relative;
+    width: 1200px;
   }
   input, select{
     margin-right: 20px;
@@ -36,11 +36,50 @@
   .tick line{
     opacity: 0.2;
   }
-
+  aside{
+    margin-top: 150px;
+    margin-left: 4.5em;
+    position: relative;
+    width: 150px;
+    float: left;
+    text-align: right;
+  }
+  h1{
+    margin-left: 0.6em;
+    float: left;
+    text-align: right;
+    position: absolute;
+  }
+  .first{
+    margin-left: auto;
+    margin-right: 180px;
+    width: 700px;
+    text-align: justify;
+  }
+  div{
+    text-align: center;
+  }
 </style>
 <body>
-  <p class="title">Pensionid</p>
-  <div class="container" align="center">
+  <h1>Pensionifondide </br> kalkulaator</h1>
+  <aside class="helper2">
+    <p>Vasakul olevale joonisele saab hiire (või mobiilsetel seadmetel näpuga) joonistada palgaprofiili, mille põhjal arvutatakse erinevate pensionifondide osakute kumulatiivne väärtus.</p>
+    </br></br></br>
+    <p>Tulemusi on võimalik kuvada fondiliikide kaupa</p>
+    </br></br></br>
+    <p>Minnes hiirega fondi täispika nime peale on võimalik varjata teised fondid</p>
+  </aside>
+  <div class="first">
+    <p>Arvutustel on võetud tehingukuupäevaks iga kuu esimene kuupäev ning lahutatud tehingu teenustasu. Samuti on võetud arvesse eriperioodidel kehtinud erinevat riigipoolse juurdemakse protsenti. Täpsemate tulemuste saamiseks on lisaks võimalik valida:
+    <ul>
+      <li>kas teie sünniaasta on enne või pärast 1955. aastat,</li>
+      <li>kas te jätkasite isiklikke sissemakseid aastal 2010 ning </li>
+      <li>kas te suurendasite vabatahtlikult isiklikke sissemakseid 3% peale vahemikus 2014-2017.</li>
+    </ul>
+    </p>
+    </br>
+  </div>
+  <div class="container">
     Palgaskaala ülempiir:
     <select onchange="maximumInput(this.value)">
       <option value="2000">2000€</option>
@@ -57,7 +96,7 @@
     Isiklikud sissemaksed aastal 2010 <input id="2010sissemaksed" class="checks" type="checkbox" checked="checked">
     Suurendatud isiklikud sissemaksed aastatel 2014-2017 <input id="vabatahtlik" class="checks" type="checkbox" checked="checked">
   </div>
-  <div align="center">
+  <div>
   Pensionifondi liik:
     <input id="data1" class="datas" type="radio" name="dataset" value="konservatiivne.txt" checked="checked"> konservatiivne
     <input id="data2" class="datas" type="radio" name="dataset" value="tasakaalustatud.txt"> tasakaalustatud
@@ -92,7 +131,7 @@
     });
 
     var margin = {top: 20, right: 120, bottom: 30, left: 70},
-    width = 1000 - margin.left - margin.right,
+    width = 950 - margin.left - margin.right,
     height = 200 - margin.top - margin.bottom;
 
     var x = d3.scaleTime().range([0, width]),
@@ -384,16 +423,14 @@
         .transition()
         .duration(time)
         .attr("y", function(d){return y(userInput[userInput.length-1].y);});
-
       }
-
     });
 
   </script>
 
   <script>
    var margin2 = {top: 20, right: 120, bottom: 30, left: 70},
-   width2 = 1000 - margin2.left - margin2.right,
+   width2 = 950 - margin2.left - margin2.right,
    height2 = 500 - margin2.top - margin2.bottom;
 
    var x2 = d3.scaleTime().range([0, width2]),
@@ -465,8 +502,8 @@
    .style("fill", "black")
    .text("Osakute kumulatiivne puhasväärtus");
 
-   function fondUpdate(){
 
+   function fondUpdate(){
     if(document.getElementById("data1").checked){
       dataset = document.getElementById("data1").value;
       names = ["SEB Konservatiivne Pensionifond", "LHV Pensionifond Intress", "LHV Pensionifond S", "Swedbank Pensionifond K1 (konservatiivne strateegia)", "LHV Pensionifond L", "Nordea Pensionifond A Pluss"];
@@ -486,6 +523,10 @@
 
     dataSelection(dataset);
     function dataSelection(dataset){
+
+      d3.select(".helper2")
+      .style("opacity", 1);
+
       d3.tsv(dataset, function(error, df) {
         df.forEach(function(d,i) {
           d.date = new Date(+d.year, +d.month-1, +d.day);
@@ -500,8 +541,6 @@
           d.parast55_jatkab_3jah = +d.parast55_jatkab_3jah;
         });
         df = df.filter(function(d){ return d.date <= new Date(2016,05,01); });
-
-        console.log(df);
 
         var years = [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016],
         months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
@@ -618,8 +657,6 @@
         .key(function(d){return d.symbol;})
         .entries(cumsum.filter(function(d){ return d.x < new Date(2015,12,1) }));
 
-        console.log(cumsumNest)
-
         cumsumNest.forEach(function(d, i){
           var fondLines = g2.append("g")
           .attr("class", "jooned");
@@ -628,6 +665,7 @@
           .attr("class", "fondLine")
           .style("fill", "none")
           .attr("clip-path", "url(#box2)")
+          .style("stroke-width", 1.2)
           .style("stroke", c2(i));
 
           fondLines.append("text")
@@ -641,18 +679,16 @@
 
         d3.selectAll(".fondLine")
         .data(cumsumNest)
-        .attr("id", function(d){return d.key;});
-
-        d3.selectAll(".fondLine")
-        .data(cumsumNest)
         .transition()
         .duration(500)
+        .attr("id", function(d, i){return "fondid" + i; })
         .attr("d", function(d){ return line2(d.values); });
 
         d3.selectAll(".fondText")
         .data(cumsumNest)
         .transition()
         .duration(500)
+        .attr("id", function(d, i){return "fondid" + i; })
         .attr("x", width2 + 5)
         .attr("y", function(d,i){ 
           var lastValue = cumsumNest[i].values[(cumsumNest[i].values.length-1)].y;
@@ -667,15 +703,29 @@
         d3.selectAll(".legend")
         .remove();
 
-        for(i=0; i < names.length; i++){
+        names.forEach(function(d, i){
           g2.append("text")
           .data(names)
           .attr("class", "legend")
           .attr("x", 40)
           .attr("y", 20 + (i*18))
           .attr("fill", c2(i))
-          .text(function(d) { return names[i]; });
-        }
+          .text(function(d) { return names[i]; })
+          .on("mouseover", function(d){
+            d3.selectAll(".fondLine")
+            .style("display", "none");
+            d3.selectAll(".fondText")
+            .style("display", "none");
+            d3.selectAll("#fondid" + i )
+            .style("display", "inline");
+          })
+          .on("mouseout", function(d){
+            d3.selectAll(".fondLine")
+            .style("display", "inline");
+            d3.selectAll(".fondText")
+            .style("display", "inline");
+          });
+        });
 
       });
   }
