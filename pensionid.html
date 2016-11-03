@@ -68,6 +68,20 @@
     d3.selectAll(".datas").on("click", function() {
       fondUpdate();
     })
+    EST = d3.formatLocale({
+      "decimal": ".",
+      "thousands": ",",
+      "grouping": [3],
+      "currency": ["", "€"],
+      "dateTime": "%a %b %e %X %Y",
+      "date": "%m-%d-%Y",
+      "time": "%H:%M:%S",
+      "periods": ["AM", "PM"],
+      "days": ["Pühapäev", "Esmaspäev", "Teisipäev", "Kolmapäev", "Neljapäev", "Reede", "Laupäev"],
+      "shortDays": ["Pühap", "Esmasp", "Teisip", "Kolmap", "Neljap", "Reede", "Laup"],
+      "months": ["Jaanuar", "Veebruar", "Märts", "Aprill", "Mai", "Juuni", "Juuli", "August", "September", "Oktoober", "November", "Detsember"],
+      "shortMonths": ["Jaan", "Veebr", "Märts", "Apr", "Mai", "Juuni", "Juuli", "Aug", "Sep", "Okt", "Nov", "Dets"]
+    });
     var margin = {top: 20, right: 120, bottom: 30, left: 70},
     width = 1000 - margin.left - margin.right,
     height = 200 - margin.top - margin.bottom;
@@ -216,6 +230,11 @@
         .duration(2000)
         .style("opacity", 0);
 
+        setInterval(function(){
+          d3.selectAll("#juhis")
+          .remove();
+        },4000);
+
         var coords = d3.mouse(this),
         mouseDate = x.invert(coords[0]),
         dates = userInput.map(function(d) {return d.x; });
@@ -290,7 +309,7 @@
           g.select(".helper")
           .attr("transform", function(d){ return "translate("+ (x(userInput[index].x) - 12)  +","+ (y(userInput[index].y) - 10) +")"; })
           .style("display", "inline")
-          .text(d3.format(".0f")(userInput[index].y) + "€")
+          .text(d3.format(",.0f")(userInput[index].y) + "€")
         }
 
         update();
@@ -409,6 +428,12 @@
    .style("opacity", .5)
    .text("Siia joonistub soetatud osakute väärtus eurodes")
 
+   g2.append("clipPath")
+   .attr("id", "box2")
+   .append("rect")
+   .attr("width", width2)
+   .attr("height", height2);
+
    g2.append("g")
    .attr("class", "x axis2")
    .attr("transform", "translate(0," + height2 + ")")
@@ -478,6 +503,9 @@
             }
           })
         });
+
+        newDates = userInput2.filter(function(d){ return d.x >= userInput2.find(function(g){ return g.y > 0; }).x && d.x < new Date(2016,01,01); });
+        x2.domain(d3.extent(newDates, function(d) { return d.x; }));
 
         function join(mis, millega, select) {
           output = [];
@@ -581,6 +609,11 @@
           maxValues.push(d3.max(tmp, function(d) {return d.y; } ));
         })
 
+        g2.select(".x.axis2")
+        .transition()
+        .duration(500)
+        .call(d3.axisBottom(x2).tickSize(-height2,5));
+
         y2.domain([0, d3.max(maxValues)+1000]);
         g2.select(".y.axis2")
         .transition()
@@ -598,6 +631,7 @@
           g2.append("path")
           .data(cumsumNest.filter(function(g){return g.key == d.key; }))
           .attr("id", "jooned")
+          .attr("clip-path", "url(#box2)")
           .style("fill", "none")
           .style("stroke", c2(i))
           .style("stroke-width", 1)
@@ -610,7 +644,7 @@
           .style("fill", c2(i))
           .attr("x", width2 + 5)
           .attr("y", y2(d.values[d.values.length-1].y))
-          .text(d.key + " - " + d3.format(".0f")(d.values[d.values.length-1].y) + "€")
+          .text(d.key + " - " + d3.format(",.0f")(d.values[d.values.length-1].y) + "€")
         })
       });
   }
