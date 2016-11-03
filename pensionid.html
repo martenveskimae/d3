@@ -603,11 +603,9 @@
         .key(function(d){return d.symbol;})
         .entries(cumsum.filter(function(d){ return d.x < new Date(2015,12,1) }));
 
-        g2.selectAll("#jooned")
-        .remove();
-
         cumsumNest.forEach(function(d, i){
           var fondLines = g2.append("g")
+          .attr("class", "jooned");
 
           fondLines.append("path")
           .attr("class", "fondLine")
@@ -641,6 +639,16 @@
           var lastValue = cumsumNest[i].values[(cumsumNest[i].values.length-1)].y;
           return y2(lastValue);})
         .text(function(d){ return d.key + " - " + d3.format(",.0f")(d.values[d.values.length-1].y) + "€" });
+
+        d3.selectAll(".fondLine")
+        .data(cumsumNest)
+        .exit()
+        .remove();
+
+        d3.selectAll(".fondText")
+        .data(cumsumNest)
+        .exit()
+        .remove();
 
         /*
         cumsumNest.forEach(function(d, i){
