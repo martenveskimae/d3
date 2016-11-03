@@ -508,19 +508,19 @@
    function fondUpdate(){
     if(document.getElementById("data1").checked){
       dataset = document.getElementById("data1").value;
-      names = ["SEB Konservatiivne Pensionifond", "LHV Pensionifond Intress", "LHV Pensionifond S", "Swedbank Pensionifond K1 (konservatiivne strateegia)", "LHV Pensionifond L", "Nordea Pensionifond A Pluss"];
+      names = ["LHV Pensionifond Intress", "LHV Pensionifond S", "Nordea Pensionifond C", "Swedbank Pensionifond K1 (konservatiivne strateegia)", "LHV Pensionifond XS", "SEB Konservatiivne Pensionifond"];
     }
     if(document.getElementById("data2").checked){
       dataset = document.getElementById("data2").value;
-      names = ["Swedbank Pensionifond K2 (tasakaalustatud strateegia)", "LHV Pensionifond 50", "SEB Optimaalne Pensionifond", "LHV Pensionifond XL", "Nordea Pensionifond B"];
+      names = ["Swedbank Pensionifond K2 (tasakaalustatud strateegia)", "LHV Pensionifond M", "LHV Pensionifond 25", "Nordea Pensionifond B", "SEB Optimaalne Pensionifond"];
     }
     if(document.getElementById("data3").checked){
       dataset = document.getElementById("data3").value;
-      names = ["SEB Progressiivne Pensionifond", "Swedbank Pensionifond K3 (kasvustrateegia)", "LHV Pensionifond 25", "LHV Pensionifond XS", "Nordea Pensionifond C"];
+      names = ["LHV Pensionifond 50", "Swedbank Pensionifond K3 (kasvustrateegia)", "LHV Pensionifond L", "Nordea Pensionifond A", "SEB Progressiivne Pensionifond"];
     }
     if(document.getElementById("data4").checked){
       dataset = document.getElementById("data4").value;
-      names = ["LHV Pensionifond M", "Swedbank Pensionifond K4 (Aktsiastrateegia)", "SEB Energiline Pensionifond", "Nordea Pensionifond A"];
+      names = ["LHV Pensionifond XL", "Swedbank Pensionifond K4 (Aktsiastrateegia)", "SEB Energiline Pensionifond", "Nordea Pensionifond A Pluss"];
     }
 
     dataSelection(dataset);
@@ -657,6 +657,7 @@
         .entries(cumsum.filter(function(d){ return d.x < new Date(2015,12,1) }));
 
         cumsumNest.forEach(function(d, i){
+          console.log(d.key)
           var fondLines = g2.append("g")
           .attr("class", "jooned");
 
