@@ -21,6 +21,9 @@
   #juhis{
     font-size: 26px;
   }
+  .legend{
+    font-size: 13;
+  }
   .datas{
     margin-right: auto;
     margin-left: 20px;
@@ -313,7 +316,7 @@
           g.select(".helper")
           .attr("transform", function(d){ return "translate("+ (x(userInput[index].x) - 12)  +","+ (y(userInput[index].y) - 10) +")"; })
           .style("display", "inline")
-          .text(d3.format(",.0f")(userInput[index].y) + "€")
+          .text(d3.format(".0f")(userInput[index].y) + "€")
         }
 
         update();
@@ -395,7 +398,7 @@
 
    var x2 = d3.scaleTime().range([0, width2]),
    y2 = d3.scaleLinear().range([height2, 0]),
-   c2 = d3.scaleOrdinal(d3.schemeCategory20c);
+   c2 = d3.scaleOrdinal(d3.schemeCategory20);
 
    var line2 = d3.line()
    .x(function(d) { return x2(d.x); })
@@ -464,10 +467,22 @@
 
    function fondUpdate(){
 
-    if(document.getElementById("data1").checked){ dataset = document.getElementById("data1").value; }
-    if(document.getElementById("data2").checked){ dataset = document.getElementById("data2").value; }
-    if(document.getElementById("data3").checked){ dataset = document.getElementById("data3").value; }
-    if(document.getElementById("data4").checked){ dataset = document.getElementById("data4").value; }
+    if(document.getElementById("data1").checked){
+      dataset = document.getElementById("data1").value;
+      names = ["SEB Konservatiivne Pensionifond", "LHV Pensionifond Intress", "LHV Pensionifond S", "Swedbank Pensionifond K1 (konservatiivne strateegia)", "LHV Pensionifond L", "Nordea Pensionifond A Pluss"];
+    }
+    if(document.getElementById("data2").checked){
+      dataset = document.getElementById("data2").value;
+      names = ["Swedbank Pensionifond K2 (tasakaalustatud strateegia)", "LHV Pensionifond 50", "SEB Optimaalne Pensionifond", "LHV Pensionifond XL", "Nordea Pensionifond B"];
+    }
+    if(document.getElementById("data3").checked){
+      dataset = document.getElementById("data3").value;
+      names = ["SEB Progressiivne Pensionifond", "Swedbank Pensionifond K3 (kasvustrateegia)", "LHV Pensionifond 25", "LHV Pensionifond XS", "Nordea Pensionifond C"];
+    }
+    if(document.getElementById("data4").checked){
+      dataset = document.getElementById("data4").value;
+      names = ["LHV Pensionifond M", "Swedbank Pensionifond K4 (Aktsiastrateegia)", "SEB Energiline Pensionifond", "Nordea Pensionifond A"];
+    }
 
     dataSelection(dataset);
     function dataSelection(dataset){
@@ -603,6 +618,8 @@
         .key(function(d){return d.symbol;})
         .entries(cumsum.filter(function(d){ return d.x < new Date(2015,12,1) }));
 
+        console.log(cumsumNest)
+
         cumsumNest.forEach(function(d, i){
           var fondLines = g2.append("g")
           .attr("class", "jooned");
@@ -640,12 +657,25 @@
         .attr("y", function(d,i){ 
           var lastValue = cumsumNest[i].values[(cumsumNest[i].values.length-1)].y;
           return y2(lastValue);})
-        .text(function(d){ return d.key + " - " + d3.format(",.0f")(d.values[d.values.length-1].y) + "€" });
+        .text(function(d){ return d.key + " - " + d3.format(".0f")(d.values[d.values.length-1].y) + "€" });
 
         d3.selectAll(".jooned")
         .data(cumsumNest)
         .exit()
         .remove();
+
+        d3.selectAll(".legend")
+        .remove();
+
+        for(i=0; i < names.length; i++){
+          g2.append("text")
+          .data(names)
+          .attr("class", "legend")
+          .attr("x", 40)
+          .attr("y", 20 + (i*18))
+          .attr("fill", c2(i))
+          .text(function(d) { return names[i]; });
+        }
 
       });
   }
