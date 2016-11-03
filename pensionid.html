@@ -117,21 +117,6 @@
       fondUpdate();
     })
 
-    EST = d3.formatLocale({
-      "decimal": ".",
-      "thousands": ",",
-      "grouping": [3],
-      "currency": ["", "€"],
-      "dateTime": "%a %b %e %X %Y",
-      "date": "%m-%d-%Y",
-      "time": "%H:%M:%S",
-      "periods": ["AM", "PM"],
-      "days": ["Pühapäev", "Esmaspäev", "Teisipäev", "Kolmapäev", "Neljapäev", "Reede", "Laupäev"],
-      "shortDays": ["Pühap", "Esmasp", "Teisip", "Kolmap", "Neljap", "Reede", "Laup"],
-      "months": ["Jaanuar", "Veebruar", "Märts", "Aprill", "Mai", "Juuni", "Juuli", "August", "September", "Oktoober", "November", "Detsember"],
-      "shortMonths": ["Jaan", "Veebr", "Märts", "Apr", "Mai", "Juuni", "Juuli", "Aug", "Sep", "Okt", "Nov", "Dets"]
-    });
-
     var margin = {top: 20, right: 120, bottom: 30, left: 70},
     width = 950 - margin.left - margin.right,
     height = 200 - margin.top - margin.bottom;
@@ -526,6 +511,36 @@
     dataSelection(dataset);
     function dataSelection(dataset){
 
+      eesti = d3.timeFormatLocale({
+        "dateTime": "%a %b %e %X %Y",
+        "date": "%m-%d-%Y",
+        "time": "%H:%M:%S",
+        "periods": ["AM", "PM"],
+        "days": ["Pühapäev", "Esmaspäev", "Teisipäev", "Kolmapäev", "Neljapäev", "Reede", "Laupäev"],
+        "shortDays": ["Pühap", "Esmasp", "Teisip", "Kolmap", "Neljap", "Reede", "Laup"],
+        "months": ["Jaanuar", "Veebruar", "Märts", "Aprill", "Mai", "Juuni", "Juuli", "August", "September", "Oktoober", "November", "Detsember"],
+        "shortMonths": ["Jaan", "Veebr", "Märts", "Apr", "Mai", "Juuni", "Juuli", "Aug", "Sep", "Okt", "Nov", "Dets"]
+      });
+
+      var formatMillisecond = eesti.format(".%L"),
+      formatSecond = eesti.format(":%S"),
+      formatMinute = eesti.format("%I:%M"),
+      formatHour = eesti.format("%I %p"),
+      formatDay = eesti.format("%a %d"),
+      formatWeek = eesti.format("%b %d"),
+      formatMonth = eesti.format("%B"),
+      formatYear = eesti.format("%Y");
+
+      eestiaeg = function multiFormat(date) {
+        return (d3.timeSecond(date) < date ? formatMillisecond
+          : d3.timeMinute(date) < date ? formatSecond
+          : d3.timeHour(date) < date ? formatMinute
+          : d3.timeDay(date) < date ? formatHour
+          : d3.timeMonth(date) < date ? (d3.timeWeek(date) < date ? formatDay : formatWeek)
+          : d3.timeYear(date) < date ? formatMonth
+          : formatYear)(date);
+        }
+        
       d3.tsv(dataset, function(error, df) {
         df.forEach(function(d,i) {
           d.date = new Date(+d.year, +d.month-1, +d.day);
@@ -644,7 +659,7 @@
         g2.select(".x.axis2")
         .transition()
         .duration(500)
-        .call(d3.axisBottom(x2).tickSize(-height2,5));
+        .call(d3.axisBottom(x2).tickSize(-height2,5).tickFormat(eestiaeg));
 
         y2.domain([0, d3.max(maxValues)+1000]);
         g2.select(".y.axis2")
@@ -657,7 +672,7 @@
         .entries(cumsum.filter(function(d){ return d.x < new Date(2015,12,1) }));
 
         cumsumNest.forEach(function(d, i){
-          console.log(d.key)
+
           var fondLines = g2.append("g")
           .attr("class", "jooned");
 
