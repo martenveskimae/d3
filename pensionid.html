@@ -61,7 +61,7 @@
   <h1>Pensionifondide </br> kalkulaator</h1>
   <aside class="helper2">
     <p>Vasakul olevale joonisele saab hiire (või mobiilsetel seadmetel näpuga) joonistada palgaprofiili, mille põhjal arvutatakse erinevate pensionifondide osakute kumulatiivne väärtus</p>
-    </br></br></br>
+    </br></br></br></br>
     <p>Tulemusi on võimalik kuvada fondiliikide kaupa</p>
     </br></br></br>
     <p>Minnes hiirega fondi täispika nime peale on võimalik varjata teised fondid</p>
@@ -74,7 +74,7 @@
       <li>kas te jätkasite isiklikke sissemakseid aastal 2010 ning </li>
       <li>kas te suurendasite vabatahtlikult isiklikke sissemakseid 3% peale vahemikus 2014-2017.</li>
     </ul>
-    Täpsem mudel on võimalik leida CITISe lehelt: <a href="http://citis.ut.ee/research/other/pensionifondide-tootluse-uhest-analuusivoimalusest"> citis.ut.ee/research/other/pensionifondide-tootluse-uhest-analuusivoimalusest</a>
+    Täpsem mudel, kus on arvestatud inflatsiooni ja õigete tehingukuupäevadega, on võimalik leida <a href="http://citis.ut.ee/">CITISe</a> lehelt: <a href="http://citis.ut.ee/research/other/pensionifondide-tootluse-uhest-analuusivoimalusest"> citis.ut.ee/research/other/pensionifondide-tootluse-uhest-analuusivoimalusest</a>
     </p>
     </br>
   </div>
@@ -143,7 +143,7 @@
         d.bruto = +d.bruto;
       });
       
-      userInput = new Array;
+      userInput = [];
       data.forEach(function(d){
         var x = d.date;
         var y = 0;
@@ -431,19 +431,9 @@
    .attr("height", height2 + margin2.top + margin2.bottom);
    var g2 = svg2.append("g").attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
 
-   var years = [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016],
-   months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+   var dataDates =d3.timeMonths(new Date(2003,01,01), new Date(2016,05,01));
 
-   dataDates = new Array
-   years.forEach(function(d){
-    months.forEach(function(g){
-      var da = new Date(+d, +g, 1);
-      dataDates.push({date: da });
-    })
-   });
-   dataDates = dataDates.filter(function(d){ return d.date < new Date(2016,06,01); });
-
-   x2.domain(d3.extent(dataDates, function(d) { return d.date; }));
+   x2.domain(d3.extent(dataDates, function(d) { return d; }));
    y2.domain([0, 5000]);
 
    g2.append("text")
@@ -556,7 +546,7 @@
         var years = [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016],
         months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
-        userInput2 = new Array;
+        userInput2 = [];
         years.forEach(function(d){
           months.forEach(function(g){
             var x = new Date(+d, +g, 1);
@@ -632,14 +622,14 @@
           }
         })
 
-        maxValues = new Array;
-        cumsum = new Array;
+        maxValues = [];
+        cumsum = [];
         var nestedData = d3.nest()
         .key(function(d){return d.symbol;})
         .entries(df);
 
         nestedData.forEach(function(d,i){
-          var tmp = new Array;
+          var tmp = [];
           var fond = d.values.map(function(d){ return d; });
 
           tmp.push({sum: fond[0].osakud, x: fond[0].date, y: fond[0].osakud*fond[0].nav, symbol: fond[0].symbol});
