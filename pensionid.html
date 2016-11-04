@@ -255,14 +255,16 @@
       .call(d3.drag().on("drag", dataInput).on("end", function(d) { fondUpdate() }));
 
       function helper(){
-        d3.selectAll("#juhis")
-        .transition()
-        .duration(2000)
-        .style("opacity", 0);
-
         setInterval(function(){
           d3.selectAll("#juhis")
-          .remove();
+          .transition()
+          .duration(2000)
+          .style("opacity", 0);
+
+          setInterval(function(){
+            d3.selectAll("#juhis")
+            .remove();
+          },4000);
         },4000);
 
         var coords = d3.mouse(this),
