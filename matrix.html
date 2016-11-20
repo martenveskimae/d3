@@ -82,10 +82,10 @@
     <option value="count">kattuvuse järgi</option>
     <option value="level">õppeastme järgi</option>
   </select>
-  <input id="data" type="radio" name="dataset" value="links.txt" checked="checked">Kõik ained
-  <input id="data" type="radio" name="dataset" value="links_valik.txt">Valikained
-  <input id="data" type="radio" name="dataset" value="links_koh.txt">Kohustuslikud ained
-  <input id="data" type="radio" name="dataset" value="links_var.txt" disabled="true">Varjatud kattuvused </br>
+  <input class="data" id="data1" type="radio" name="dataset" value="links.txt" checked="checked">Kõik ained
+  <input class="data" id="data2" type="radio" name="dataset" value="links_valik.txt">Valikained
+  <input class="data" id="data3" type="radio" name="dataset" value="links_koh.txt">Kohustuslikud ained
+  <input class="data" id="data4" type="radio" name="dataset" value="links_var.txt">Varjatud kattuvused </br>
   Filtreeri:<input id="minimum" type="range" min="0" max="100" value="0" step="5" onchange="showValue(this.value)", style="width:93px; vertical-align:middle;"><span id="range">0</span>%
   <input id="phd" type="checkbox" name="phd">Ph.D.
   <input id="over" type="checkbox" name="over">Instituutide ülesed
@@ -273,11 +273,14 @@
 
 
       d3.select("#order").on("change", function() {
-        order(this.value);
+        var datA = "",
+            min = document.getElementById("minimum").value,
+            phD = document.getElementById("phd").checked,
+            oveR = document.getElementById("over").checked;
+        switchData(datA, min, phD, oveR);
       });
 
-      datasetStore = "links.txt";
-      d3.selectAll("#data").on("click", function() {
+      d3.selectAll(".data").on("click", function() {
         var datA = this.value;
         var min = document.getElementById("minimum").value,
             phD = document.getElementById("phd").checked,
@@ -310,6 +313,19 @@
       });
 
       function switchData(dataset, minimumValue, phd, over) {
+        if(document.getElementById("data1").checked){
+          datasetStore = document.getElementById("data1").value;
+        }
+        if(document.getElementById("data2").checked){
+          datasetStore = document.getElementById("data2").value;
+        }
+        if(document.getElementById("data3").checked){
+          datasetStore = document.getElementById("data3").value;
+        }
+        if(document.getElementById("data4").checked){
+          datasetStore = document.getElementById("data4").value;
+        }
+
         if(!dataset) dataset = datasetStore;
         counter = 0;
         var case1 = 0;
@@ -381,8 +397,6 @@
             }
           }
 
-          console.log(ee, aa, bb, cc, dd)
-
           for(i=0;i<matrixGroup.length; i++){
             for(j=0;j<matrixGroup.length;j++){
               matrixGroup[i][j].countN = matrixGroup[i][i].countN;
@@ -393,6 +407,7 @@
           calculateOrders();
           var e = document.getElementById("order");
           var orderValue = e.options[e.selectedIndex].value;
+
           order(orderValue);
 
           var row = g.selectAll(".row")
