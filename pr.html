@@ -266,14 +266,14 @@
 				setInterval(function(){
 					d3.selectAll("#juhis")
 					.transition()
-					.duration(1000)
+					.duration(500)
 					.style("opacity", 0);
 
 					setInterval(function(){
 						d3.selectAll("#juhis")
 						.remove();
 					},1000);
-				},1000);
+				},500);
 
 				var coords = d3.mouse(this),
 				group = +d3.format(",.0f")((coords[0]) / x.step()),
