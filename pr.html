@@ -71,6 +71,11 @@
     	#ccc 11%, 
     	#ccc 20%);
 	}
+	button{
+		margin-left: -130px;
+		width: 150px;
+		height: 50px;
+	}
 </style>
 <script src="http://d3js.org/d3.v4.min.js"></script>
 
@@ -88,6 +93,7 @@
   	</br>
 	<div class="container"></div>
 	<div>
+		<button class="helper" type="button" onclick="done()">Done!</button>
 		<p class="years">2010<input class="years" id="years" type="range" value="2015" min="2010" max="2015" list="steps" onchange="yearsChange()"/>2015</p>
 	</div>
 	<script>
@@ -258,22 +264,15 @@
 			.style("fill", "none")
 			.style("pointer-events", "all")
 			.on("click", dataInput)
-			.call(d3.drag().on("drag", dataInput).on("end", done));
+			.call(d3.drag().on("drag", dataInput));
 
 			function dataInput(){
 				if(count > 0) return;
 
-				setInterval(function(){
-					d3.selectAll("#juhis")
-					.transition()
-					.duration(500)
-					.style("opacity", 0);
-
-					setInterval(function(){
-						d3.selectAll("#juhis")
-						.remove();
-					},1000);
-				},500);
+				d3.selectAll("#juhis")
+				.transition()
+				.duration(1000)
+				.style("opacity", 0);
 
 				var coords = d3.mouse(this),
 				group = +d3.format(",.0f")((coords[0]) / x.step()),
@@ -351,7 +350,7 @@
 				.attr("y", function(d){return y(df[df.length-1].pperp)+3;});
 			}
 
-			function done(){
+			done = function done(){
 				count += 1;
 
 				d3.selectAll(".years")
@@ -359,8 +358,11 @@
 				.duration(2000)
 				.style("opacity",1);
 
-				g.select(".helper")
+				d3.selectAll(".helper")
 				.remove()
+
+				d3.selectAll("#juhis")
+				.remove();
 
 				g.select("#pperp")
 				.transition()
