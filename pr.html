@@ -13,7 +13,7 @@
 		background: #ffffff;
 		margin: 8em auto 4em auto;
 		position: relative;
-		width: 1200px;
+		width: 1300px;
 	}
 	input, select{
 	}
@@ -48,16 +48,18 @@
 	}
 	.first{
 		margin-left: auto;
-		margin-right: 180px;
+		margin-right: 260px;
 		width: 700px;
 		text-align: justify;
 	}
 	div{
 		text-align: center;
 	}
+	.years{
+		opacity: 0;
+	}
 	#years{
 		width: 500px;
-		opacity: 0;
 	}
 	input[type="range"]::-moz-range-track {
   		padding: 0 10px;
@@ -72,10 +74,21 @@
 </style>
 <script src="http://d3js.org/d3.v4.min.js"></script>
 
-<body>
+<body> 
+	<h1>e-Prescribing</br> by age</h1>
+  	<aside class="helper2">
+    	<p>You can draw your best guess on the graph (by using your mouse or touch screen) and see how it compares to actual data.</p>
+    	</br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br>
+    	<p class="years">You can change the year filter by adjusting the slider on the right</p>
+    	</br></br></br></br></br></br></br></br></br></br></br></br></br></br>
+  	</aside>
+  	<div class="first">
+  		<p>In Estonia, over 10M prescription drugs were sold in 2015. For a country with population just over 1.3M, this makes 8 prescription drugs per inhabitant, regardless of their age, gender or other characteristics. However, not all of us need prescription drugs, so if we'd only count those, who have fallen ill, the number of prescribed drugs per person would be even higher. Below you can take a guess, how are prescription drugs distributed across different age groups, counting only those who have fallen ill.</p>
+  	</div>
+  	</br>
 	<div class="container"></div>
 	<div>
-		<input id="years" type="range" value="2015" min="2010" max="2015" list="steps" onchange="yearsChange()"/>
+		<p class="years">2010<input class="years" id="years" type="range" value="2015" min="2010" max="2015" list="steps" onchange="yearsChange()"/>2015</p>
 	</div>
 	<script>
 
@@ -96,7 +109,7 @@
 		arr.forEach(ticks);
 
 		var margin = {top: 30, right: 200, bottom: 30, left: 70},
-		width = 1200 - margin.left - margin.right,
+		width = 1100 - margin.left - margin.right,
 		height = 600 - margin.top - margin.bottom;
 
 		var x = d3.scalePoint().range([0, width]),
@@ -341,7 +354,7 @@
 			function done(){
 				count += 1;
 
-				d3.select("#years")
+				d3.selectAll(".years")
 				.transition()
 				.duration(2000)
 				.style("opacity",1);
