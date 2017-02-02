@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+
+<title>Prescription drugs</title>
+
+<style>
+	html {
+		min-width: 1000px;
+	}
+	body{
+		font: 12px "San Francisco", Helvetica, Arial, sans-serif;
+		background: #ffffff;
+		margin: 8em auto 4em auto;
+		position: relative;
+		width: 1200px;
+	}
+	input, select{
+	}
+	#juhis, #year{
+		font-size: 26px;
+	}
+	.legend{
+		font-size: 13;
+	}
+	.datas{
+		margin-right: auto;
+		margin-left: 20px;
+	}
+	.tick line{
+		opacity: 0.2;
+	}
+	aside{
+		margin-top: 220px;
+		margin-left: 4.5em;
+		position: relative;
+		width: 150px;
+		float: left;
+		text-align: right;
+		font-size: 11px;
+	}
+	h1{
+		margin-left: 0.6em;
+		float: left;
+		text-align: right;
+		position: absolute;
+		font-size: 24px;
+	}
+	.first{
+		margin-left: auto;
+		margin-right: 180px;
+		width: 700px;
+		text-align: justify;
+	}
+	div{
+		text-align: center;
+	}
+	#years{
+		width: 500px;
+		opacity: 0;
+	}
+	input[type="range"]::-moz-range-track {
+  		padding: 0 10px;
+  		background: repeating-linear-gradient(to right, 
+    	#ccc, 
+    	#ccc 10%, 
+    	#000 10%, 
+    	#000 11%, 
+    	#ccc 11%, 
+    	#ccc 20%);
+	}
+</style>
+<script src="http://d3js.org/d3.v4.min.js"></script>
+
+<body>
+	<div class="container"></div>
+	<div>
+		<input id="years" type="range" value="2015" min="2010" max="2015" list="steps" onchange="yearsChange()"/>
+	</div>
+	<script>
+
+		function ticks(element) {
+			if (element.hasOwnProperty('list') && element.hasOwnProperty('min') && element.hasOwnProperty('max') &&    element.hasOwnProperty('step')) {
+				var datalist = document.createElement('datalist'),
+					minimum = parseInt(element.getAttribute('min')),
+					step = parseInt(element.getAttribute('step')),
+					maximum = parseInt(element.getAttribute('max'));
+					datalist.id = element.getAttribute('list');
+				for (var i = minimum; i < maximum+step; i = i + step) {
+					datalist.innerHTML +="<option value="+i+"></option>";
+				}
+				element.parentNode.insertBefore(datalist, element.nextSibling);
+		}}
+		var lists = document.querySelectorAll("input[type=range][list]"),
+		arr = Array.prototype.slice.call(lists);
+		arr.forEach(ticks);
+
+		var margin = {top: 30, right: 200, bottom: 30, left: 70},
+		width = 1200 - margin.left - margin.right,
+		height = 600 - margin.top - margin.bottom;
+
+		var x = d3.scalePoint().range([0, width]),
+		y = d3.scaleLinear().range([height, 0]),
+		count = 0,
+		year = 2015;
+
+		var line = d3.line()
+		.x(function(d) { return x(d.ageGroup); })
+		.y(function(d) { return y(d.pperp); })
+		.curve(d3.curveMonotoneX);
+
+		var userLine = d3.line()
+		.x(function(d) { return x(d.x); })
+		.y(function(d) { return y(d.y); })
+		.curve(d3.curveMonotoneX);
+
+		var svg = d3.select(".container").append("svg")
+		.attr("width", width + margin.left + margin.right)
+		.attr("height", height + margin.top + margin.bottom);
+		var g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		d3.csv("pr.csv", function(error, data) {
+			data.forEach(function(d,i) {
+				d.order = +d.order;
+				d.year = +d.year;
+				d.pperp = +d3.format(",.0f")(d.pperp);
+			});
+
+			df = data.sort(function(a,b) { return a.order - b.order; }).filter(function(d){ return d.year == year; });
+
+			userInput = [];
+			df.forEach(function(d){
+				var x = d.ageGroup;
+				var y = 12;
+				var defaultData= {x: x, y: y};
+				userInput.push(defaultData);
+			});
+
+			x.domain(df.map(function (d) {return d.ageGroup; }));
+			y.domain([0, 25]);
+
+			g.append("clipPath")
+			.attr("id", "box")
+			.append("rect")
+			.attr("width", width)
+			.attr("height", height);
+
+			g.append("path")
+			.data(df)
+			.attr("id", "pperp")
+			.attr("d", line(df))
+			.style("fill", "none")
+			.style("stroke", "grey")
+			.style("stroke-width", 1.5)
+			.style("opacity", 0);
+
+			g.append("text")
+			.attr("id", "year")
+			.attr("x", 30)
+			.attr("y", -10)
+			.style("text-anchor", "middle")
+			.style("fill", "black")
+			.text(year)
+
+			g.append("text")
+			.attr("id", "juhis")
+			.attr("x", width/2)
+			.attr("y", height/2 + 12)
+			.style("text-anchor", "middle")
+			.style("fill", "grey")
+			.style("opacity", .5)
+			.text("Draw here!")
+
+			g.append("text")
+			.attr("id", "pperpText")
+			.attr("y", function(){ return y(df[df.length-1].pperp)+3; })
+			.attr("x", width + 5)
+			.style("fill", "grey")
+			.text("True value")
+			.style("opacity", 0);
+
+			g.append("path")
+			.data(userInput)
+			.attr("id", "userInput")
+			.attr("d", userLine(userInput))
+			.attr("clip-path", "url(#box)")
+			.style("fill", "none")
+			.style("stroke", "red")
+			.style("stroke-width", 2);
+
+			g.append("text")
+			.attr("id", "userInputText")
+			.attr("y", function(d){return y(userInput[userInput.length-1].y)+3;})
+			.attr("x", width + 5)
+			.style("fill", "red")
+			.text("Your guess");
+
+			g.selectAll(".circles")
+			.data(userInput)
+			.enter()
+			.append("circle")
+			.attr("class", function(d,i){ return "circle" + i; })
+			.attr("id", "userInputPoints")
+			.attr("clip-path", "url(#box)")
+			.attr("cx", function(d){return x(d.x);})
+			.attr("cy", function(d){return y(d.y);})
+			.attr("r", 2.5)
+			.style("fill", "none")
+			.style("stroke", "red")
+			.style("stroke-width", 1);
+
+			g.append("g")
+			.attr("class", "x axis")
+			.attr("transform", "translate(0," + height + ")")
+			.call(d3.axisBottom(x).tickSize(-height,5))
+			.append("text")
+			.attr("class", "label")
+			.attr("x", width-5)
+			.attr("y", -6)
+			.style("text-anchor", "end")
+			.style("fill", "black")
+			.text("Age group");
+
+			g.append("g")
+			.attr("class", "y axis")
+			.call(d3.axisLeft(y).tickSize(-width,5))
+			.append("text")
+			.attr("class", "label")
+			.attr("transform", "rotate(-90)")
+			.attr("y", 6)
+			.attr("x", -5)
+			.attr("dy", ".71em")
+			.style("text-anchor", "end")
+			.style("fill", "black")
+			.text("Number of e-prescriptions");
+
+			g.append("text")
+			.attr("class", "helper")
+			.style("display", "none")
+			.style("fill", "red");
+
+			g.append("rect")
+			.attr("width", width)
+			.attr("height", height)
+			.style("fill", "none")
+			.style("pointer-events", "all")
+			.on("click", dataInput)
+			.call(d3.drag().on("drag", dataInput).on("end", done));
+
+			function dataInput(){
+				if(count > 0) return;
+
+				setInterval(function(){
+					d3.selectAll("#juhis")
+					.transition()
+					.duration(1000)
+					.style("opacity", 0);
+
+					setInterval(function(){
+						d3.selectAll("#juhis")
+						.remove();
+					},1000);
+				},1000);
+
+				var coords = d3.mouse(this),
+				group = +d3.format(",.0f")((coords[0]) / x.step()),
+				inputX = x.domain()[group],
+				inputY = +d3.format(",.0f")(y.invert(coords[1]));
+
+				if(inputY > 25){
+					var inputY = 25;
+				} else if (inputY < 0){
+					var inputY = 0;
+				}
+
+				var inputData = {x: inputX, y: inputY},
+				index = x.domain().indexOf(inputX);
+
+				if(coords[0] > width - (width/(userInput.length-1))/2 ){
+					var index = userInput.length - 1;
+					var inputData = {x: userInput[index].x, y: inputY};
+				}
+				if (index !== -1) {
+					userInput[index] = inputData;
+
+					g.selectAll("#userInputPoints")
+					.style("fill", "none");
+					g.select(".circle"+index)
+					.style("fill", "red");
+
+					g.select(".helper")
+					.attr("transform", function(d){ return "translate("+ (x(userInput[index].x) - 3)  +","+ (y(userInput[index].y) - 10) +")"; })
+					.style("display", "inline")
+					.text(d3.format(".0f")(userInput[index].y))
+				}
+
+				update();
+			}
+
+			function update(){
+
+				g.select("#userInput")
+				.data(userInput)
+				.transition()
+				.duration(10)
+				.attr("d", userLine(userInput));
+
+				g.selectAll("#userInputPoints")
+				.data(userInput)
+				.transition()
+				.duration(10)
+				.attr("cx", function(d){return x(d.x);})
+				.attr("cy", function(d){return y(d.y);});
+
+				g.select("#userInputText")
+				.transition()
+				.duration(10)
+				.attr("y", function(d){return y(userInput[userInput.length-1].y)+3;});
+			}
+
+			yearsChange = function yearsChange(){
+
+				year = document.getElementById("years").value
+				df = data.sort(function(a,b) { return a.order - b.order; }).filter(function(d){ return d.year == year; });
+
+				g.select("#year")
+				.text(year);
+
+				g.select("#pperp")
+				.data(userInput)
+				.transition()
+				.duration(200)
+				.attr("d", line(df));
+
+				g.select("#pperpText")
+				.transition()
+				.duration(200)
+				.attr("y", function(d){return y(df[df.length-1].pperp)+3;});
+			}
+
+			function done(){
+				count += 1;
+
+				d3.select("#years")
+				.transition()
+				.duration(2000)
+				.style("opacity",1);
+
+				g.select(".helper")
+				.remove()
+
+				g.select("#pperp")
+				.transition()
+				.duration(2000)
+				.style("opacity", 1);
+
+				g.select("#pperpText")
+				.transition()
+				.duration(2000)
+				.style("opacity", 1);
+			}
+		});
+
+	</script>
+
+</body>
