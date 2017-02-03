@@ -83,7 +83,7 @@
 	<h1>e-Prescribing</br> by age</h1>
   	<aside class="helper2">
     	<p>You can draw your best guess on the graph (by using your mouse or touch screen) and see how it compares to actual data.</p>
-    	</br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br>
+    	</br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br></br>
     	<p class="years">You can change the year filter by adjusting the slider on the right</p>
     	</br></br></br></br></br></br></br></br></br></br></br></br></br></br>
   	</aside>
@@ -94,7 +94,7 @@
 	<div class="container"></div>
 	<div>
 		<button class="helper" type="button" onclick="done()">Done!</button>
-		<p class="years">2010<input class="years" id="years" type="range" value="2015" min="2010" max="2015" list="steps" onchange="yearsChange()"/>2015</p>
+		<p class="years">2010<input class="years" id="years" type="range" value="2015" min="2010" max="2015" list="steps" oninput="yearsChange()"/>2015</p>
 	</div>
 	<script>
 
@@ -116,7 +116,7 @@
 
 		var margin = {top: 30, right: 200, bottom: 30, left: 70},
 		width = 1100 - margin.left - margin.right,
-		height = 600 - margin.top - margin.bottom;
+		height = 500 - margin.top - margin.bottom;
 
 		var x = d3.scalePoint().range([0, width]),
 		y = d3.scaleLinear().range([height, 0]),
@@ -184,7 +184,7 @@
 			g.append("text")
 			.attr("id", "juhis")
 			.attr("x", width/2)
-			.attr("y", height/2 + 12)
+			.attr("y", height/2)
 			.style("text-anchor", "middle")
 			.style("fill", "grey")
 			.style("opacity", .5)
